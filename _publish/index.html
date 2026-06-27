@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>株式会社VERA Holdings ｜ 会社案内</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@400;500;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#1d447c; --navy-deep:#13315a; --navy-soft:#2a5690;
+    --red:#c5201d; --red-deep:#a51916;
+    --gold:#b9985a; --gold-soft:#cbb27e;
+    --ink:#1c2433; --muted:#5b6678; --line:#e4e0d6;
+    --paper:#fbfaf6; --card:#ffffff; --cream:#f4f1ea;
+    --serif:'Zen Old Mincho', serif; --sans:'Noto Sans JP', sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{-webkit-print-color-adjust:exact;print-color-adjust:exact;font-family:var(--sans);color:var(--ink);background:var(--paper);line-height:1.9;font-weight:300;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:980px;margin:0 auto;padding:0 28px}
+  .serif{font-family:var(--serif)}
+  .red{color:var(--red)}
+  section{padding:72px 0}
+  h2.title{font-family:var(--serif);font-size:13px;letter-spacing:.42em;color:var(--red);font-weight:500;margin-bottom:10px}
+  h2.title+.lead{font-family:var(--serif);font-size:27px;font-weight:500;color:var(--navy);letter-spacing:.04em;margin-bottom:30px;line-height:1.5}
+  p{font-size:15.5px;color:#36404f}
+  .nb{white-space:nowrap}
+  .hero .tag,.hero .tag2,.backbone .k,h2.title+.lead,.mission .k,.concept .recover,.pill .body .one,.bridge .b,.floor .ttl,.story p{word-break:keep-all;overflow-wrap:anywhere;line-break:strict}
+
+  /* HERO — 白系背景 × 2色ロゴ主役（表紙は維持） */
+  .hero{background:radial-gradient(120% 120% at 50% 0%,#ffffff 0%,#f6f3ec 70%,#efe9dd 100%);color:var(--ink);text-align:center;padding:96px 28px 86px;border-bottom:1px solid var(--line)}
+  .hero .logo{width:236px;height:auto;margin:0 auto 8px;display:block}
+  .hero .holdings{font-family:var(--serif);letter-spacing:.5em;font-size:14px;color:var(--navy);font-weight:500;margin-left:.5em}
+  .hero .rule{width:46px;height:1px;background:var(--red);margin:30px auto 26px;opacity:.9}
+  .hero .tag{font-family:var(--serif);font-size:31px;letter-spacing:.12em;font-weight:500;line-height:1.7;color:var(--navy)}
+  .hero .sub{font-size:14.5px;color:#5a6675;margin-top:16px;letter-spacing:.08em;font-weight:300}
+
+  /* BACKBONE band — 背骨の一文 */
+  .backbone{background:var(--navy);color:#fff;text-align:center;padding:64px 28px}
+  .backbone .k{font-family:var(--serif);font-size:25px;line-height:1.95;letter-spacing:.06em;font-weight:500}
+  .backbone .k .red{color:#ff9b86}
+  .backbone .s{font-size:13.5px;color:#bcc8da;margin-top:18px;letter-spacing:.06em}
+
+  /* CONCEPT */
+  .concept{text-align:center}
+  .concept .mark{width:74px;height:auto;margin:0 auto 22px;display:block}
+  .vera-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:30px}
+  .vera-grid .v{padding:24px 14px;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+  .vera-grid .v .l{font-family:var(--serif);font-size:30px;color:var(--navy);font-weight:700}
+  .vera-grid .v .e{font-size:11px;letter-spacing:.18em;color:var(--red);margin:6px 0 7px;font-weight:500}
+  .vera-grid .v .j{font-size:14px;color:var(--ink);font-weight:500}
+  .vera-grid .v .jj{font-size:11.5px;color:var(--muted);margin-top:2px}
+  .concept .note{margin-top:28px;font-size:15px;color:#3a4453;max-width:680px;margin-left:auto;margin-right:auto}
+  .concept .recover{margin-top:16px;font-family:var(--serif);font-size:16px;color:var(--navy);letter-spacing:.03em}
+  .concept .recover b{color:var(--red);font-weight:500}
+
+  /* FOUNDATION — 土台（二階建て） */
+  .found{background:var(--cream)}
+  .house{max-width:560px;margin:6px auto 0}
+  .house .roof{width:0;height:0;margin:0 auto;border-left:200px solid transparent;border-right:200px solid transparent;border-bottom:46px solid var(--navy)}
+  .floor{border:1px solid var(--line);border-top:none;background:var(--card);padding:20px 26px;text-align:center}
+  .floor.f2{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .floor .lv{font-family:var(--serif);font-size:12px;letter-spacing:.2em;color:var(--red);font-weight:500}
+  .floor.f2 .lv{color:#ff9b86}
+  .floor .ttl{font-family:var(--serif);font-size:18px;margin-top:4px;font-weight:500}
+  .floor .ds{font-size:12.5px;color:var(--muted);margin-top:4px}
+  .floor.f2 .ds{color:#cdd6e4}
+  .found .note{margin-top:26px;font-size:14.5px;color:#3a4453;max-width:680px;margin-left:auto;margin-right:auto;text-align:center}
+
+  /* VALUE MAP */
+  .vmap{text-align:center}
+  .vmap .figwrap{max-width:760px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:26px 22px}
+  .vmap svg{width:100%;height:auto;display:block}
+
+  /* PILLARS — 五本の柱 */
+  .pillars{display:grid;grid-template-columns:1fr;gap:14px}
+  .pill{display:grid;grid-template-columns:128px 1fr;gap:0;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .pill .head{background:var(--navy);color:#fff;padding:22px 18px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
+  .pill .head .e{font-size:11px;letter-spacing:.18em;color:#ff9b86;font-weight:500}
+  .pill .head .j{font-family:var(--serif);font-size:22px;font-weight:500;margin-top:4px}
+  .pill .body{padding:20px 24px}
+  .pill .body .one{font-family:var(--serif);font-size:16.5px;color:var(--navy);font-weight:500;letter-spacing:.02em}
+  .pill .body .d{font-size:14px;color:var(--muted);margin-top:7px;line-height:1.85}
+  .bridge{margin-top:18px;background:#fff;border:1px dashed var(--red);border-radius:10px;padding:16px 22px;text-align:center}
+  .bridge .b{font-family:var(--serif);font-size:16px;color:var(--red-deep);letter-spacing:.03em}
+  .bridge .s{font-size:12.5px;color:var(--muted);margin-top:5px}
+
+  /* MISSION band */
+  .mission{background:var(--navy);color:#fff;text-align:center}
+  .mission .k{font-family:var(--serif);font-size:33px;letter-spacing:.1em;font-weight:500}
+  .mission .k .red{color:#ff9b86}
+  .mission p{color:#cdd6e4;margin-top:18px;font-size:15px;max-width:700px;margin-left:auto;margin-right:auto}
+
+  /* BUSINESS cards */
+  .biz{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+  .biz .c{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:26px 26px 24px;position:relative}
+  .biz .c .n{font-family:var(--serif);font-size:13px;color:var(--red);letter-spacing:.1em}
+  .biz .c h3{font-size:17px;color:var(--navy);font-weight:500;margin:6px 0 9px;letter-spacing:.02em}
+  .biz .c p{font-size:14px;color:var(--muted);line-height:1.85}
+  .tagchip{display:inline-block;font-size:11px;color:var(--red);border:1px solid var(--red);border-radius:20px;padding:1px 10px;margin-left:6px;vertical-align:middle;letter-spacing:.05em}
+
+  /* SHOWCASE */
+  .showcase{background:var(--cream)}
+  .scgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:8px}
+  .sc{display:flex;gap:16px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 20px}
+  .sc .dot{flex:0 0 10px;width:10px;height:10px;border-radius:50%;background:var(--navy);margin-top:8px}
+  .sc .dot.r{background:var(--red)}
+  .sc h4{font-size:15px;color:var(--navy);font-weight:500}
+  .sc span{font-size:13px;color:var(--muted);display:block;margin-top:3px;line-height:1.7}
+  .scnote{font-size:11.5px;color:#8a93a2;margin-top:14px;line-height:1.7;letter-spacing:.02em}
+
+  /* STRENGTH */
+  .str{display:grid;grid-template-columns:repeat(2,1fr);gap:14px 34px}
+  .str .s{display:flex;gap:16px;align-items:flex-start;padding:6px 0}
+  .str .s .num{font-family:var(--serif);font-size:22px;color:var(--red);line-height:1.2;flex:0 0 34px}
+  .str .s h4{font-size:16px;color:var(--navy);font-weight:500;margin-bottom:4px}
+  .str .s p{font-size:13.5px;color:var(--muted);line-height:1.8}
+
+  /* MESSAGE */
+  .msg{background:var(--navy-deep);color:#fff}
+  .msg h2.title{color:#ff9b86}
+  .msg h2.title+.lead{color:var(--gold-soft)}
+  .msg p{color:#cdd6e4;font-size:15px;max-width:720px}
+  .msg .sign{margin-top:26px;font-family:var(--serif);font-size:15px;color:#fff;letter-spacing:.1em}
+  .msg .sign-img{display:block;width:240px;height:auto;margin-top:4px}
+
+  /* OUTLINE table */
+  .tbl{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .tbl th,.tbl td{text-align:left;padding:16px 22px;font-size:14.5px;border-bottom:1px solid var(--line);vertical-align:top}
+  .tbl th{width:150px;background:#f7f4ee;color:var(--navy);font-weight:500;font-family:var(--serif);letter-spacing:.06em}
+  .tbl td{color:#36404f}
+  .tbl tr:last-child th,.tbl tr:last-child td{border-bottom:none}
+
+  /* FOOTER */
+  footer{background:var(--navy);color:#fff;text-align:center;padding:54px 28px}
+  footer .logo{width:150px;height:auto;margin:0 auto 14px;display:block}
+  footer .ft{font-size:12.5px;color:#a9b6c9;margin-top:10px;letter-spacing:.1em;line-height:1.9}
+  @media(max-width:760px){ footer .ft .ft-sep{display:none} footer .ft .nb:first-child{display:block;margin-bottom:4px} }
+  footer .ftag{color:#ff9b86;font-family:var(--serif);font-size:13px;letter-spacing:.18em;margin-top:18px}
+
+  @media(max-width:760px){
+    .vera-grid{grid-template-columns:repeat(2,1fr)}
+    .biz,.scgrid,.str{grid-template-columns:1fr}
+    .hero .tag,.mission .k,.backbone .k{font-size:23px}
+    .hero .logo{width:200px}
+    .pill{grid-template-columns:1fr}
+    .pill .head{flex-direction:row;gap:10px;padding:14px 18px}
+    .house .roof{border-left-width:140px;border-right-width:140px}
+  }
+  @media print{ body{background:#fff} section{padding:24px 0} .hero{padding:42px 28px} footer{padding:30px 28px;break-inside:avoid} .biz .c,.sc,.str .s,.pill,.floor,.vmap .figwrap{break-inside:avoid} }
+  @page{size:A4;margin:11mm}
+</style>
+</head>
+<body>
+
+<!-- HERO（表紙：維持） -->
+<header class="hero">
+  <img class="logo" src="vera_logo_2color.svg" alt="VERA Holdings">
+  <div class="holdings">HOLDINGS</div>
+  <div class="rule"></div>
+  <div class="tag">守る、を、事業に。</div>
+  <div class="tag2" style="font-family:var(--serif);font-size:20px;letter-spacing:.1em;color:var(--red);font-weight:500;margin-top:14px">縛らない。だから、選ばれる。</div>
+  <div class="sub">100年つづくブランドを、AIとともに支える。</div>
+</header>
+
+<!-- BACKBONE（背骨の一文） -->
+<section class="backbone">
+  <div class="wrap">
+    <div class="k"><span class="nb">二階建ての上に、</span><span class="nb">〈<span class="red">守る</span>〉と〈<span class="red">縛らない</span>〉。</span><br><span class="nb">それを名乗らず、</span><span class="nb">100年かけて、</span><span class="nb">次の世代へ手渡す。</span></div>
+    <div class="s">― これが、VERAという会社のいちばん芯にある一文です。</div>
+  </div>
+</section>
+
+<!-- CONCEPT（四つ葉：R=本物(中身)／A=源(源泉)に修正） -->
+<section class="concept">
+  <div class="wrap">
+    <img class="mark" src="vera_logo_mono_navy.svg" alt="">
+    <h2 class="title">CONCEPT</h2>
+    <div class="lead"><span class="nb">四つの信念が、</span><span class="nb">ひとつの四つ葉に。</span></div>
+    <div class="vera-grid">
+      <div class="v"><div class="l">V</div><div class="e">VITAL</div><div class="j">活力</div><div class="jj">巡らせる</div></div>
+      <div class="v"><div class="l">E</div><div class="e">EARNEST</div><div class="j">誠実</div><div class="jj">先に差し出す</div></div>
+      <div class="v"><div class="l">R</div><div class="e">REAL</div><div class="j">本物</div><div class="jj">中身</div></div>
+      <div class="v"><div class="l">A</div><div class="e">AUTHENTIC</div><div class="j">源</div><div class="jj">源泉</div></div>
+    </div>
+    <p class="note">途切れることのないモノラインで描いた四つ葉のクローバー。<br>社会との強い結びつきと、本質を見つめ、誠実に未来へ歩み続ける意志を表しています。</p>
+    <div class="recover"><span class="nb">四つ葉は、4つの信念。</span><span class="nb">その土台にあるのは</span><span class="nb">〈<b>守る</b>／<b>縛らない</b>〉、</span><span class="nb">目指すのは〈<b>人のしあわせ</b>〉。</span></div>
+  </div>
+</section>
+
+<!-- FOUNDATION（土台＝二階建て） -->
+<section class="found">
+  <div class="wrap">
+    <h2 class="title" style="text-align:center">FOUNDATION</h2>
+    <div class="lead" style="text-align:center"><span class="nb">私たちの土台</span> ― <span class="nb">まず、足元で一番に。</span></div>
+    <div class="house">
+      <div class="roof"></div>
+      <div class="floor f2">
+        <div class="lv">2F ― 目的</div>
+        <div class="ttl">人を、幸せにできる会社 No.1</div>
+        <div class="ds">"一番"にしたいのは、売上の大きさではありません。お客様が自分たちだけで回せる状態まで渡して、後ろに回ること。一番かどうかは、私たちが名乗らず、お客様が後で呼んでくださいます。</div>
+      </div>
+      <div class="floor">
+        <div class="lv">1F ― 戦い方</div>
+        <div class="ttl">まず足元で一番に、そこから世界へ</div>
+        <div class="ds">いきなり日本一を狙わない。目の前の地域・お客様で一番に → 埼玉 → 関東 → 全国 → 世界へ、一歩ずつ。</div>
+      </div>
+    </div>
+    <p class="note">2階（目的）を支えるのが1階（戦い方）。シェアや実績は、それ自体がゴールではなく、<br>「人を幸せにする力」を最大化するための土台です。20年以上前に伯父から受け取った一粒の種を、100年かけて次の世代へ。</p>
+  </div>
+</section>
+
+<!-- VALUE MAP（価値の地図） -->
+<section class="vmap">
+  <div class="wrap">
+    <h2 class="title">VALUE MAP</h2>
+    <div class="lead">価値の地図 ― ぜんぶが、一本でつながっている。</div>
+    <div class="figwrap">
+      <svg viewBox="0 0 760 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="VERAの価値構造：土台→背骨→四つの信念→しあわせ">
+        <defs>
+          <marker id="ar" markerWidth="9" markerHeight="9" refX="6" refY="4.5" orient="auto">
+            <path d="M0,0 L9,4.5 L0,9 z" fill="#c5201d"/>
+          </marker>
+        </defs>
+        <!-- 上昇の矢印（土台→しあわせ） -->
+        <line x1="40" y1="560" x2="40" y2="60" stroke="#c5201d" stroke-width="2" marker-end="url(#ar)" opacity="0.85"/>
+        <text x="22" y="320" fill="#c5201d" font-size="12" font-family="'Zen Old Mincho',serif" transform="rotate(-90 22 320)" text-anchor="middle">土台 → 背骨 → 信念 → しあわせ</text>
+
+        <!-- ☆ しあわせ（北極星・目指す先） -->
+        <g>
+          <polygon points="380,30 385.9,47.9 404.7,48 389.5,59.1 395.3,77 380,66 364.7,77 370.5,59.1 355.3,48 374.1,47.9" fill="#c5201d"/>
+          <text x="380" y="105" text-anchor="middle" fill="#1d447c" font-size="19" font-family="'Zen Old Mincho',serif" font-weight="500">しあわせ</text>
+          <text x="380" y="125" text-anchor="middle" fill="#5b6678" font-size="11.5">目指す北極星（2階の目的）</text>
+        </g>
+
+        <!-- 四つの信念 V/E/R/A -->
+        <text x="380" y="172" text-anchor="middle" fill="#c5201d" font-size="11" letter-spacing="3" font-family="'Zen Old Mincho',serif">FOUR BELIEFS ― 四つの信念</text>
+        <g font-family="'Zen Old Mincho',serif">
+          <g><rect x="120" y="184" width="135" height="62" rx="9" fill="#fff" stroke="#1d447c" stroke-width="1.4"/><text x="187" y="210" text-anchor="middle" fill="#1d447c" font-size="20" font-weight="700">V</text><text x="187" y="232" text-anchor="middle" fill="#1c2433" font-size="14">活力</text></g>
+          <g><rect x="270" y="184" width="135" height="62" rx="9" fill="#fff" stroke="#1d447c" stroke-width="1.4"/><text x="337" y="210" text-anchor="middle" fill="#1d447c" font-size="20" font-weight="700">E</text><text x="337" y="232" text-anchor="middle" fill="#1c2433" font-size="14">誠実</text></g>
+          <g><rect x="420" y="184" width="135" height="62" rx="9" fill="#fff" stroke="#1d447c" stroke-width="1.4"/><text x="487" y="210" text-anchor="middle" fill="#1d447c" font-size="20" font-weight="700">R</text><text x="487" y="232" text-anchor="middle" fill="#1c2433" font-size="13">本物（中身）</text></g>
+          <g><rect x="570" y="184" width="120" height="62" rx="9" fill="#fff" stroke="#1d447c" stroke-width="1.4"/><text x="630" y="210" text-anchor="middle" fill="#1d447c" font-size="20" font-weight="700">A</text><text x="630" y="232" text-anchor="middle" fill="#1c2433" font-size="13">源（源泉）</text></g>
+        </g>
+
+        <!-- 背骨：守る／縛らない -->
+        <text x="380" y="296" text-anchor="middle" fill="#c5201d" font-size="11" letter-spacing="3" font-family="'Zen Old Mincho',serif">BACKBONE ― 背骨の二語</text>
+        <g font-family="'Zen Old Mincho',serif">
+          <rect x="190" y="308" width="170" height="54" rx="27" fill="#1d447c"/><text x="275" y="335" text-anchor="middle" fill="#fff" font-size="20" font-weight="500">守る</text><text x="275" y="352" text-anchor="middle" fill="#bcc8da" font-size="10.5" font-family="'Noto Sans JP',sans-serif">後ろで地面を整える</text>
+          <rect x="400" y="308" width="170" height="54" rx="27" fill="#1d447c"/><text x="485" y="335" text-anchor="middle" fill="#fff" font-size="20" font-weight="500">縛らない</text><text x="485" y="352" text-anchor="middle" fill="#bcc8da" font-size="10.5" font-family="'Noto Sans JP',sans-serif">選ぶ自由まで渡す</text>
+        </g>
+
+        <!-- 土台：二階建て -->
+        <text x="380" y="412" text-anchor="middle" fill="#c5201d" font-size="11" letter-spacing="3" font-family="'Zen Old Mincho',serif">FOUNDATION ― 土台（二階建て）</text>
+        <polygon points="380,424 520,460 240,460" fill="#13315a"/>
+        <g font-family="'Zen Old Mincho',serif">
+          <rect x="240" y="460" width="280" height="44" fill="#1d447c"/><text x="380" y="488" text-anchor="middle" fill="#fff" font-size="14">2F｜人を幸せにできる会社No.1（目的）</text>
+          <rect x="240" y="504" width="280" height="44" fill="#2a5690"/><text x="380" y="532" text-anchor="middle" fill="#fff" font-size="14">1F｜足元で一番に → 世界へ（戦い方）</text>
+        </g>
+
+        <!-- 脚注 -->
+        <text x="380" y="582" text-anchor="middle" fill="#5b6678" font-size="12.5" font-family="'Zen Old Mincho',serif">名乗らず、100年かけて、次の世代へ手渡す。</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- PILLARS（五本の柱） -->
+<section>
+  <div class="wrap">
+    <h2 class="title">FIVE PILLARS</h2>
+    <div class="lead">五本の柱 ― VERAが大切にしていること。</div>
+    <div class="pillars">
+      <div class="pill">
+        <div class="head"><div class="e">VITAL</div><div class="j">活力</div></div>
+        <div class="body"><div class="one">止まった流れを、もう一度めぐらせる。それがVERAの仕事です。</div><div class="d">活力は、溜め込む残高ではなく、巡らせる流れ。流して、誰かを潤して、はじめて「活かした」になる。</div></div>
+      </div>
+      <div class="pill">
+        <div class="head"><div class="e">EARNEST</div><div class="j">誠実</div></div>
+        <div class="body"><div class="one">報酬より先に、未来へ手付金を打つ。それがVERAの誠実です。</div><div class="d">本気は、言葉ではなく、先に差し出したもので決まる。戻らないこともある。それでも、こちらから先に置きます。</div></div>
+      </div>
+      <div class="pill">
+        <div class="head"><div class="e">REAL</div><div class="j">本物</div></div>
+        <div class="body"><div class="one">あたりさわりのない"平均"を、いちばん警戒します。</div><div class="d">本物の中身は、こだわりと信念。それを、相手が自分で選んだしあわせへ向ける。芯は曲げず、やり方は直し続けます。</div></div>
+      </div>
+      <div class="pill">
+        <div class="head"><div class="e">AUTHENTIC</div><div class="j">源</div></div>
+        <div class="body"><div class="one">本物は名乗らず、いつか人に呼ばれる。だから、行いで示します。</div><div class="d">"authentic"の語源は「自ら為す者＝著者」。自分の人生の作者であること。だから「うちは本物です」とは、自分からは言いません。</div></div>
+      </div>
+      <div class="pill">
+        <div class="head"><div class="e">SHIAWASE</div><div class="j">しあわせ</div></div>
+        <div class="body"><div class="one">笑顔は追いかけると逃げる。だから、咲く場所をつくる側に回ります。</div><div class="d">しあわせとは、誰かが安心して力を振れる場所を、後ろで黙って整えること。「あといくら」で測れるものは、たぶん本物のしあわせじゃない。</div></div>
+      </div>
+    </div>
+    <div class="bridge">
+      <div class="b">還りは当てにしない。それでも、結果的に巡って還ってくる。</div>
+      <div class="s">― 先に置く（誠実）→ 結果的に巡る（活力）。この順番で読んでください。</div>
+    </div>
+  </div>
+</section>
+
+<!-- MISSION（しあわせ：選ぶ自由を補う） -->
+<section class="mission">
+  <div class="wrap">
+    <div class="k"><span class="nb">私たちが守るのは、</span><span class="nb"><span class="red">人のしあわせ</span>。</span></div>
+    <p>中小企業の挑戦と、その先にある働く人や家族の暮らしまで。そして、その人が自分で選ぶ自由まで。私たちは前に出て、代わりに経営はしません。お客様が自分の足で立てるよう、後ろで足場を整えます。<br>ウェルビーイング（心ゆたかな状態）を起点に、100年つづくブランドづくりを伴走します。</p>
+  </div>
+</section>
+
+<!-- STORY（なぜ「後ろ」に回るのか：代表の語り・野球コーチ） -->
+<section class="story" style="background:var(--cream);border-top:1px solid var(--line);border-bottom:1px solid var(--line)">
+  <div class="wrap" style="max-width:760px">
+    <h2 class="title" style="text-align:center">STORY</h2>
+    <div class="lead" style="text-align:center">なぜ、私たちは「後ろ」に回るのか。</div>
+    <p style="font-size:15.5px;line-height:2.05;color:#36404f">
+      私は、少年野球のコーチをしています。バッターボックスに立つのは、子どもです。私が代わりに打つことはできません。コーチにできるのは、その子が思いきり振れるよう、後ろで地面をならしておくことだけ。<br><br>
+      会社も、同じだと思っています。経営をするのは、お客様です。私たちは前に出て指図しません。お客様が自分の足で立てるよう、後ろで足場を整える。「もう自分たちでできます」——その一言が聞けたら、私たちは静かに一歩、後ろに下がります。<br><br>
+      だから私たちは、囲い込みません。いつでも離れられる関係のまま、それでも選び続けてもらえる。前に立つのではなく、後ろで支える。それが、VERAの仕事のかたちです。
+    </p>
+  </div>
+</section>
+
+<!-- BUSINESS（事業内容：防災は断定回避・準備中／環境は出さない） -->
+<section>
+  <div class="wrap">
+    <h2 class="title">BUSINESS</h2>
+    <div class="lead">事業内容</div>
+    <div class="biz">
+      <div class="c"><div class="n">01</div><h3>経営・営業支援コンサルティング</h3><p>経営の右腕・左腕として、戦略立案から営業支援・販売促進・マーケティングまで伴走します。</p></div>
+      <div class="c"><div class="n">02</div><h3>AI・DX ／ ソフトウェア開発</h3><p>AIを軸にしたWebアプリ・業務システムの企画・開発・運用。現場で使える形に落とし込みます。</p></div>
+      <div class="c"><div class="n">03</div><h3>自社ブランドの販売・ショーケース</h3><p>自社ブランドに加え、本当に良いと信じたサービスだけを厳選し、お客様の課題に合わせてお繋ぎするショーケース事業。</p></div>
+      <div class="c"><div class="n">04</div><h3>住まいの支援 ／ VERAハウス<span class="tagchip">準備中</span></h3><p>大震災で「完全無傷」を証明した超耐震住宅で、家族の命と資産を守る。ご紹介から賃貸・資産活用まで伴走します（準備中）。</p></div>
+      <div class="c" style="grid-column:1 / -1"><div class="n">05</div><h3>グループ経営管理（Holdings）</h3><p>各事業・グループ会社を束ね、長く価値を生み続ける経営基盤を統括します。</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- SHOWCASE -->
+<section class="showcase">
+  <div class="wrap">
+    <h2 class="title">SHOWCASE</h2>
+    <div class="lead">提供サービス・取り扱いブランド</div>
+    <div class="scgrid">
+      <div class="sc"><div class="dot r"></div><div><h4>社長のヒダリウデ</h4><span>経営企画を代行する“右腕・左腕”サービス。</span></div></div>
+      <div class="sc"><div class="dot"></div><div><h4>ReviBooStar（レビブースター）</h4><span>Google口コミ・MEOを伸ばすAI集客ツール。</span></div></div>
+      <div class="sc"><div class="dot"></div><div><h4>onemind</h4><span>離職を防ぎ、定着を支える理念浸透×社内ポータルサービス。</span></div></div>
+      <div class="sc"><div class="dot r"></div><div><h4>Diamond Note ／ Pulcher Note</h4><span>自社開発アプリ（育成記録・健康習慣化）。</span></div></div>
+      <div class="sc" style="grid-column:1 / -1"><div class="dot r"></div><div><h4>VERAハウス × 超耐震住宅<span class="tagchip">準備中</span></h4><span>大震災で「完全無傷」を証明した超耐震住宅のご紹介と、賃貸経営の伴走（準備中）。</span></div></div>
+    </div>
+    <p class="scnote">※「完全無傷」は、提携先・百年住宅（WPC工法）の実績に基づく表現です。阪神・淡路大震災では495棟すべてが居住可能・窓ガラス1枚すら割れず、東日本大震災・熊本地震でも地震の揺れによる建物の損傷はゼロを記録しています。</p>
+  </div>
+</section>
+
+<!-- STRENGTH（本物の自称色をやわらげ） -->
+<section>
+  <div class="wrap">
+    <h2 class="title">STRENGTH</h2>
+    <div class="lead">私たちの強み</div>
+    <div class="str">
+      <div class="s"><div class="num">01</div><div><h4>AIを軸にした高機動</h4><p>AIの力で、企画・開発・運用までスピーディに一気通貫。</p></div></div>
+      <div class="s"><div class="num">02</div><div><h4>ウェルビーイング起点</h4><p>売上の前に「人のしあわせ」を置く。だから長く続く関係になる。</p></div></div>
+      <div class="s"><div class="num">03</div><div><h4>信じられるものだけを</h4><p>自社・他社を問わず、本当に良いと信じたものだけをお繋ぎします。</p></div></div>
+      <div class="s"><div class="num">04</div><div><h4>縛らない、という姿勢</h4><p>決められた一本道は敷きません。解約の自由も先に渡し、それでも選び直してもらえる関係を選びます。辞めやすくして、後ろに回る——そこが私たちの流儀です。</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- MESSAGE（誠実＝先に差し出す／活力＝めぐらせる を一文ずつ） -->
+<section class="msg">
+  <div class="wrap">
+    <h2 class="title">MESSAGE</h2>
+    <div class="lead">代表メッセージ</div>
+    <p>私たちは「守る」を事業にしています。止まった流れを、もう一度めぐらせるために。<br>
+    技術や流行の前に、まず目の前の人と、その人が大切にしているものを守りたい。<br>
+    だから、報酬より先に、こちらから手を差し出します。戻らないこともある。それでも、置きます。<br>
+    中小企業が積み上げてきた誇りを、100年つづくブランドへ。AIという新しい道具を、温かく・誠実に使いこなしていきます。</p>
+    <div class="sign">代表取締役</div>
+    <img class="sign-img" src="sign_morio_white.png" alt="森岡 浩一">
+  </div>
+</section>
+
+<!-- COMPANY -->
+<section>
+  <div class="wrap">
+    <h2 class="title">COMPANY</h2>
+    <div class="lead">会社概要</div>
+    <table class="tbl">
+      <tr><th>商号</th><td>株式会社VERA Holdings（VERA Holdings Co., Ltd.）</td></tr>
+      <tr><th>所在地</th><td>〒100-0011　東京都千代田区内幸町1-3-1　幸ビルディング9階</td></tr>
+      <tr><th>設立</th><td>2026年7月9日（決算期：6月）</td></tr>
+      <tr><th>代表者</th><td>代表取締役　森岡 浩一</td></tr>
+      <tr><th>事業内容</th><td>経営・営業支援コンサルティング／AI・DX・ソフトウェア開発／自社ブランドの販売及びショーケース・ご紹介／住まいの支援（VERAハウス・準備中）／グループ経営管理</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <img class="logo" src="vera_logo_white.svg" alt="VERA Holdings">
+  <div class="ft"><span class="nb">株式会社VERA Holdings</span><span class="ft-sep"> ｜ </span><span class="nb">〒100-0011</span> <span class="nb">東京都千代田区内幸町1-3-1</span> <span class="nb">幸ビルディング9階</span></div>
+  <div class="ftag">守る、を、事業に。</div>
+</footer>
+
+</body>
+</html>
