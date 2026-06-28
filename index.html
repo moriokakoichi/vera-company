@@ -26,8 +26,8 @@
   h2.title{font-family:var(--serif);font-size:13px;letter-spacing:.42em;color:var(--red);font-weight:500;margin-bottom:10px}
   h2.title+.lead{font-family:var(--serif);font-size:27px;font-weight:500;color:var(--navy);letter-spacing:.04em;margin-bottom:30px;line-height:1.5}
   p{font-size:15.5px;color:#36404f}
-  .nb{white-space:nowrap}
-  .hero .tag,.hero .tag2,.backbone .k,h2.title+.lead,.mission .k,.concept .recover,.pill .body .one,.bridge .b,.floor .ttl,.story p{word-break:keep-all;overflow-wrap:anywhere;line-break:strict}
+  .br-sp{display:none}
+  @media(max-width:760px){ .br-sp{display:inline} }
 
   /* HERO — 白系背景 × 2色ロゴ主役（表紙は維持） */
   .hero{background:radial-gradient(120% 120% at 50% 0%,#ffffff 0%,#f6f3ec 70%,#efe9dd 100%);color:var(--ink);text-align:center;padding:96px 28px 86px;border-bottom:1px solid var(--line)}
@@ -168,7 +168,7 @@
 <!-- BACKBONE（背骨の一文） -->
 <section class="backbone">
   <div class="wrap">
-    <div class="k"><span class="nb">二階建ての上に、</span><span class="nb">〈<span class="red">守る</span>〉と〈<span class="red">縛らない</span>〉。</span><br><span class="nb">それを名乗らず、</span><span class="nb">100年かけて、</span><span class="nb">次の世代へ手渡す。</span></div>
+    <div class="k">二階建ての上に、<br class="br-sp">〈<span class="red">守る</span>〉と<br class="br-sp">〈<span class="red">縛らない</span>〉。<br>それを名乗らず、<br class="br-sp">100年かけて、<br class="br-sp">次の世代へ手渡す。</div>
     <div class="s">― これが、VERAという会社のいちばん芯にある一文です。</div>
   </div>
 </section>
@@ -178,7 +178,7 @@
   <div class="wrap">
     <img class="mark" src="vera_logo_mono_navy.svg" alt="">
     <h2 class="title">CONCEPT</h2>
-    <div class="lead"><span class="nb">四つの信念が、</span><span class="nb">ひとつの四つ葉に。</span></div>
+    <div class="lead">四つの信念が、<br class="br-sp">ひとつの四つ葉に。</div>
     <div class="vera-grid">
       <div class="v"><div class="l">V</div><div class="e">VITAL</div><div class="j">活力</div><div class="jj">巡らせる</div></div>
       <div class="v"><div class="l">E</div><div class="e">EARNEST</div><div class="j">誠実</div><div class="jj">先に差し出す</div></div>
@@ -186,7 +186,7 @@
       <div class="v"><div class="l">A</div><div class="e">AUTHENTIC</div><div class="j">源</div><div class="jj">源泉</div></div>
     </div>
     <p class="note">途切れることのないモノラインで描いた四つ葉のクローバー。<br>社会との強い結びつきと、本質を見つめ、誠実に未来へ歩み続ける意志を表しています。</p>
-    <div class="recover"><span class="nb">四つ葉は、4つの信念。</span><span class="nb">その土台にあるのは</span><span class="nb">〈<b>守る</b>／<b>縛らない</b>〉、</span><span class="nb">目指すのは〈<b>人のしあわせ</b>〉。</span></div>
+    <div class="recover">四つ葉は、4つの信念。<br class="br-sp">その土台にあるのは〈<b>守る</b>／<b>縛らない</b>〉、<br class="br-sp">目指すのは〈<b>人のしあわせ</b>〉。</div>
   </div>
 </section>
 
@@ -194,7 +194,7 @@
 <section class="found">
   <div class="wrap">
     <h2 class="title" style="text-align:center">FOUNDATION</h2>
-    <div class="lead" style="text-align:center"><span class="nb">私たちの土台</span> ― <span class="nb">まず、足元で一番に。</span></div>
+    <div class="lead" style="text-align:center">私たちの土台 ―<br class="br-sp"> まず、足元で一番に。</div>
     <div class="house">
       <div class="roof"></div>
       <div class="floor f2">
@@ -303,7 +303,7 @@
 <!-- MISSION（しあわせ：選ぶ自由を補う） -->
 <section class="mission">
   <div class="wrap">
-    <div class="k"><span class="nb">私たちが守るのは、</span><span class="nb"><span class="red">人のしあわせ</span>。</span></div>
+    <div class="k">私たちが守るのは、<br class="br-sp"><span class="red">人のしあわせ</span>。</div>
     <p>中小企業の挑戦と、その先にある働く人や家族の暮らしまで。そして、その人が自分で選ぶ自由まで。私たちは前に出て、代わりに経営はしません。お客様が自分の足で立てるよう、後ろで足場を整えます。<br>ウェルビーイング（心ゆたかな状態）を起点に、100年つづくブランドづくりを伴走します。</p>
   </div>
 </section>
@@ -398,7 +398,7 @@
 <!-- FOOTER -->
 <footer>
   <img class="logo" src="vera_logo_white.svg" alt="VERA Holdings">
-  <div class="ft"><span class="nb">株式会社VERA Holdings</span><span class="ft-sep"> ｜ </span><span class="nb">〒100-0011</span> <span class="nb">東京都千代田区内幸町1-3-1</span> <span class="nb">幸ビルディング9階</span></div>
+  <div class="ft">株式会社VERA Holdings<span class="ft-sep"> ｜ </span><br class="br-sp">〒100-0011 東京都千代田区内幸町1-3-1<br class="br-sp"> 幸ビルディング9階</div>
   <div class="ftag">守る、を、事業に。</div>
 </footer>
 
