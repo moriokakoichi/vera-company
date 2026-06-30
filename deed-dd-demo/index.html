@@ -1,0 +1,1123 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>DEED「PERSONAL AI ∞」— D.D（ディディ）DEMO</title>
+<style>
+:root{
+  --bg-void:#08080A; --bg-shell:#0E0E10; --bg-surface:#161617; --bg-surface-2:#1C1C1E; --bg-elevated:#232325;
+  --line:#2A2A2C; --line-soft:#202022; --line-focus:#D85A30;
+  --accent:#D85A30; --accent-hover:#E96B3F; --accent-dark:#712B13; --accent-soft:#FAECE7; --accent-glow:rgba(216,90,48,.28);
+  --text-hi:#F4F1EE; --text-mid:#B8B5B2; --text-lo:#8A8A8E; --text-on-accent:#0E0E10;
+  --ok:#4FB477; --warn:#E0A23C; --error:#E5484D; --error-bg:rgba(229,72,77,.10);
+  --radius:14px; --radius-sm:10px; --radius-pill:999px;
+  --shadow-card:0 6px 24px rgba(0,0,0,.45);
+  --ease:cubic-bezier(.22,.61,.36,1);
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic UI",Meiryo,system-ui,sans-serif;
+  --font-num:"SF Mono","Segoe UI Mono","Roboto Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:var(--font);background:var(--bg-void);color:var(--text-mid);-webkit-font-smoothing:antialiased;line-height:1.6}
+.num{font-family:var(--font-num);font-variant-numeric:tabular-nums}
+
+.app-shell{
+  max-width:480px;min-height:100dvh;margin-inline:auto;background:var(--bg-shell);position:relative;
+  display:flex;flex-direction:column;overflow-x:hidden;
+}
+@media(min-width:520px){
+  body{background:var(--bg-void)}
+  .app-shell{box-shadow:0 0 80px rgba(0,0,0,.6);border-inline:1px solid var(--line-soft)}
+}
+
+/* header */
+.app-header{
+  position:sticky;top:0;z-index:50;height:56px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 16px;background:rgba(14,14,16,.86);backdrop-filter:blur(8px);border-bottom:1px solid var(--line-soft);
+}
+.brand{display:flex;align-items:center;gap:9px;min-width:0}
+.brand .logo{font-weight:800;font-size:13px;color:var(--text-hi);letter-spacing:.02em;flex-shrink:0}
+.brand .div{width:1px;height:16px;background:var(--line);flex-shrink:0}
+.brand .sub{font-size:11px;color:var(--text-lo);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.brand .sub .inf{color:var(--accent);font-weight:700}
+.demo-pill{
+  display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:600;letter-spacing:.04em;
+  border:1px solid var(--accent-dark);color:#C9A99B;background:rgba(216,90,48,.07);
+  padding:5px 9px;border-radius:var(--radius-pill);white-space:nowrap;
+}
+.demo-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:dotpulse 2s infinite}
+@keyframes dotpulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* main + screens */
+.main{flex:1;position:relative}
+.screen{display:none;padding:20px 16px 40px;animation:fadein .22s var(--ease)}
+.screen.active{display:block}
+@keyframes fadein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* footer */
+.app-footer{padding:16px;border-top:1px solid var(--line-soft);font-size:12px;color:var(--text-lo);text-align:center;line-height:1.7}
+.app-footer a{color:var(--text-lo);text-decoration:underline;cursor:pointer}
+
+/* typography helpers */
+h1.hero{font-size:34px;font-weight:800;letter-spacing:.04em;line-height:1.1;color:var(--text-hi)}
+h2.title{font-size:22px;font-weight:700;line-height:1.25;color:var(--text-hi);margin-bottom:6px}
+.sec-head{font-size:16px;font-weight:700;color:var(--text-hi);margin:18px 0 10px}
+.label-cap{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.cap{font-size:12px;color:var(--text-lo)}
+.body{font-size:15px;color:var(--text-mid)}
+.mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}.mt20{margin-top:20px}.mt24{margin-top:24px}
+
+/* buttons */
+.btn{display:flex;align-items:center;justify-content:center;width:100%;border:none;cursor:pointer;font-family:var(--font);transition:transform .08s var(--ease)}
+.btn-primary{background:linear-gradient(180deg,#E96B3F,#D85A30);color:var(--text-on-accent);height:52px;border-radius:var(--radius-pill);font-weight:600;font-size:16px}
+.btn-primary:active{transform:translateY(1px);box-shadow:0 0 0 4px var(--accent-glow)}
+.btn-primary:disabled{background:var(--bg-surface-2);color:var(--text-lo);cursor:not-allowed;box-shadow:none}
+.btn-secondary{background:transparent;border:1px solid var(--line);color:var(--text-mid);height:48px;border-radius:var(--radius-pill);font-size:15px}
+.btn-secondary:active{transform:translateY(1px)}
+.btn-link{background:none;border:none;color:var(--accent);font-size:14px;cursor:pointer;min-height:44px;font-family:var(--font);width:auto}
+.cta-pulse{animation:ctaglow 2.4s infinite}
+@keyframes ctaglow{0%,100%{box-shadow:0 0 0 0 rgba(216,90,48,0)}50%{box-shadow:0 0 0 5px var(--accent-glow)}}
+
+/* inputs */
+.field{margin-bottom:16px}
+.field>label{display:block;margin-bottom:7px}
+.in-wrap{position:relative}
+.input,select.input{
+  width:100%;background:var(--bg-surface);border:1px solid var(--line);border-radius:var(--radius-sm);
+  height:52px;padding:0 14px;color:var(--text-hi);font-size:16px;font-family:var(--font);
+}
+.input::placeholder{color:var(--text-lo);font-style:italic}
+.input:focus{outline:none;border-color:var(--line-focus);box-shadow:0 0 0 3px var(--accent-glow)}
+.input.filled{border-color:var(--ok)}
+.input.errored{border-color:var(--error);background:var(--error-bg)}
+.in-check{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--ok);display:none}
+.input.filled+.in-check{display:block}
+.err-msg{font-size:12px;color:var(--error);margin-top:6px;display:none}
+.err-msg.show{display:block}
+.help{font-size:12px;color:var(--text-lo);margin-top:6px}
+.row3{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:8px}
+select.input{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238A8A8E' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+
+/* segmented / chips */
+.seg{display:flex;gap:8px}
+.seg-btn{flex:1;height:46px;border:1px solid var(--line);background:transparent;color:var(--text-mid);border-radius:var(--radius-pill);font-size:14px;cursor:pointer;font-family:var(--font);transition:all .12s var(--ease)}
+.seg-btn.on{background:var(--accent);color:var(--text-on-accent);border-color:var(--accent);font-weight:600}
+
+/* role cards (LP) */
+.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.role-card{background:var(--bg-surface);border:1px solid var(--line-soft);border-radius:var(--radius);padding:14px;opacity:0;transform:translateY(12px)}
+.role-card.in{animation:rolein .5s var(--ease) forwards}
+@keyframes rolein{to{opacity:1;transform:translateY(0)}}
+.role-card .ricon{color:var(--accent);margin-bottom:8px}
+.role-card .rt{font-size:13px;font-weight:700;color:var(--text-hi);margin-bottom:3px}
+.role-card .rd{font-size:11.5px;color:var(--text-lo);line-height:1.5}
+
+/* progress */
+.progress-wrap{margin-bottom:18px}
+.progress-label{font-size:11px;font-weight:600;letter-spacing:.08em;color:var(--accent);margin-bottom:8px}
+.seg-bar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.seg-seg{height:3px;background:var(--line);border-radius:2px;position:relative}
+.seg-seg.done{height:3px;background:var(--accent)}
+.seg-seg.cur{height:5px;background:var(--accent)}
+
+/* consent */
+.consent-list{list-style:none;margin:16px 0}
+.consent-list li{display:flex;gap:10px;align-items:flex-start;margin-bottom:12px;font-size:14px;color:var(--text-mid)}
+.consent-list li svg{flex-shrink:0;margin-top:2px;color:var(--ok)}
+.note-box{background:var(--bg-surface);border:1px solid var(--line-soft);border-radius:var(--radius);padding:14px;font-size:13px;color:var(--text-mid);line-height:1.7}
+
+/* trainer banner */
+.tr-banner{background:rgba(216,90,48,.08);border:1px solid var(--accent-dark);border-radius:var(--radius-sm);padding:11px 13px;font-size:12.5px;color:#D9BCB1;line-height:1.5;display:flex;gap:8px;align-items:flex-start}
+.tr-banner b{color:var(--accent-soft)}
+
+/* body composition dashboard */
+.bc-head{display:flex;justify-content:space-between;align-items:center;margin:14px 0 12px}
+.toggle{display:inline-flex;align-items:center;gap:8px;font-size:12px;color:var(--text-mid);cursor:pointer;user-select:none}
+.toggle .sw{width:38px;height:22px;border-radius:var(--radius-pill);background:var(--bg-surface-2);border:1px solid var(--line);position:relative;transition:.2s}
+.toggle .sw::after{content:"";position:absolute;width:16px;height:16px;border-radius:50%;background:var(--text-lo);top:2px;left:2px;transition:.2s}
+.toggle.on .sw{background:var(--accent);border-color:var(--accent)}
+.toggle.on .sw::after{left:18px;background:var(--text-on-accent)}
+.bc-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.bc-cell{background:var(--bg-surface-2);border:1px solid var(--line-soft);border-radius:var(--radius);padding:12px;box-shadow:var(--shadow-card)}
+.bc-cell.calc{border-color:var(--accent-dark)}
+.bc-cell .bl{display:flex;align-items:center;gap:5px;margin-bottom:6px}
+.bc-cell .bl .en{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text-lo)}
+.bc-cell .bl .ja{font-size:10px;color:var(--text-lo)}
+.bc-cell .fmark{font-size:10px;color:var(--accent);border:1px solid var(--accent-dark);border-radius:3px;padding:0 3px;margin-left:auto}
+.bc-cell .lk{margin-left:auto;color:var(--text-lo)}
+.bc-val{display:flex;align-items:baseline;gap:4px}
+.bc-val .v{font-size:28px;font-weight:700;color:var(--text-hi);font-family:var(--font-num);font-variant-numeric:tabular-nums;line-height:1}
+.bc-val .u{font-size:12px;font-weight:500;color:var(--text-lo)}
+.bc-edit{width:100%;background:var(--bg-surface);border:1px solid var(--line);border-radius:8px;height:40px;padding:0 10px;color:var(--text-hi);font-size:16px;font-family:var(--font-num);margin-top:2px}
+.bc-edit:focus{outline:none;border-color:var(--line-focus)}
+.range{margin-top:8px}
+.range .track{height:5px;background:var(--line);border-radius:3px;position:relative}
+.range .band{position:absolute;height:100%;background:rgba(79,180,119,.35);border-radius:3px}
+.range .band.warn{background:rgba(224,162,60,.35)}
+.range .dot{position:absolute;width:10px;height:10px;border-radius:50%;background:var(--accent);top:50%;transform:translate(-50%,-50%);box-shadow:0 0 0 3px rgba(216,90,48,.25)}
+.range .rl{display:flex;justify-content:space-between;font-size:9.5px;color:var(--text-lo);margin-top:4px}
+
+/* goal cards */
+.goal-cards{display:flex;flex-direction:column;gap:10px}
+.goal-card{display:flex;gap:12px;align-items:center;background:var(--bg-surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px;cursor:pointer;transition:all .12s var(--ease)}
+.goal-card.on{border-color:var(--accent);background:rgba(216,90,48,.08)}
+.goal-card .gi{color:var(--text-lo);flex-shrink:0}
+.goal-card.on .gi{color:var(--accent)}
+.goal-card .gt{font-size:15px;font-weight:700;color:var(--text-hi)}
+.goal-card .gd{font-size:12px;color:var(--text-lo)}
+.preview-chip{display:inline-block;margin-top:6px;font-size:13px;font-weight:600;color:var(--accent)}
+.warn-chip{display:flex;gap:7px;align-items:flex-start;background:rgba(224,162,60,.1);border:1px solid rgba(224,162,60,.4);border-radius:var(--radius-sm);padding:10px 12px;font-size:12.5px;color:#E0C99A;margin-top:12px;line-height:1.5}
+
+/* summary chip (validation) */
+.err-summary{display:none;background:rgba(216,90,48,.08);border:1px solid var(--accent-dark);border-radius:var(--radius-sm);padding:11px 13px;font-size:13px;color:#E0B5A6;margin-bottom:12px;cursor:pointer}
+.err-summary.show{display:block}
+.err-summary b{color:var(--accent)}
+
+.sticky-cta{position:sticky;bottom:0;padding-top:14px;background:linear-gradient(transparent,var(--bg-shell) 24%);margin-top:8px}
+
+/* analyzing */
+#screen-analyzing{display:none;position:fixed;inset:0;z-index:60;background:var(--bg-void);flex-direction:column;align-items:center;justify-content:center;padding:30px}
+#screen-analyzing.active{display:flex}
+.dd-ring{position:relative;width:120px;height:120px;margin-bottom:30px}
+.dd-ring .sym{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;animation:pulse 3s infinite}
+.dd-ring .ring{position:absolute;inset:0;animation:rotate 1.4s linear infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+@keyframes rotate{to{transform:rotate(360deg)}}
+.an-steps{width:100%;max-width:300px}
+.an-step{display:flex;align-items:center;gap:10px;font-size:13.5px;color:var(--text-lo);padding:7px 0;opacity:.4;transition:.3s}
+.an-step.active{opacity:1;color:var(--text-mid)}
+.an-step.done{opacity:1;color:var(--text-hi)}
+.an-step .ic{width:18px;height:18px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.an-step .spin{width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:rotate .7s linear infinite}
+.an-bar{width:100%;max-width:300px;height:4px;background:var(--line);border-radius:2px;margin-top:20px;overflow:hidden}
+.an-bar>div{height:100%;width:0;background:var(--accent);transition:width .4s var(--ease)}
+.demo-strip{font-size:11px;font-weight:600;color:#C9A99B;background:rgba(216,90,48,.07);border:1px solid var(--accent-dark);border-radius:var(--radius-pill);padding:6px 12px;margin-top:26px}
+
+/* result */
+.dd-header{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.dd-header .ttl{font-size:20px;font-weight:800;color:var(--text-hi);letter-spacing:.02em}
+.greet{font-size:15px;color:var(--text-mid);line-height:1.7;margin-bottom:18px}
+.sum-cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:18px}
+.sum-card{background:var(--bg-surface-2);border:1px solid var(--line-soft);border-radius:var(--radius);padding:12px 8px;text-align:center}
+.sum-card .sl{font-size:10px;color:var(--text-lo);letter-spacing:.04em;margin-bottom:6px}
+.sum-card .sv{font-size:22px;font-weight:700;color:var(--text-hi);font-family:var(--font-num);font-variant-numeric:tabular-nums;line-height:1}
+.sum-card .su{font-size:10px;color:var(--text-lo);margin-top:3px}
+.verdict-block{opacity:0;animation:vfade .5s var(--ease) forwards}
+.verdict-block:nth-child(1){animation-delay:.0s}
+.verdict-block:nth-child(2){animation-delay:.08s}
+.verdict-block:nth-child(3){animation-delay:.16s}
+.verdict-block:nth-child(4){animation-delay:.24s}
+.verdict-block:nth-child(5){animation-delay:.32s}
+@keyframes vfade{to{opacity:1}}
+.voice-card{background:var(--bg-surface);border:1px solid var(--line-soft);border-radius:var(--radius);padding:14px 15px;margin-bottom:11px}
+.voice-card.truth{border-color:var(--accent);background:rgba(216,90,48,.06)}
+.voice-card .vrole{font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:7px}
+.voice-card .vtext{font-size:15px;color:var(--text-mid);line-height:1.75}
+.voice-card .vtext em{font-style:normal;font-weight:600;color:var(--accent)}
+.basis{background:var(--bg-surface-2);border:1px solid var(--line-soft);border-radius:var(--radius);padding:15px;margin-bottom:11px}
+.basis h4{font-size:13px;color:var(--text-hi);margin-bottom:12px;font-weight:700}
+.kcal-big{display:flex;align-items:baseline;gap:6px;margin-bottom:14px}
+.kcal-big .v{font-size:32px;font-weight:700;color:var(--accent);font-family:var(--font-num);font-variant-numeric:tabular-nums}
+.kcal-big .u{font-size:13px;color:var(--text-lo)}
+.pfc-bar{display:flex;height:14px;border-radius:7px;overflow:hidden;margin:6px 0 8px}
+.pfc-bar .p{background:var(--accent)}.pfc-bar .f{background:var(--warn)}.pfc-bar .c{background:var(--ok)}
+.pfc-legend{display:flex;gap:14px;font-size:12px;flex-wrap:wrap}
+.pfc-legend span{display:flex;align-items:center;gap:5px;color:var(--text-mid)}
+.pfc-legend .sw{width:10px;height:10px;border-radius:2px}
+.train-bar{display:flex;height:24px;border-radius:6px;overflow:hidden;margin:8px 0 6px;font-size:11px;font-weight:600}
+.train-bar>div{display:flex;align-items:center;justify-content:center;color:var(--text-on-accent)}
+.train-bar .str{background:var(--accent)}.train-bar .car{background:var(--ok)}
+.pace-line{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-mid);margin-top:10px}
+.pace-tag{font-size:11px;font-weight:600;padding:2px 8px;border-radius:var(--radius-pill)}
+.pace-tag.ok{background:rgba(79,180,119,.15);color:var(--ok)}
+.pace-tag.warn{background:rgba(224,162,60,.15);color:var(--warn)}
+.action-list{list-style:none}
+.action-list li{display:flex;gap:10px;font-size:14px;color:var(--text-mid);margin-bottom:9px;line-height:1.55}
+.action-list li .n{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--accent);color:var(--text-on-accent);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:var(--font-num)}
+.bottom-demo{text-align:center;font-size:10.5px;color:#C9A99B;background:rgba(216,90,48,.06);border:1px solid var(--accent-dark);border-radius:var(--radius-pill);padding:6px 12px;margin:16px 0 8px}
+
+/* chat */
+#screen-chat{padding-bottom:80px}
+.chat-log{display:flex;flex-direction:column;gap:12px;margin:14px 0}
+.bubble{max-width:80%;padding:11px 14px;border-radius:16px;font-size:14px;line-height:1.6;animation:fadein .25s var(--ease)}
+.bubble.dd{background:var(--bg-elevated);color:var(--text-mid);align-self:flex-start;border-bottom-left-radius:5px;display:flex;gap:9px}
+.bubble.dd .sm{flex-shrink:0}
+.bubble.user{background:var(--accent);color:var(--text-on-accent);align-self:flex-end;border-bottom-right-radius:5px}
+.typing{align-self:flex-start;background:var(--bg-elevated);padding:13px 16px;border-radius:16px;border-bottom-left-radius:5px;display:flex;gap:4px}
+.typing span{width:7px;height:7px;border-radius:50%;background:var(--text-lo);animation:bounce 1.2s infinite}
+.typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-5px);opacity:1}}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.chip{border:1px solid var(--line);background:var(--bg-surface);color:var(--text-mid);border-radius:var(--radius-pill);padding:8px 14px;font-size:13px;cursor:pointer;font-family:var(--font)}
+.chip:active{background:var(--bg-surface-2)}
+.chat-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;display:flex;gap:8px;padding:10px 16px;background:rgba(14,14,16,.94);backdrop-filter:blur(8px);border-top:1px solid var(--line-soft)}
+.chat-bar input{flex:1;background:var(--bg-surface);border:1px solid var(--line);border-radius:var(--radius-pill);height:44px;padding:0 16px;color:var(--text-hi);font-size:16px;font-family:var(--font)}
+.chat-bar input:focus{outline:none;border-color:var(--line-focus)}
+.chat-send{width:44px;height:44px;flex-shrink:0;border-radius:50%;background:var(--accent);border:none;color:var(--text-on-accent);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.chat-demo{text-align:center;font-size:10.5px;color:var(--text-lo);margin-bottom:4px}
+
+/* toast */
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--bg-elevated);color:var(--text-hi);font-size:13px;padding:11px 18px;border-radius:var(--radius-pill);border:1px solid var(--line);z-index:100;opacity:0;pointer-events:none;transition:opacity .3s}
+.toast.show{opacity:1}
+
+@media(prefers-reduced-motion:reduce){
+  *{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+}
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <header class="app-header">
+    <div class="brand">
+      <span class="logo">DEED</span><span class="div"></span>
+      <span class="sub">PERSONAL AI <span class="inf">∞</span></span>
+    </div>
+    <span class="demo-pill"><span class="demo-dot"></span>DEMO／ダミー</span>
+  </header>
+
+  <main class="main">
+    <!-- ① CONSENT -->
+    <section class="screen" id="screen-consent" data-screen="consent">
+      <div style="text-align:center;margin:10px 0 18px">
+        <svg width="64" height="40" viewBox="0 0 64 40" style="filter:drop-shadow(0 0 8px var(--accent-glow))">
+          <path d="M20 20 C20 8 8 8 8 20 C8 32 20 32 32 20 C44 8 56 8 56 20 C56 32 44 32 32 20" fill="none" stroke="#D85A30" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h2 class="title" style="text-align:center">はじめる前に</h2>
+      <p class="body" style="text-align:center;margin:8px 0 16px">DEED「PERSONAL AI ∞」へようこそ。<br>あなた専属のAIトレーナー D.D（ディディ）が伴走します。</p>
+      <div class="note-box">
+        ここで入力する身長・体重などの健康情報は、<b style="color:var(--text-hi)">この端末の中だけに保存</b>されます（localStorage）。サーバーへ送信されません。これは体験デモです。
+      </div>
+      <ul class="consent-list mt16">
+        <li><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 8l3.5 3.5L13 4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>保存先＝この端末のみ（localStorage）</li>
+        <li><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 8l3.5 3.5L13 4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>外部へ一切通信しません</li>
+        <li><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 8l3.5 3.5L13 4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>ダミーのD.Dが応答します（医療診断ではありません）</li>
+      </ul>
+      <button class="btn btn-primary mt8" id="btn-consent">同意して、はじめる</button>
+      <div style="text-align:center"><button class="btn-link" id="btn-clear-consent">あとで削除する＝端末のデータを消す</button></div>
+    </section>
+
+    <!-- ② LP HERO -->
+    <section class="screen" id="screen-lp" data-screen="lp">
+      <div id="resume-bar" style="display:none;background:var(--bg-surface);border:1px solid var(--accent-dark);border-radius:var(--radius-sm);padding:12px;margin-bottom:16px">
+        <div style="font-size:13px;color:var(--text-mid);margin-bottom:9px">前回の続きが残っています。</div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-primary" style="height:40px;font-size:14px" id="btn-resume">続きから再開する</button>
+          <button class="btn btn-secondary" style="height:40px;font-size:14px" id="btn-restart">最初からやり直す</button>
+        </div>
+      </div>
+      <div style="background:radial-gradient(circle at 50% 30%,rgba(216,90,48,.18),transparent 60%);border-radius:var(--radius);padding:36px 16px 24px;text-align:center;margin-bottom:20px">
+        <div style="margin-bottom:18px">
+          <svg width="80" height="50" viewBox="0 0 64 40" style="filter:drop-shadow(0 0 10px var(--accent-glow))">
+            <path d="M20 20 C20 8 8 8 8 20 C8 32 20 32 32 20 C44 8 56 8 56 20 C56 32 44 32 32 20" fill="none" stroke="#D85A30" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h1 class="hero">PERSONAL AI <span style="color:var(--accent)">∞</span></h1>
+        <p class="body mt12">あなた専属のAIトレーナー、<b style="color:var(--text-hi)">D.D</b>。</p>
+      </div>
+      <div class="role-grid" id="role-grid">
+        <div class="role-card"><div class="ricon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21c-5-3.5-8-6.5-8-10a4 4 0 017-2.6A4 4 0 0120 11c0 3.5-3 6.5-8 10z"/></svg></div><div class="rt">毎日のパートナー</div><div class="rd">食事・運動・気持ちに寄り添う</div></div>
+        <div class="role-card"><div class="ricon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg></div><div class="rt">嘘は見抜く</div><div class="rd">ごまかしを、正面から優しく</div></div>
+        <div class="role-card"><div class="ricon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/></svg></div><div class="rt">目的を忘れさせない</div><div class="rd">始めた理由へ連れ戻す</div></div>
+        <div class="role-card"><div class="ricon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0z"/><path d="M4 21v-1a6 6 0 016-6h4a6 6 0 016 6v1"/></svg></div><div class="rt">DEED連携</div><div class="rd">担当トレーナーと同じ方針で伴走</div></div>
+      </div>
+      <button class="btn btn-primary mt20" id="btn-start">はじめる</button>
+    </section>
+
+    <!-- ③ STEP1 -->
+    <section class="screen" id="screen-step1" data-screen="step1">
+      <div class="progress-wrap">
+        <div class="progress-label">STEP 1 / 3 ─ 基本情報</div>
+        <div class="seg-bar"><div class="seg-seg cur"></div><div class="seg-seg"></div><div class="seg-seg"></div></div>
+      </div>
+      <h2 class="title">まず、あなたのこと</h2>
+      <p class="cap" style="margin-bottom:18px">会員のあなたが入れるのは基本情報と目標だけ。体の数値はトレーナーが計測済みです。</p>
+
+      <div class="err-summary" id="err-sum-1"></div>
+
+      <div class="field">
+        <label class="label-cap">お名前</label>
+        <div class="in-wrap">
+          <input class="input" id="f-name" type="text" placeholder="例: 山田 太郎" autocomplete="off">
+          <span class="in-check"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 8l3.5 3.5L13 4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </div>
+        <div class="err-msg" id="e-name"></div>
+      </div>
+
+      <div class="field">
+        <label class="label-cap">生年月日</label>
+        <div class="row3">
+          <select class="input" id="f-by"><option value="">年</option></select>
+          <select class="input" id="f-bm"><option value="">月</option></select>
+          <select class="input" id="f-bd"><option value="">日</option></select>
+        </div>
+        <div class="help">例: 1990 / 4 / 15</div>
+        <div class="err-msg" id="e-birth"></div>
+      </div>
+
+      <div class="field">
+        <label class="label-cap">性別 <span style="color:var(--text-lo);text-transform:none;letter-spacing:0">（任意）</span></label>
+        <div class="seg" id="seg-sex">
+          <button class="seg-btn" data-v="male">男性</button>
+          <button class="seg-btn" data-v="female">女性</button>
+          <button class="seg-btn" data-v="na">回答しない</button>
+        </div>
+      </div>
+
+      <div class="sticky-cta">
+        <button class="btn btn-primary" id="btn-s1-next">次へ進む</button>
+      </div>
+    </section>
+
+    <!-- ④ STEP2 -->
+    <section class="screen" id="screen-step2" data-screen="step2">
+      <div class="progress-wrap">
+        <div class="progress-label">STEP 2 / 3 ─ 体組成（担当トレーナー計測済み）</div>
+        <div class="seg-bar"><div class="seg-seg done"></div><div class="seg-seg cur"></div><div class="seg-seg"></div></div>
+      </div>
+      <h2 class="title">あなたの体組成</h2>
+      <div class="tr-banner mt8">
+        <span>📋</span>
+        <span>担当トレーナー〈<b id="tr-name">佐藤 健</b>（DEED 新宿東口店）〉が計測・入力済みです。あなたは確認するだけでOK。</span>
+      </div>
+
+      <div class="bc-head">
+        <span class="cap">BMI・体脂肪量は自動算出（<span style="color:var(--accent)">ƒ</span>＝計算値）</span>
+        <span class="toggle" id="bc-toggle"><span class="sw"></span>計測値を編集</span>
+      </div>
+
+      <div class="bc-grid" id="bc-grid"></div>
+
+      <div class="sticky-cta">
+        <button class="btn btn-primary" id="btn-s2-next">次へ（目標へ）</button>
+        <div style="text-align:center;margin-top:6px"><button class="btn-link" id="btn-s2-back">ひとつ戻る</button></div>
+      </div>
+    </section>
+
+    <!-- ⑤ STEP3 -->
+    <section class="screen" id="screen-step3" data-screen="step3">
+      <div class="progress-wrap">
+        <div class="progress-label">STEP 3 / 3 ─ 目標</div>
+        <div class="seg-bar"><div class="seg-seg done"></div><div class="seg-seg done"></div><div class="seg-seg cur"></div></div>
+      </div>
+      <h2 class="title">どこを目指す？</h2>
+
+      <div class="err-summary" id="err-sum-3"></div>
+
+      <div class="field">
+        <label class="label-cap">目的</label>
+        <div class="goal-cards" id="goal-cards">
+          <div class="goal-card" data-v="cut"><span class="gi"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 15l7-7 7 7"/></svg></span><div><div class="gt">減量</div><div class="gd">脂肪を落とし、引き締める</div></div></div>
+          <div class="goal-card" data-v="bulk"><span class="gi"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 9l7 7 7-7"/></svg></span><div><div class="gt">増量</div><div class="gd">筋肉で、質よく増やす</div></div></div>
+          <div class="goal-card" data-v="maintain"><span class="gi"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 12h14"/></svg></span><div><div class="gt">体型維持</div><div class="gd">今の体を保ち、中身を磨く</div></div></div>
+        </div>
+        <div class="err-msg" id="e-goal"></div>
+      </div>
+
+      <div class="field">
+        <label class="label-cap">目標体重</label>
+        <div class="in-wrap">
+          <input class="input num" id="f-target" type="number" inputmode="decimal" placeholder="例: 62" step="0.1">
+          <span class="in-check"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 8l3.5 3.5L13 4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </div>
+        <div class="preview-chip" id="target-preview"></div>
+        <div class="err-msg" id="e-target"></div>
+      </div>
+
+      <div class="field">
+        <label class="label-cap">期限</label>
+        <select class="input" id="f-deadline">
+          <option value="">選択してください</option>
+          <option value="m1">1ヶ月後</option>
+          <option value="m3">3ヶ月後</option>
+          <option value="m6">半年後</option>
+          <option value="m12">1年後</option>
+          <option value="date">日付指定</option>
+        </select>
+        <div class="in-wrap mt8" id="date-wrap" style="display:none">
+          <input class="input" id="f-date" type="date">
+        </div>
+        <div class="err-msg" id="e-deadline"></div>
+      </div>
+
+      <div class="warn-chip" id="goal-conflict" style="display:none">
+        <span>⚠️</span><span id="goal-conflict-text"></span>
+      </div>
+
+      <div class="sticky-cta">
+        <button class="btn btn-primary cta-pulse" id="btn-analyze">AIで解析する</button>
+        <div style="text-align:center;margin-top:6px"><button class="btn-link" id="btn-s3-back">ひとつ戻る</button></div>
+      </div>
+    </section>
+
+    <!-- ⑦ RESULT -->
+    <section class="screen" id="screen-result" data-screen="result"></section>
+
+    <!-- ⑧ CHAT -->
+    <section class="screen" id="screen-chat" data-screen="chat">
+      <div class="chat-demo">※これはデモの定型応答です。実際のAI接続はありません</div>
+      <button class="btn-link" id="btn-chat-back" style="margin-bottom:4px">‹ 所見へ戻る</button>
+      <div class="chat-log" id="chat-log"></div>
+      <div class="chips" id="chat-chips"></div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    D.Dの所見は入力値から計算した目安です（医療・栄養の診断ではありません）。<br>
+    データはこの端末のみに保存・通信なし。 DEED「PERSONAL AI ∞」DEMO<br>
+    <a id="btn-clear-footer">この端末から消す</a>
+  </footer>
+</div>
+
+<!-- ⑥ ANALYZING overlay -->
+<section id="screen-analyzing">
+  <div class="dd-ring">
+    <div class="sym"><svg width="56" height="35" viewBox="0 0 64 40"><path d="M20 20 C20 8 8 8 8 20 C8 32 20 32 32 20 C44 8 56 8 56 20 C56 32 44 32 32 20" fill="none" stroke="#D85A30" stroke-width="2.5" stroke-linecap="round"/></svg></div>
+    <div class="ring"><svg width="120" height="120" viewBox="0 0 120 120"><circle cx="60" cy="60" r="54" fill="none" stroke="#D85A30" stroke-width="3" stroke-linecap="round" stroke-dasharray="80 260"/></svg></div>
+  </div>
+  <div class="an-steps" id="an-steps"></div>
+  <div class="an-bar"><div id="an-bar-fill"></div></div>
+  <div class="demo-strip">DEMO ─ 実際のAI接続なし／ダミーデータ</div>
+</section>
+
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+const STORE_KEY="dd_demo_v1";
+const TRAINER="佐藤 健";
+const today=new Date();
+
+// ---- state ----
+let state={
+  screen:"consent",consented:false,step:1,
+  data:{
+    name:"",birthYear:"",birthMonth:"",birthDay:"",sex:"",
+    height:172,weight:70,bodyFat:20,muscle:30,water:55,bone:3.0,trainer:TRAINER,trainerLocked:true,
+    goalType:"",targetWeight:"",deadline:"",deadlineDate:""
+  },
+  result:null,chatLog:[],chatTurn:0
+};
+
+// ---- persistence ----
+function save(){
+  try{
+    localStorage.setItem(STORE_KEY,JSON.stringify({consented:state.consented,step:state.step,data:state.data}));
+  }catch(e){}
+}
+function load(){
+  try{
+    const raw=localStorage.getItem(STORE_KEY);
+    if(!raw)return false;
+    const o=JSON.parse(raw);
+    if(o&&o.data){state.data=Object.assign(state.data,o.data);state.consented=!!o.consented;state.step=o.step||1;return true;}
+  }catch(e){}
+  return false;
+}
+function clearAll(){
+  try{localStorage.removeItem(STORE_KEY);}catch(e){}
+  state={screen:"consent",consented:false,step:1,
+    data:{name:"",birthYear:"",birthMonth:"",birthDay:"",sex:"",height:172,weight:70,bodyFat:20,muscle:30,water:55,bone:3.0,trainer:TRAINER,trainerLocked:true,goalType:"",targetWeight:"",deadline:"",deadlineDate:""},
+    result:null,chatLog:[],chatTurn:0};
+}
+
+// ---- screen routing ----
+function show(name){
+  state.screen=name;
+  document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("active",s.dataset.screen===name));
+  const an=document.getElementById("screen-analyzing");
+  an.classList.toggle("active",name==="analyzing");
+  window.scrollTo(0,0);
+}
+function toast(msg){
+  const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),2200);
+}
+
+// ===== CALC (pure / deterministic) =====
+function calcAge(y,m,d){
+  if(!y||!m||!d)return 30;
+  let age=today.getFullYear()-y;
+  const mm=today.getMonth()+1, dd=today.getDate();
+  if(mm<m||(mm===m&&dd<d))age--;
+  return age;
+}
+function calcBMI(weight,height){
+  const hm=height/100, bmi=weight/(hm*hm);
+  let label,color;
+  if(bmi<18.5){label="低体重";color="var(--warn)";}
+  else if(bmi<25){label="標準";color="var(--ok)";}
+  else if(bmi<30){label="やや高め";color="var(--accent)";}
+  else{label="高め";color="var(--error)";}
+  return {bmi:Math.round(bmi*10)/10,label,color};
+}
+function calcFat(weight,bodyFat){
+  const fatMass=Math.round(weight*(bodyFat/100)*10)/10;
+  const leanMass=Math.round((weight-fatMass)*10)/10;
+  return {fatMass,leanMass};
+}
+function calcCalories(d,age,leanMass){
+  const w=+d.weight,h=+d.height;
+  let bmr;
+  if(d.sex==="male")bmr=10*w+6.25*h-5*age+5;
+  else if(d.sex==="female")bmr=10*w+6.25*h-5*age-161;
+  else bmr=10*w+6.25*h-5*age-78;
+  const tdee=bmr*1.375;
+  let target;
+  if(d.goalType==="cut")target=tdee-400;
+  else if(d.goalType==="bulk")target=tdee+250;
+  else target=tdee;
+  const floor=leanMass*30;
+  if(target<floor)target=floor;
+  return {bmr:Math.round(bmr),tdee:Math.round(tdee),dailyKcal:Math.round(target/10)*10};
+}
+function weeksFromDeadline(d){
+  if(d.deadline==="m1")return 4;
+  if(d.deadline==="m3")return 13;
+  if(d.deadline==="m6")return 26;
+  if(d.deadline==="m12")return 52;
+  if(d.deadline==="date"&&d.deadlineDate){
+    const dl=new Date(d.deadlineDate+"T00:00:00");
+    const wk=Math.ceil((dl-today)/(7*24*3600*1000));
+    return Math.max(1,wk);
+  }
+  return 12;
+}
+function calcPace(d){
+  const w=+d.weight, t=+d.targetWeight;
+  const diff=w-t; // 正=減らす, 負=増やす
+  const absDiff=Math.round(Math.abs(diff)*10)/10;
+  const weeks=weeksFromDeadline(d);
+  const pace=weeks>0?Math.round((absDiff/weeks)*100)/100:0;
+  const safeWeekly=Math.round(w*0.007*100)/100;
+  const isAggressive=pace>safeWeekly;
+  let direction;
+  if(Math.abs(diff)<0.6||d.goalType==="maintain")direction="keep";
+  else if(diff>0)direction="reduce";
+  else direction="gain";
+  return {diff,absDiff,weeks,pace,safeWeekly,isAggressive,direction};
+}
+function calcPFC(goalType,dailyKcal,weight,leanMass){
+  let proteinG;
+  if(goalType==="cut")proteinG=weight*2.0;
+  else if(goalType==="bulk")proteinG=weight*1.8;
+  else proteinG=weight*1.6;
+  proteinG=Math.round(proteinG);
+  const fatRatio=goalType==="maintain"?0.28:0.25;
+  let fatG=Math.round((dailyKcal*fatRatio)/9);
+  let remaining=dailyKcal-(proteinG*4+fatG*9);
+  let carbG=Math.max(0,Math.round(remaining/4));
+  const total=proteinG*4+fatG*9+carbG*4||1;
+  return {
+    proteinG,fatG,carbG,
+    pPct:Math.round(proteinG*4/total*100),
+    fPct:Math.round(fatG*9/total*100),
+    cPct:Math.round(carbG*4/total*100)
+  };
+}
+function trainingSplit(goalType){
+  if(goalType==="cut")return {strength:50,cardio:50,times:3,text:"週3回（筋トレ＋有酸素を少し）"};
+  if(goalType==="bulk")return {strength:75,cardio:25,times:4,text:"週4回（高重量の筋トレ中心）"};
+  return {strength:60,cardio:40,times:2,text:"週2〜3回（今の質を保つ維持メニュー）"};
+}
+function muscleNote(weight,leanMass){
+  const r=leanMass/weight;
+  if(r>=0.78)return "土台となる筋肉はしっかりある。これは強い武器になる";
+  if(r>=0.70)return "筋肉の土台は平均的。整え方しだいで伸びる位置にいる";
+  return "筋肉の伸びしろがまだ大きい。ここを育てると体は応えてくれる";
+}
+
+// ===== ANALYZE (core, deterministic) =====
+function analyze(){
+  const d=state.data;
+  const age=calcAge(+d.birthYear,+d.birthMonth,+d.birthDay);
+  const bmiO=calcBMI(+d.weight,+d.height);
+  const {fatMass,leanMass}=calcFat(+d.weight,+d.bodyFat);
+  const cal=calcCalories(d,age,leanMass);
+  const pace=calcPace(d);
+  const pfc=calcPFC(d.goalType,cal.dailyKcal,+d.weight,leanMass);
+  const tr=trainingSplit(d.goalType);
+  const mNote=muscleNote(+d.weight,leanMass);
+
+  // direction label / conflict
+  const dirJP=d.goalType==="cut"?"減量":d.goalType==="bulk"?"増量":"維持";
+  let conflict=false;
+  if(d.goalType==="cut"&&pace.diff<0)conflict=true;
+  if(d.goalType==="bulk"&&pace.diff>0)conflict=true;
+
+  // truth line (必ず1つ)
+  let truth;
+  if(conflict){
+    truth="数字は正直だ。"+dirJP+"を選んだのに、目標体重がいまと逆を向いている。どっちが本当の望みだ？ 設定を一緒に整えよう。";
+  }else if(pace.isAggressive){
+    truth="正直に言うね。あと"+pace.weeks+"週で"+pace.absDiff+"kgは、かなり攻めたペース（週"+pace.pace+"kg）だ。体を壊さない上限は週"+pace.safeWeekly+"kg目安。焦りは続かない、期限か目標を少しゆるめよう。";
+  }else if(+d.bodyFat>=(d.sex==="female"?30:25)&&d.goalType==="cut"){
+    truth="最初の2週間で大きく落ちても、それは水分のことが多い。数字に一喜一憂しないこと。本番はそこからだ。";
+  }else if(d.goalType==="maintain"){
+    truth="『今日くらいいいか』が3回続くと、それは維持じゃなくなる。でも責めない。気づいて戻れたら、それで十分だ。";
+  }else if(pace.absDiff>0&&pace.absDiff<=2){
+    truth="正直に言うね。"+(d.goalType==="bulk"?"あと"+pace.absDiff+"kg増":"あと"+pace.absDiff+"kg")+"は一見ラクに見える数字だ。でも最後の"+pace.absDiff+"kgが一番ねばる。ここでサボった記録は僕が必ず見抜く。順調な時こそ、その出番だ。";
+  }else if(+d.bodyFat>=18){
+    truth="体脂肪"+(+d.bodyFat)+"％──いまは標準内でも、ここは油断するとじわっと戻りやすいゾーンだ。『今日くらい』が積もると数字に出る。順調な時ほど、僕がその"+(+d.bodyFat)+"％から目を離さない。";
+  }else if(bmiO.bmi>=22){
+    truth="BMI"+bmiO.bmi.toFixed(1)+"。悪くない、でも『大丈夫』と思った瞬間に崩れるのがこのゾーンだ。ごまかしの記録は数字で必ず食い違う。だから僕はその"+bmiO.bmi.toFixed(1)+"を毎日見ている。";
+  }else{
+    truth="あと"+(pace.absDiff||1)+"kg、週"+pace.weeks+"週の計画だ。順調な滑り出しほど気がゆるむ。記録をごまかせば数字が必ずズレて見える――そこを僕は見逃さない。だから安心して任せてくれ。";
+  }
+
+  // actions (目的別)
+  let actions;
+  if(d.goalType==="cut"){
+    actions=["毎食、手のひら1枚分のタンパク質（合計"+pfc.proteinG+"g目安）を先に食べる",
+      "1日 約"+cal.dailyKcal+"kcal を意識（細かい計算は不要、まず『食べすぎた日』を作らない）",
+      "週"+tr.times+"回、"+TRAINER+"さんのメニューをこなす"];
+  }else if(d.goalType==="bulk"){
+    actions=["3食＋間食で 約"+cal.dailyKcal+"kcal を『下回らない』",
+      "タンパク質 "+pfc.proteinG+"g を毎日確保（不足分はプロテインで補う）",
+      "週"+tr.times+"回、前回より1回でも重く・1回でも多く"];
+  }else{
+    actions=["今の食事リズムを崩さない（極端な食べすぎ・抜きを作らない）",
+      "週1回、同じ条件（朝・起床後）で体重を測る",
+      "週"+tr.times+"回のトレーニングを『予定どおり』続ける"];
+  }
+
+  const name=d.name||"あなた";
+  state.result={
+    name,age,bmi:bmiO.bmi,bmiLabel:bmiO.label,bmiColor:bmiO.color,
+    fatMass,leanMass,bmr:cal.bmr,tdee:cal.tdee,dailyKcal:cal.dailyKcal,
+    diff:pace.diff,absDiff:pace.absDiff,weeks:pace.weeks,pace:pace.pace,safeWeekly:pace.safeWeekly,
+    isAggressive:pace.isAggressive,direction:pace.direction,dirJP,conflict,
+    pfc,tr,mNote,truth,actions,
+    height:+d.height,weight:+d.weight,bodyFat:+d.bodyFat,goalType:d.goalType,targetWeight:+d.targetWeight
+  };
+}
+
+// ===== RENDER RESULT =====
+function renderResult(){
+  const r=state.result;
+  const dirWord=r.direction==="reduce"?"-":r.direction==="gain"?"+":"±";
+  const diffStr=r.direction==="keep"?"維持":dirWord+r.absDiff.toFixed(1)+" kg";
+  const paceTagClass=r.isAggressive?"warn":"ok";
+  const paceTagText=r.isAggressive?"ややタイト":"現実的";
+
+  const purposeGoal=r.targetWeight?(r.targetWeight+"kg"):"あの目標";
+  const el=document.getElementById("screen-result");
+  el.innerHTML=
+  '<div class="dd-header"><svg width="36" height="22" viewBox="0 0 64 40" style="filter:drop-shadow(0 0 6px var(--accent-glow))"><path d="M20 20 C20 8 8 8 8 20 C8 32 20 32 32 20 C44 8 56 8 56 20 C56 32 44 32 32 20" fill="none" stroke="#D85A30" stroke-width="2.5" stroke-linecap="round"/></svg><span class="ttl">D.D の所見</span></div>'+
+  '<p class="greet">'+esc(r.name)+'さん。ここから一緒に始めよう。担当の'+TRAINER+'さんが計測した数字を、僕（D.D）が読み解いた。数字は責めるためじゃない、今いる場所を正確に知るためのものだ。</p>'+
+
+  '<div class="verdict-block"><div class="sum-cards">'+
+    '<div class="sum-card"><div class="sl">現在BMI</div><div class="sv">'+r.bmi.toFixed(1)+'</div><div class="su" style="color:'+r.bmiColor+'">'+r.bmiLabel+'</div></div>'+
+    '<div class="sum-card"><div class="sl">目標まで</div><div class="sv">'+(r.direction==="keep"?"±0":dirWord+r.absDiff.toFixed(1))+'</div><div class="su">'+(r.direction==="keep"?"維持":"kg")+'</div></div>'+
+    '<div class="sum-card"><div class="sl">期限まで</div><div class="sv">'+r.weeks+'</div><div class="su">週間</div></div>'+
+  '</div></div>'+
+
+  '<div class="verdict-block"><div class="voice-card"><div class="vrole">毎日のパートナー</div><div class="vtext">ひとことで言うと──'+r.mNote+'。<em>'+r.bmiLabel+'</em>のゾーンにいる、というのが今日のスタート地点だ。ここは「良い・悪い」じゃない、設計の出発点にすぎない。</div></div></div>'+
+
+  '<div class="verdict-block"><div class="voice-card truth"><div class="vrole">嘘は見抜く</div><div class="vtext">'+r.truth+'</div></div></div>'+
+
+  '<div class="verdict-block"><div class="basis">'+
+    '<h4>数値の根拠（あなたの入力から算出）</h4>'+
+    '<div class="label-cap" style="color:var(--text-lo);margin-bottom:4px">推奨1日カロリー目安</div>'+
+    '<div class="kcal-big"><span class="v">'+r.dailyKcal+'</span><span class="u">kcal / 日</span></div>'+
+    '<div class="cap" style="margin-top:-6px;margin-bottom:14px">前提＝基礎代謝'+r.bmr+'kcal × 活動係数1.375（軽い運動を想定）／目的補正後。あくまで目安です。</div>'+
+    '<div class="label-cap" style="color:var(--text-lo);margin-bottom:6px">PFC配分（目安）</div>'+
+    '<div class="pfc-bar"><div class="p" style="width:'+r.pfc.pPct+'%"></div><div class="f" style="width:'+r.pfc.fPct+'%"></div><div class="c" style="width:'+r.pfc.cPct+'%"></div></div>'+
+    '<div class="pfc-legend"><span><span class="sw" style="background:var(--accent)"></span>P '+r.pfc.proteinG+'g（'+r.pfc.pPct+'%）</span><span><span class="sw" style="background:var(--warn)"></span>F '+r.pfc.fatG+'g（'+r.pfc.fPct+'%）</span><span><span class="sw" style="background:var(--ok)"></span>C '+r.pfc.carbG+'g（'+r.pfc.cPct+'%）</span></div>'+
+    '<div class="label-cap" style="color:var(--text-lo);margin:16px 0 6px">トレーニング配分</div>'+
+    '<div class="train-bar"><div class="str" style="width:'+r.tr.strength+'%">筋トレ '+r.tr.strength+'</div><div class="car" style="width:'+r.tr.cardio+'%">有酸素 '+r.tr.cardio+'</div></div>'+
+    '<div class="cap">'+r.tr.text+'</div>'+
+    '<div class="pace-line">想定ペース 週あたり <b class="num" style="color:var(--text-hi)">'+r.pace.toFixed(2)+' kg</b><span class="pace-tag '+paceTagClass+'">'+paceTagText+'</span></div>'+
+    '<div class="cap" style="margin-top:4px">健全な範囲の目安＝週 '+r.safeWeekly.toFixed(2)+'kg（体重の0.7%）まで。</div>'+
+  '</div></div>'+
+
+  '<div class="verdict-block"><div class="basis"><h4>まず今週やること（3つだけ）</h4><ul class="action-list">'+
+    '<li><span class="n">1</span><span>'+r.actions[0]+'</span></li>'+
+    '<li><span class="n">2</span><span>'+r.actions[1]+'</span></li>'+
+    '<li><span class="n">3</span><span>'+r.actions[2]+'</span></li>'+
+  '</ul><div class="cap" style="margin-top:4px">欲張らない。この3つだけ、7日間やってみよう。</div></div></div>'+
+
+  '<div class="verdict-block"><div class="voice-card"><div class="vrole">目的を忘れさせない</div><div class="vtext">'+esc(r.name)+'さんが「'+purposeGoal+'になりたい」と入力したとき、その先に見たい景色があったはずだ。体重はゴールじゃない。その数字の向こうにある「'+r.dirJP+'した自分で、何をしたいか」──それを忘れそうになったら、いつでも僕に話しかけてほしい。</div></div></div>'+
+
+  '<div class="verdict-block"><div class="voice-card"><div class="vrole">DEED連携</div><div class="vtext">担当の<em>'+TRAINER+'</em>さんと、僕（D.D）は、同じ方針で君に伴走する。じゃあ、今日から。いってみよう。</div></div></div>'+
+
+  '<div class="bottom-demo">DEMO ─ 実際のAI接続なし／入力値から計算したダミー所見</div>'+
+
+  '<button class="btn btn-primary mt12" id="btn-to-chat">D.Dと話す</button>'+
+  '<button class="btn btn-secondary mt8" id="btn-revise">目標を見直す</button>';
+
+  document.getElementById("btn-to-chat").onclick=()=>{startChat();show("chat");};
+  document.getElementById("btn-revise").onclick=()=>show("step3");
+}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+
+// ===== ANALYZING SEQUENCE =====
+function runAnalyzing(){
+  analyze(); // 同期で結果確保（決定的）
+  const steps=[
+    "体組成データを読み込み中…",
+    "目標と期限を照合…",
+    "最適な1日の配分を計算…",
+    "D.Dが所見をまとめています…"
+  ];
+  const cont=document.getElementById("an-steps");
+  cont.innerHTML=steps.map((s,i)=>'<div class="an-step" data-i="'+i+'"><span class="ic"></span>'+s+'</div>').join("");
+  const fill=document.getElementById("an-bar-fill");
+  show("analyzing");
+  let i=0;
+  function tick(){
+    const rows=cont.querySelectorAll(".an-step");
+    if(i>0){rows[i-1].classList.remove("active");rows[i-1].classList.add("done");rows[i-1].querySelector(".ic").innerHTML='<svg width="16" height="16" viewBox="0 0 16 16" style="color:var(--ok)"><path d="M3 8l3.5 3.5L13 4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';}
+    if(i<steps.length){
+      rows[i].classList.add("active");rows[i].querySelector(".ic").innerHTML='<span class="spin"></span>';
+      fill.style.width=Math.round((i+1)/steps.length*100)+"%";
+      i++;
+      setTimeout(tick,750+(i===2?150:0));
+    }else{
+      setTimeout(()=>{renderResult();show("result");},400);
+    }
+  }
+  setTimeout(tick,400);
+}
+
+// ===== CHAT =====
+const CHIPS=["お菓子食べちゃった…","今日は疲れて何もできなかった","ちゃんとやってるのに減らない","メニュー全部こなせた！"];
+function ddReply(text){
+  const r=state.result, name=r?r.name:"あなた";
+  const t=text;
+  if(/お菓子|食べ|ごはん|ラーメン|間食/.test(t))
+    return "正直に言ってくれてありがとう。それが一番大事だ。1回のお菓子で体は変わらない。変わるのは『食べた、もういいや』って崩れる時だけ。次の食事からいつも通りに戻そう。それで全部チャラだ。";
+  if(/疲れ|だるい|休|サボ|できなかった/.test(t))
+    return "休むのもトレーニングのうちだ。"+name+"さん、明日できることを1つだけ決めておこう。水をいつもより1杯多く飲む、でもいい。それで十分前に進んでる。";
+  if(/減らない|痩せ|増えな|体重|変わらない/.test(t)){
+    let extra=r&&r.isAggressive?"いまの設定は少し攻めてる。焦らず週"+r.safeWeekly.toFixed(2)+"kgの範囲で十分だ。":"";
+    return "その『ちゃんと』を一緒に分解しよう。責めてるんじゃない。飲み物のカロリー、週末の外食、睡眠時間――だいたいこのどれかに隠れてる。心当たり、ひとつだけ思い浮かぶ？ "+extra;
+  }
+  if(/できた|こなせ|頑張|やれた|達成/.test(t))
+    return "最高だ。その『できた』をちゃんと自分で認めること。それが続ける一番の燃料になる。きつい日に、今日の"+name+"さんが助けてくれる。明日もマイペースでいこう。";
+  if(/続けられ|やめ|無理|くじけ/.test(t)){
+    const g=r?r.targetWeight+"kg":"あの目標";
+    return "そう思う日があって当然だ。一回、最初に戻ろう。"+name+"さんが「"+g+"」を入れたとき、その先に見たかったものは何だった？ ゴールは体重じゃない。今日は1ミリでいい。僕も一緒にいる。";
+  }
+  return "うん、聞いてるよ。"+name+"さんのペースで話してくれていい。食事のこと、トレーニングのこと、気持ちのこと、どれでも。今日はどんな1日だった？";
+}
+function pushBubble(role,text){
+  const log=document.getElementById("chat-log");
+  const b=document.createElement("div");
+  b.className="bubble "+role;
+  if(role==="dd")b.innerHTML='<span class="sm"><svg width="22" height="14" viewBox="0 0 64 40"><path d="M20 20 C20 8 8 8 8 20 C8 32 20 32 32 20 C44 8 56 8 56 20 C56 32 44 32 32 20" fill="none" stroke="#D85A30" stroke-width="3" stroke-linecap="round"/></svg></span><span>'+esc(text)+'</span>';
+  else b.textContent=text;
+  log.appendChild(b);
+  window.scrollTo(0,document.body.scrollHeight);
+}
+function ddTyping(cb){
+  const log=document.getElementById("chat-log");
+  const t=document.createElement("div");t.className="typing";t.innerHTML="<span></span><span></span><span></span>";
+  log.appendChild(t);window.scrollTo(0,document.body.scrollHeight);
+  setTimeout(()=>{t.remove();cb();},650);
+}
+function userSay(text){
+  pushBubble("user",text);
+  ddTyping(()=>pushBubble("dd",ddReply(text)));
+}
+function renderChips(){
+  const c=document.getElementById("chat-chips");
+  c.innerHTML="";
+  CHIPS.forEach(ch=>{
+    const b=document.createElement("button");b.className="chip";b.textContent=ch;
+    b.onclick=()=>userSay(ch);
+    c.appendChild(b);
+  });
+}
+function startChat(){
+  const log=document.getElementById("chat-log");
+  if(log.children.length>0)return;
+  const name=state.result?state.result.name:"あなた";
+  pushBubble("dd",name+"、今日もよく来た。今日の食事や調子、ひとことで教えて。");
+  renderChips();
+}
+
+// ===== BODY COMPOSITION DASHBOARD =====
+const BC_FIELDS=[
+  {k:"height",en:"HEIGHT",ja:"身長",u:"cm",min:120,max:220,band:[155,185]},
+  {k:"weight",en:"WEIGHT",ja:"体重",u:"kg",min:30,max:200,band:[50,90]},
+  {k:"bmi",en:"BMI",ja:"",u:"",calc:true,band:[18.5,25],bandFull:[15,35]},
+  {k:"bodyFat",en:"BODY FAT",ja:"体脂肪率",u:"%",min:3,max:60,band:[10,22]},
+  {k:"fatmass",en:"BODY FAT MASS",ja:"体脂肪量",u:"kg",calc:true},
+  {k:"muscle",en:"MUSCLE",ja:"筋肉量",u:"kg",min:10,max:120,band:[25,55]},
+  {k:"water",en:"WATER",ja:"水分",u:"%",min:30,max:75,band:[50,65]},
+  {k:"bone",en:"BONE",ja:"骨量",u:"kg",min:1,max:6,band:[2.5,3.5]}
+];
+function renderBC(){
+  const d=state.data;
+  const bmiV=Math.round((+d.weight/Math.pow(+d.height/100,2))*10)/10;
+  const fatMass=Math.round(+d.weight*(+d.bodyFat/100)*10)/10;
+  const grid=document.getElementById("bc-grid");
+  grid.innerHTML="";
+  BC_FIELDS.forEach(f=>{
+    let val, editable=!f.calc&&!d.trainerLocked;
+    if(f.k==="bmi")val=bmiV;
+    else if(f.k==="fatmass")val=fatMass;
+    else val=d[f.k];
+    const cell=document.createElement("div");
+    cell.className="bc-cell"+(f.calc?" calc":"");
+    let head='<div class="bl"><span class="en">'+f.en+'</span>'+(f.ja?'<span class="ja">'+f.ja+'</span>':"")+
+      (f.calc?'<span class="fmark">ƒ</span>':(d.trainerLocked?'<span class="lk"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="1"/><path d="M8 11V8a4 4 0 018 0v3"/></svg></span>':""))+'</div>';
+    let valHtml;
+    if(editable){
+      valHtml='<input class="bc-edit num" type="number" data-k="'+f.k+'" value="'+val+'" step="0.1">';
+    }else{
+      valHtml='<div class="bc-val"><span class="v">'+val+'</span><span class="u">'+f.u+'</span></div>';
+    }
+    // range bar
+    let rangeHtml="";
+    if(f.band&&f.k!=="fatmass"){
+      const full=f.bandFull||[f.min,f.max];
+      const lo=full[0],hi=full[1];
+      const clamp=x=>Math.max(0,Math.min(100,(x-lo)/(hi-lo)*100));
+      const bL=clamp(f.band[0]),bR=clamp(f.band[1]);
+      const dotPos=clamp(+val);
+      const outside=(+val<f.band[0]||+val>f.band[1]);
+      rangeHtml='<div class="range"><div class="track"><div class="band'+(outside?" warn":"")+'" style="left:'+bL+'%;width:'+(bR-bL)+'%"></div><div class="dot" style="left:'+dotPos+'%"></div></div></div>';
+    }
+    cell.innerHTML=head+valHtml+rangeHtml;
+    grid.appendChild(cell);
+  });
+  // wire edit inputs
+  if(!d.trainerLocked){
+    grid.querySelectorAll(".bc-edit").forEach(inp=>{
+      inp.addEventListener("input",()=>{
+        const k=inp.dataset.k, v=parseFloat(inp.value);
+        if(!isNaN(v))state.data[k]=v;
+        save();
+        // re-render only calc cells & ranges → simplest: full re-render preserving focus
+        const active=document.activeElement, ak=active&&active.dataset?active.dataset.k:null, ap=active?active.selectionStart:null;
+        renderBC();
+        if(ak){const re=document.querySelector('.bc-edit[data-k="'+ak+'"]');if(re){re.focus();try{re.setSelectionRange(ap,ap);}catch(e){}}}
+      });
+    });
+  }
+  document.getElementById("tr-name").textContent=TRAINER;
+}
+
+// ===== STEP1 setup =====
+function buildSelects(){
+  const by=document.getElementById("f-by"),bm=document.getElementById("f-bm"),bd=document.getElementById("f-bd");
+  const yNow=today.getFullYear();
+  for(let y=yNow-12;y>=yNow-80;y--){const o=document.createElement("option");o.value=y;o.textContent=y;by.appendChild(o);}
+  for(let m=1;m<=12;m++){const o=document.createElement("option");o.value=m;o.textContent=m;bm.appendChild(o);}
+  for(let dd=1;dd<=31;dd++){const o=document.createElement("option");o.value=dd;o.textContent=dd;bd.appendChild(o);}
+}
+function markFilled(inp,filled){inp.classList.toggle("filled",filled);}
+
+// ===== VALIDATION =====
+function setErr(id,msg){const e=document.getElementById(id);if(!e)return;e.textContent=msg;e.classList.toggle("show",!!msg);}
+function showSummary(id,items){
+  const s=document.getElementById(id);
+  if(!items.length){s.classList.remove("show");return false;}
+  s.innerHTML="未入力が <b>"+items.length+"件</b> あります（"+items.join("・")+"）。タップで最初の項目へ。";
+  s.classList.add("show");
+  s.onclick=()=>{const first=document.querySelector(".input.errored, .err-msg.show");if(first)first.scrollIntoView({behavior:"smooth",block:"center"});};
+  return true;
+}
+function validateStep1(){
+  const d=state.data;const missing=[];
+  if(!d.name||!d.name.trim()){setErr("e-name","お名前が未入力です");document.getElementById("f-name").classList.add("errored");missing.push("お名前");}else{setErr("e-name","");document.getElementById("f-name").classList.remove("errored");}
+  if(!d.birthYear||!d.birthMonth||!d.birthDay){setErr("e-birth","生年月日が未入力です（年・月・日すべて入れてください）");missing.push("生年月日");}else{setErr("e-birth","");}
+  return !showSummary("err-sum-1",missing);
+}
+function validateStep2(){
+  const d=state.data;
+  let ok=true;
+  if(!(d.height>=120&&d.height<=220)){toast("身長は120〜220cmの範囲で入れてください");ok=false;}
+  else if(!(d.weight>=30&&d.weight<=200)){toast("体重は30〜200kgの範囲で入れてください");ok=false;}
+  else if(!(d.bodyFat>=3&&d.bodyFat<=60)){toast("体脂肪率は3〜60%の範囲で入れてください");ok=false;}
+  return ok;
+}
+function validateStep3(){
+  const d=state.data;const missing=[];
+  if(!d.goalType){setErr("e-goal","目的が選ばれていません");missing.push("目的");}else{setErr("e-goal","");}
+  if(d.goalType!=="maintain"){
+    if(!d.targetWeight){setErr("e-target","目標体重が未入力です（例: 62）");document.getElementById("f-target").classList.add("errored");missing.push("目標体重");}
+    else if(!(d.targetWeight>=30&&d.targetWeight<=200)){setErr("e-target","目標体重は30〜200kgの範囲で入れてください");document.getElementById("f-target").classList.add("errored");missing.push("目標体重");}
+    else{setErr("e-target","");document.getElementById("f-target").classList.remove("errored");}
+  }else{setErr("e-target","");document.getElementById("f-target").classList.remove("errored");}
+  if(!d.deadline){setErr("e-deadline","期限が未入力です（いつまでに達成したいか教えてください）");missing.push("期限");}
+  else if(d.deadline==="date"){
+    if(!d.deadlineDate){setErr("e-deadline","目標日を選んでください");missing.push("目標日");}
+    else{
+      const dl=new Date(d.deadlineDate+"T00:00:00");
+      if(dl<=today){setErr("e-deadline","期限は今日より後の日付にしてください");missing.push("期限");}
+      else setErr("e-deadline","");
+    }
+  }else setErr("e-deadline","");
+  return !showSummary("err-sum-3",missing);
+}
+
+// ===== STEP3 live preview & conflict =====
+function updateTargetPreview(){
+  const d=state.data;
+  const p=document.getElementById("target-preview");
+  if(d.goalType==="maintain"){p.textContent="";}
+  else if(d.targetWeight&&d.weight){
+    const diff=Math.round((d.targetWeight-d.weight)*10)/10;
+    if(diff===0)p.textContent="今と同じ体重です";
+    else p.textContent="今より "+(diff>0?"+":"")+diff.toFixed(1)+" kg";
+  }else p.textContent="";
+  // conflict
+  const cw=document.getElementById("goal-conflict");
+  let msg="";
+  if(d.goalType==="cut"&&d.targetWeight&&d.targetWeight>d.weight)msg="目的が「減量」ですが、目標体重が現体重より重くなっています。所見でも一緒に整えましょう。";
+  if(d.goalType==="bulk"&&d.targetWeight&&d.targetWeight<d.weight)msg="目的が「増量」ですが、目標体重が現体重より軽くなっています。所見でも一緒に整えましょう。";
+  if(msg){document.getElementById("goal-conflict-text").textContent=msg;cw.style.display="flex";}
+  else cw.style.display="none";
+}
+
+// ===== HYDRATE inputs from state =====
+function hydrate(){
+  const d=state.data;
+  const fn=document.getElementById("f-name");fn.value=d.name||"";markFilled(fn,!!(d.name&&d.name.trim()));
+  document.getElementById("f-by").value=d.birthYear||"";
+  document.getElementById("f-bm").value=d.birthMonth||"";
+  document.getElementById("f-bd").value=d.birthDay||"";
+  document.querySelectorAll("#seg-sex .seg-btn").forEach(b=>b.classList.toggle("on",b.dataset.v===d.sex));
+  document.getElementById("bc-toggle").classList.toggle("on",!d.trainerLocked);
+  document.querySelector("#bc-toggle").lastChild.textContent=d.trainerLocked?"計測値を編集":"編集を終える";
+  document.querySelectorAll("#goal-cards .goal-card").forEach(c=>c.classList.toggle("on",c.dataset.v===d.goalType));
+  const ft=document.getElementById("f-target");ft.value=d.targetWeight||"";markFilled(ft,!!d.targetWeight);
+  document.getElementById("f-deadline").value=d.deadline||"";
+  document.getElementById("date-wrap").style.display=d.deadline==="date"?"block":"none";
+  if(d.deadlineDate)document.getElementById("f-date").value=d.deadlineDate;
+  const tom=new Date(today.getTime()+86400000);
+  document.getElementById("f-date").min=tom.toISOString().slice(0,10);
+  updateTargetPreview();
+  renderBC();
+}
+
+// ===== WIRE EVENTS =====
+function wire(){
+  // consent
+  document.getElementById("btn-consent").onclick=()=>{state.consented=true;save();show("lp");checkResume();};
+  document.getElementById("btn-clear-consent").onclick=()=>{clearAll();hydrate();toast("端末のデータを消しました");show("consent");};
+
+  // lp
+  document.getElementById("btn-start").onclick=()=>{state.step=1;show("step1");};
+  document.getElementById("btn-resume").onclick=()=>{
+    document.getElementById("resume-bar").style.display="none";
+    const s=state.step;show("step"+(s>=1&&s<=3?s:1));
+  };
+  document.getElementById("btn-restart").onclick=()=>{
+    document.getElementById("resume-bar").style.display="none";
+    state.data.name="";state.data.birthYear="";state.data.birthMonth="";state.data.birthDay="";state.data.sex="";
+    state.data.goalType="";state.data.targetWeight="";state.data.deadline="";state.data.deadlineDate="";
+    save();hydrate();show("step1");
+  };
+
+  // step1 inputs
+  const fn=document.getElementById("f-name");
+  fn.addEventListener("input",()=>{state.data.name=fn.value;markFilled(fn,!!fn.value.trim());fn.classList.remove("errored");setErr("e-name","");save();});
+  ["f-by","f-bm","f-bd"].forEach((id,i)=>{
+    document.getElementById(id).addEventListener("change",e=>{
+      state.data[["birthYear","birthMonth","birthDay"][i]]=e.target.value;
+      if(state.data.birthYear&&state.data.birthMonth&&state.data.birthDay)setErr("e-birth","");
+      save();
+    });
+  });
+  document.querySelectorAll("#seg-sex .seg-btn").forEach(b=>{
+    b.onclick=()=>{state.data.sex=b.dataset.v;document.querySelectorAll("#seg-sex .seg-btn").forEach(x=>x.classList.toggle("on",x===b));save();};
+  });
+  document.getElementById("btn-s1-next").onclick=()=>{if(validateStep1()){state.step=2;save();show("step2");}};
+
+  // step2
+  document.getElementById("bc-toggle").onclick=()=>{
+    state.data.trainerLocked=!state.data.trainerLocked;
+    document.getElementById("bc-toggle").classList.toggle("on",!state.data.trainerLocked);
+    document.querySelector("#bc-toggle").lastChild.textContent=state.data.trainerLocked?"計測値を編集":"編集を終える";
+    save();renderBC();
+  };
+  document.getElementById("btn-s2-back").onclick=()=>{state.step=1;show("step1");};
+  document.getElementById("btn-s2-next").onclick=()=>{if(validateStep2()){state.step=3;save();show("step3");}};
+
+  // step3
+  document.querySelectorAll("#goal-cards .goal-card").forEach(c=>{
+    c.onclick=()=>{
+      state.data.goalType=c.dataset.v;
+      document.querySelectorAll("#goal-cards .goal-card").forEach(x=>x.classList.toggle("on",x===c));
+      setErr("e-goal","");
+      if(c.dataset.v==="maintain"&&!state.data.targetWeight){state.data.targetWeight=state.data.weight;const ft=document.getElementById("f-target");ft.value=state.data.weight;markFilled(ft,true);}
+      updateTargetPreview();save();
+    };
+  });
+  const ft=document.getElementById("f-target");
+  ft.addEventListener("input",()=>{state.data.targetWeight=ft.value?parseFloat(ft.value):"";markFilled(ft,!!ft.value);ft.classList.remove("errored");setErr("e-target","");updateTargetPreview();save();});
+  const dl=document.getElementById("f-deadline");
+  dl.addEventListener("change",()=>{
+    state.data.deadline=dl.value;
+    document.getElementById("date-wrap").style.display=dl.value==="date"?"block":"none";
+    setErr("e-deadline","");save();
+  });
+  document.getElementById("f-date").addEventListener("change",e=>{state.data.deadlineDate=e.target.value;setErr("e-deadline","");save();});
+  document.getElementById("btn-s3-back").onclick=()=>{state.step=2;show("step2");};
+  document.getElementById("btn-analyze").onclick=()=>{if(validateStep3()){save();runAnalyzing();}};
+
+  // chat
+  document.getElementById("btn-chat-back").onclick=()=>show("result");
+
+  // clear (footer)
+  document.getElementById("btn-clear-footer").onclick=()=>{
+    if(confirm("この端末に保存された入力をすべて消します。元に戻せません。よろしいですか？")){
+      clearAll();hydrate();toast("消去しました");show("consent");
+    }
+  };
+
+  // role cards intersection (LP)
+  if("IntersectionObserver" in window){
+    const io=new IntersectionObserver((ents)=>{
+      ents.forEach((e,i)=>{if(e.isIntersecting){e.target.style.animationDelay=(i*0.08)+"s";e.target.classList.add("in");io.unobserve(e.target);}});
+    },{threshold:.2});
+    document.querySelectorAll("#role-grid .role-card").forEach(c=>io.observe(c));
+  }else{
+    document.querySelectorAll("#role-grid .role-card").forEach(c=>c.classList.add("in"));
+  }
+
+  // chat input bar (inserted dynamically)
+  ensureChatBar();
+}
+
+function ensureChatBar(){
+  if(document.querySelector(".chat-bar"))return;
+  const bar=document.createElement("div");bar.className="chat-bar";bar.style.display="none";
+  bar.innerHTML='<div style="position:absolute;top:-16px;left:0;right:0" class="chat-demo">※デモの定型応答です／AI接続なし</div><input id="chat-input" type="text" placeholder="メッセージを入力…" autocomplete="off"><button class="chat-send" id="chat-send"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M3 11l18-8-8 18-2-7-8-3z"/></svg></button>';
+  document.querySelector(".app-shell").appendChild(bar);
+  const inp=document.getElementById("chat-input");
+  const send=()=>{const v=inp.value.trim();if(!v)return;userSay(v);inp.value="";};
+  document.getElementById("chat-send").onclick=send;
+  inp.addEventListener("keydown",e=>{if(e.key==="Enter")send();});
+}
+function toggleChatBar(){
+  const bar=document.querySelector(".chat-bar");
+  if(bar)bar.style.display=state.screen==="chat"?"flex":"none";
+}
+
+function checkResume(){
+  const d=state.data;
+  const hasInput=d.name||d.birthYear||d.goalType||d.targetWeight;
+  document.getElementById("resume-bar").style.display=hasInput?"block":"none";
+}
+
+// observe screen changes for chat bar visibility
+const _show=show;
+show=function(n){_show(n);toggleChatBar();};
+
+// ===== INIT =====
+buildSelects();
+const had=load();
+wire();
+hydrate();
+if(state.consented){show("lp");checkResume();}
+else show("consent");
+</script>
+</body>
+</html>
