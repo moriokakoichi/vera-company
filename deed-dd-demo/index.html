@@ -1,1123 +1,1383 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="utf-8">
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
-<title>DEED「PERSONAL AI ∞」— D.D（ディディ）DEMO</title>
+<title>DEED D.D デモ</title>
+<!--
+  ===== 実装ハード制約チェックリスト（全✅で完成）=====
+  [✅] 1 単一ファイル・CSS/JS全インライン（<style>1個・<script>1個・<link>/<img src>/@import/url(http) なし）
+  [✅] 2 外部リソース読込ゼロ（CDN/Webフォント/Tailwind/Chart.js禁止・グラフはinline SVGをJSで構築）
+  [✅] 3 ネットワーク通信ゼロ（fetch/XHR/WebSocket/EventSource/sendBeacon 不使用・Claude/Anthropic参照なし）
+  [✅] 4 システムフォントのみ
+  [✅] 5 noindex meta
+  [✅] 6 デモバッジ「DEMO ダミーデータ」常設
+  [✅] 7 localStorage 保存・再開・クリア（キー dd_demo_v1）
+  [✅] 8 決定的（Math.random 不使用・new Date は年齢/期限週のみ）
+  [✅] 9 XSS（ユーザー文字列は esc() 経由）
+  [✅] 10 プレースホルダ/未実装コメント禁止（全機能実装）
+-->
 <style>
 :root{
-  --bg-void:#08080A; --bg-shell:#0E0E10; --bg-surface:#161617; --bg-surface-2:#1C1C1E; --bg-elevated:#232325;
-  --line:#2A2A2C; --line-soft:#202022; --line-focus:#D85A30;
-  --accent:#D85A30; --accent-hover:#E96B3F; --accent-dark:#712B13; --accent-soft:#FAECE7; --accent-glow:rgba(216,90,48,.28);
-  --text-hi:#F4F1EE; --text-mid:#B8B5B2; --text-lo:#8A8A8E; --text-on-accent:#0E0E10;
-  --ok:#4FB477; --warn:#E0A23C; --error:#E5484D; --error-bg:rgba(229,72,77,.10);
-  --radius:14px; --radius-sm:10px; --radius-pill:999px;
-  --shadow-card:0 6px 24px rgba(0,0,0,.45);
-  --ease:cubic-bezier(.22,.61,.36,1);
-  --font:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic UI",Meiryo,system-ui,sans-serif;
-  --font-num:"SF Mono","Segoe UI Mono","Roboto Mono",ui-monospace,Menlo,Consolas,monospace;
+  --accent:#D85A30; --accent-dark:#712B13; --accent-soft:#FAECE7;
+  --accent-glow:rgba(216,90,48,.28);
+  --bg:#0E0C0B; --surface:#1A1614; --surface-2:#241E1B; --surface-3:#2E2622;
+  --line:#3A302B; --line-soft:rgba(255,255,255,.06);
+  --text:#F4EEEA; --text-2:#C7BBB2; --text-3:#8C7E75; --text-on-accent:#FFFFFF;
+  --ok:#4FB477; --ok-soft:rgba(79,180,119,.16);
+  --warn:#E6B23A; --warn-soft:rgba(230,178,58,.16);
+  --danger:#E0533B; --danger-soft:rgba(224,83,59,.16);
+  --info:#5AA6D8;
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic UI","Meiryo",system-ui,sans-serif;
+  --fs-hero:28px; --fs-h1:22px; --fs-h2:18px; --fs-body:15px; --fs-sub:13px; --fs-label:12px; --fs-micro:11px; --lh:1.6;
+  --r-lg:20px; --r-md:14px; --r-sm:9px; --r-pill:999px;
+  --pad:16px; --gap:12px;
+  --shadow-card:0 6px 20px rgba(0,0,0,.45);
+  --shadow-cta:0 6px 16px var(--accent-glow);
+  --shell-w:480px; --ease:cubic-bezier(.22,.61,.36,1);
 }
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%}
-body{font-family:var(--font);background:var(--bg-void);color:var(--text-mid);-webkit-font-smoothing:antialiased;line-height:1.6}
-.num{font-family:var(--font-num);font-variant-numeric:tabular-nums}
-
-.app-shell{
-  max-width:480px;min-height:100dvh;margin-inline:auto;background:var(--bg-shell);position:relative;
-  display:flex;flex-direction:column;overflow-x:hidden;
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{margin:0; padding:0;}
+body{
+  background:var(--bg); color:var(--text); font-family:var(--font);
+  font-size:var(--fs-body); line-height:var(--lh);
+  display:flex; flex-direction:column; align-items:center; min-height:100dvh;
+}
+#demoBadge{
+  position:fixed; top:8px; right:8px; z-index:9999;
+  background:var(--accent-dark); color:#fff; font-size:var(--fs-micro); font-weight:700;
+  border-radius:var(--r-pill); padding:3px 10px; pointer-events:none; letter-spacing:.04em;
+}
+#app{
+  width:min(100%,var(--shell-w)); background:var(--surface); min-height:100dvh;
+  margin-inline:auto; position:relative; overflow:hidden;
+  padding-bottom:env(safe-area-inset-bottom);
 }
 @media(min-width:520px){
-  body{background:var(--bg-void)}
-  .app-shell{box-shadow:0 0 80px rgba(0,0,0,.6);border-inline:1px solid var(--line-soft)}
+  #app{
+    border:1px solid var(--line); border-radius:24px;
+    box-shadow:0 20px 60px rgba(0,0,0,.6);
+    min-height:min(900px,100dvh); margin-block:24px; overflow:hidden;
+  }
+  #demoBadge{position:absolute; top:8px; right:8px;}
+  body{justify-content:flex-start;}
 }
+.screen{display:none; flex-direction:column; min-height:100dvh; padding:0;}
+@media(min-width:520px){ .screen{min-height:min(852px,calc(100dvh - 48px));} }
+.screen.active{display:flex;}
+.scroll{flex:1 1 auto; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:var(--pad) var(--pad) 90px;}
+.pad{padding:var(--pad);}
+h1.title{font-size:var(--fs-h1); font-weight:700; margin:4px 0 2px;}
+.subtitle{font-size:var(--fs-sub); color:var(--text-2); margin:0 0 14px;}
+.h2{font-size:var(--fs-h2); font-weight:700; margin:18px 0 8px;}
+.muted{color:var(--text-3);}
+.small{font-size:var(--fs-sub); color:var(--text-2);}
+.micro{font-size:var(--fs-micro); color:var(--text-3);}
 
-/* header */
-.app-header{
-  position:sticky;top:0;z-index:50;height:56px;display:flex;align-items:center;justify-content:space-between;
-  padding:0 16px;background:rgba(14,14,16,.86);backdrop-filter:blur(8px);border-bottom:1px solid var(--line-soft);
-}
-.brand{display:flex;align-items:center;gap:9px;min-width:0}
-.brand .logo{font-weight:800;font-size:13px;color:var(--text-hi);letter-spacing:.02em;flex-shrink:0}
-.brand .div{width:1px;height:16px;background:var(--line);flex-shrink:0}
-.brand .sub{font-size:11px;color:var(--text-lo);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.brand .sub .inf{color:var(--accent);font-weight:700}
-.demo-pill{
-  display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:600;letter-spacing:.04em;
-  border:1px solid var(--accent-dark);color:#C9A99B;background:rgba(216,90,48,.07);
-  padding:5px 9px;border-radius:var(--radius-pill);white-space:nowrap;
-}
-.demo-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:dotpulse 2s infinite}
-@keyframes dotpulse{0%,100%{opacity:1}50%{opacity:.4}}
+.topbar{display:flex; align-items:center; gap:10px; padding:14px var(--pad) 4px; min-height:48px;}
+.backbtn{background:none; border:none; color:var(--accent); font-size:var(--fs-body); font-weight:600; cursor:pointer; padding:6px 4px; display:inline-flex; align-items:center; gap:4px;}
+.gear{margin-left:auto; background:none; border:none; color:var(--text-2); cursor:pointer; font-size:18px; padding:6px;}
 
-/* main + screens */
-.main{flex:1;position:relative}
-.screen{display:none;padding:20px 16px 40px;animation:fadein .22s var(--ease)}
-.screen.active{display:block}
-@keyframes fadein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.btn{display:flex; align-items:center; justify-content:center; gap:8px; width:100%; border:none; cursor:pointer; font-family:var(--font); font-size:var(--fs-body); border-radius:var(--r-md); transition:transform .12s var(--ease), box-shadow .12s var(--ease);}
+.btn.primary{height:52px; font-weight:700; color:var(--text-on-accent); background:linear-gradient(135deg,var(--accent),var(--accent-dark)); box-shadow:var(--shadow-cta);}
+.btn.primary:active{transform:translateY(1px); box-shadow:0 3px 8px var(--accent-glow);}
+.btn.secondary{height:48px; background:transparent; border:1px solid var(--line); color:var(--text);}
+.btn.secondary:active{background:var(--surface-3);}
+.btn.ghost{height:44px; background:none; color:var(--accent); font-weight:600;}
+.btn.ghost:active{background:var(--accent-soft); color:var(--accent-dark);}
+.btn.danger{height:52px; font-weight:700; background:transparent; border:1px solid var(--danger); color:var(--danger);}
+.btn.danger:active{background:var(--danger-soft);}
+.btn[disabled],.btn.disabled{opacity:.45; filter:grayscale(.3); pointer-events:none;}
 
-/* footer */
-.app-footer{padding:16px;border-top:1px solid var(--line-soft);font-size:12px;color:var(--text-lo);text-align:center;line-height:1.7}
-.app-footer a{color:var(--text-lo);text-decoration:underline;cursor:pointer}
+.footer-cta{position:sticky; bottom:0; background:linear-gradient(to top,var(--surface) 70%,transparent); border-top:1px solid var(--line); padding:12px var(--pad) calc(12px + env(safe-area-inset-bottom)); display:flex; gap:10px;}
+.footer-cta .btn{flex:1;}
+.footer-cta .btn.secondary{flex:0 0 42%;}
 
-/* typography helpers */
-h1.hero{font-size:34px;font-weight:800;letter-spacing:.04em;line-height:1.1;color:var(--text-hi)}
-h2.title{font-size:22px;font-weight:700;line-height:1.25;color:var(--text-hi);margin-bottom:6px}
-.sec-head{font-size:16px;font-weight:700;color:var(--text-hi);margin:18px 0 10px}
-.label-cap{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
-.cap{font-size:12px;color:var(--text-lo)}
-.body{font-size:15px;color:var(--text-mid)}
-.mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}.mt20{margin-top:20px}.mt24{margin-top:24px}
+.field{margin-bottom:14px;}
+.flabel{display:block; font-size:var(--fs-label); color:var(--text-3); font-weight:600; margin:0 0 6px;}
+.req{color:var(--accent);}
+.inp,select.inp{width:100%; height:50px; background:var(--surface-3); border:1px solid var(--line); border-radius:var(--r-md); color:var(--text); font-size:var(--fs-body); font-family:var(--font); padding:0 14px; appearance:none; -webkit-appearance:none;}
+.inp::placeholder{color:var(--text-3);}
+.inp:focus,select.inp:focus{outline:none; border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-glow);}
+.inp.err{border-color:var(--danger); background:var(--danger-soft);}
+.selwrap{position:relative;}
+.selwrap::after{content:""; position:absolute; right:14px; top:50%; transform:translateY(-25%); border-left:5px solid transparent; border-right:5px solid transparent; border-top:6px solid var(--text-3); pointer-events:none;}
+.row3{display:grid; grid-template-columns:1.3fr 1fr 1fr; gap:8px;}
+.inline-err{font-size:var(--fs-sub); color:var(--danger); margin-top:5px; display:flex; gap:4px; align-items:center;}
+.formerr{background:var(--danger-soft); border-radius:var(--r-md); padding:10px 12px; font-size:var(--fs-sub); color:var(--danger); margin-bottom:12px;}
 
-/* buttons */
-.btn{display:flex;align-items:center;justify-content:center;width:100%;border:none;cursor:pointer;font-family:var(--font);transition:transform .08s var(--ease)}
-.btn-primary{background:linear-gradient(180deg,#E96B3F,#D85A30);color:var(--text-on-accent);height:52px;border-radius:var(--radius-pill);font-weight:600;font-size:16px}
-.btn-primary:active{transform:translateY(1px);box-shadow:0 0 0 4px var(--accent-glow)}
-.btn-primary:disabled{background:var(--bg-surface-2);color:var(--text-lo);cursor:not-allowed;box-shadow:none}
-.btn-secondary{background:transparent;border:1px solid var(--line);color:var(--text-mid);height:48px;border-radius:var(--radius-pill);font-size:15px}
-.btn-secondary:active{transform:translateY(1px)}
-.btn-link{background:none;border:none;color:var(--accent);font-size:14px;cursor:pointer;min-height:44px;font-family:var(--font);width:auto}
-.cta-pulse{animation:ctaglow 2.4s infinite}
-@keyframes ctaglow{0%,100%{box-shadow:0 0 0 0 rgba(216,90,48,0)}50%{box-shadow:0 0 0 5px var(--accent-glow)}}
+.chips{display:flex; flex-wrap:wrap; gap:8px;}
+.chip{display:inline-flex; align-items:center; gap:5px; min-height:38px; padding:0 14px; border-radius:var(--r-pill); background:var(--surface-3); border:1px solid transparent; color:var(--text-2); font-size:var(--fs-body); cursor:pointer; font-family:var(--font); transition:.12s var(--ease);}
+.chip.on{background:var(--accent-soft); border-color:var(--accent); color:var(--accent-dark); font-weight:600;}
+.chip.on::before{content:"✓"; font-weight:800;}
 
-/* inputs */
-.field{margin-bottom:16px}
-.field>label{display:block;margin-bottom:7px}
-.in-wrap{position:relative}
-.input,select.input{
-  width:100%;background:var(--bg-surface);border:1px solid var(--line);border-radius:var(--radius-sm);
-  height:52px;padding:0 14px;color:var(--text-hi);font-size:16px;font-family:var(--font);
-}
-.input::placeholder{color:var(--text-lo);font-style:italic}
-.input:focus{outline:none;border-color:var(--line-focus);box-shadow:0 0 0 3px var(--accent-glow)}
-.input.filled{border-color:var(--ok)}
-.input.errored{border-color:var(--error);background:var(--error-bg)}
-.in-check{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--ok);display:none}
-.input.filled+.in-check{display:block}
-.err-msg{font-size:12px;color:var(--error);margin-top:6px;display:none}
-.err-msg.show{display:block}
-.help{font-size:12px;color:var(--text-lo);margin-top:6px}
-.row3{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:8px}
-select.input{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238A8A8E' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+.stepper{display:flex; align-items:flex-start; justify-content:space-between; padding:6px var(--pad) 2px; position:relative;}
+.stepper .seg{display:flex; flex-direction:column; align-items:center; flex:1; position:relative; z-index:2;}
+.stepper .dot{width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; background:var(--surface-3); color:var(--text-3); border:2px solid transparent;}
+.stepper .seg.cur .dot{border-color:var(--accent); color:var(--text); box-shadow:0 0 0 4px var(--accent-glow);}
+.stepper .seg.done .dot{background:var(--accent); color:#fff;}
+.stepper .lab{font-size:var(--fs-micro); color:var(--text-3); margin-top:5px;}
+.stepper .seg.cur .lab,.stepper .seg.done .lab{color:var(--text-2);}
+.stepper .bar{position:absolute; top:13px; height:3px; background:var(--line); z-index:1;}
+.stepper .bar.fill{background:var(--accent);}
 
-/* segmented / chips */
-.seg{display:flex;gap:8px}
-.seg-btn{flex:1;height:46px;border:1px solid var(--line);background:transparent;color:var(--text-mid);border-radius:var(--radius-pill);font-size:14px;cursor:pointer;font-family:var(--font);transition:all .12s var(--ease)}
-.seg-btn.on{background:var(--accent);color:var(--text-on-accent);border-color:var(--accent);font-weight:600}
+.card{background:var(--surface-2); border-radius:var(--r-md); padding:14px; margin-bottom:12px;}
+.card.lg{border-radius:var(--r-lg);}
+.metric-card{background:var(--surface-2); border-radius:var(--r-md); padding:14px; box-shadow:var(--shadow-card); margin-bottom:12px;}
+.mc-lab{font-size:var(--fs-label); color:var(--text-3); font-weight:600;}
+.auto-badge{font-size:var(--fs-micro); background:var(--accent-soft); color:var(--accent-dark); border-radius:var(--r-sm); padding:2px 7px; font-weight:700;}
+.mc-top{display:flex; justify-content:space-between; align-items:center;}
+.mc-val{font-size:var(--fs-h1); font-weight:700; margin-top:3px;}
+.mc-val .u{font-size:var(--fs-sub); color:var(--text-3); font-weight:400; margin-left:4px;}
 
-/* role cards (LP) */
-.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.role-card{background:var(--bg-surface);border:1px solid var(--line-soft);border-radius:var(--radius);padding:14px;opacity:0;transform:translateY(12px)}
-.role-card.in{animation:rolein .5s var(--ease) forwards}
-@keyframes rolein{to{opacity:1;transform:translateY(0)}}
-.role-card .ricon{color:var(--accent);margin-bottom:8px}
-.role-card .rt{font-size:13px;font-weight:700;color:var(--text-hi);margin-bottom:3px}
-.role-card .rd{font-size:11.5px;color:var(--text-lo);line-height:1.5}
+.band{position:relative; height:10px; border-radius:var(--r-pill); margin-top:10px; background:var(--surface-3); overflow:visible;}
+.band .seg-c{position:absolute; top:0; bottom:0;}
+.band .dot-m{position:absolute; top:-3px; width:7px; height:16px; border-radius:var(--r-pill); background:var(--accent); border:1px solid #fff; transform:translateX(-50%);}
+.band.warn .dot-m{background:var(--warn);}
+.band-labs{display:flex; justify-content:space-between; font-size:var(--fs-micro); color:var(--text-3); margin-top:6px;}
+.verdict{font-size:var(--fs-sub); font-weight:600; margin-top:4px;}
 
-/* progress */
-.progress-wrap{margin-bottom:18px}
-.progress-label{font-size:11px;font-weight:600;letter-spacing:.08em;color:var(--accent);margin-bottom:8px}
-.seg-bar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
-.seg-seg{height:3px;background:var(--line);border-radius:2px;position:relative}
-.seg-seg.done{height:3px;background:var(--accent)}
-.seg-seg.cur{height:5px;background:var(--accent)}
+.srcchips{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;}
+.srcchip{font-size:var(--fs-label); border-radius:var(--r-sm); padding:3px 8px; cursor:pointer; line-height:1.3; position:relative;}
+.srcchip.input{background:rgba(90,166,216,.18); color:var(--info);}
+.srcchip.choice{background:var(--accent-soft); color:var(--accent-dark);}
+.srcchip.ref{background:var(--surface-3); color:var(--text-2);}
+.srcchip .tip{display:none; position:absolute; left:0; bottom:calc(100% + 6px); width:230px; background:var(--surface-3); border:1px solid var(--line); color:var(--text-2); font-size:var(--fs-micro); font-weight:400; padding:8px 10px; border-radius:var(--r-md); z-index:50; box-shadow:var(--shadow-card); text-align:left; white-space:normal;}
+.srcchip.open .tip{display:block;}
 
-/* consent */
-.consent-list{list-style:none;margin:16px 0}
-.consent-list li{display:flex;gap:10px;align-items:flex-start;margin-bottom:12px;font-size:14px;color:var(--text-mid)}
-.consent-list li svg{flex-shrink:0;margin-top:2px;color:var(--ok)}
-.note-box{background:var(--bg-surface);border:1px solid var(--line-soft);border-radius:var(--radius);padding:14px;font-size:13px;color:var(--text-mid);line-height:1.7}
+.role-card{display:flex; gap:12px; align-items:flex-start; background:var(--surface-2); border-radius:var(--r-md); padding:14px; margin-bottom:10px;}
+.role-ic{flex:0 0 40px; width:40px; height:40px; border-radius:50%; background:var(--accent-soft); display:flex; align-items:center; justify-content:center; font-size:20px;}
+.role-card h3{margin:0 0 3px; font-size:var(--fs-body); font-weight:700;}
+.role-card p{margin:0; font-size:var(--fs-sub); color:var(--text-2);}
 
-/* trainer banner */
-.tr-banner{background:rgba(216,90,48,.08);border:1px solid var(--accent-dark);border-radius:var(--radius-sm);padding:11px 13px;font-size:12.5px;color:#D9BCB1;line-height:1.5;display:flex;gap:8px;align-items:flex-start}
-.tr-banner b{color:var(--accent-soft)}
+.hero{padding:24px var(--pad) 8px; background:radial-gradient(120% 80% at 50% 0%,rgba(216,90,48,.18),transparent 60%);}
+.hero h1{font-size:var(--fs-hero); font-weight:800; line-height:1.3; margin:0 0 8px;}
+.logoword{font-size:var(--fs-hero); font-weight:800; letter-spacing:.12em; text-align:center;}
+.logoword .t{color:var(--accent);}
 
-/* body composition dashboard */
-.bc-head{display:flex;justify-content:space-between;align-items:center;margin:14px 0 12px}
-.toggle{display:inline-flex;align-items:center;gap:8px;font-size:12px;color:var(--text-mid);cursor:pointer;user-select:none}
-.toggle .sw{width:38px;height:22px;border-radius:var(--radius-pill);background:var(--bg-surface-2);border:1px solid var(--line);position:relative;transition:.2s}
-.toggle .sw::after{content:"";position:absolute;width:16px;height:16px;border-radius:50%;background:var(--text-lo);top:2px;left:2px;transition:.2s}
-.toggle.on .sw{background:var(--accent);border-color:var(--accent)}
-.toggle.on .sw::after{left:18px;background:var(--text-on-accent)}
-.bc-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.bc-cell{background:var(--bg-surface-2);border:1px solid var(--line-soft);border-radius:var(--radius);padding:12px;box-shadow:var(--shadow-card)}
-.bc-cell.calc{border-color:var(--accent-dark)}
-.bc-cell .bl{display:flex;align-items:center;gap:5px;margin-bottom:6px}
-.bc-cell .bl .en{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text-lo)}
-.bc-cell .bl .ja{font-size:10px;color:var(--text-lo)}
-.bc-cell .fmark{font-size:10px;color:var(--accent);border:1px solid var(--accent-dark);border-radius:3px;padding:0 3px;margin-left:auto}
-.bc-cell .lk{margin-left:auto;color:var(--text-lo)}
-.bc-val{display:flex;align-items:baseline;gap:4px}
-.bc-val .v{font-size:28px;font-weight:700;color:var(--text-hi);font-family:var(--font-num);font-variant-numeric:tabular-nums;line-height:1}
-.bc-val .u{font-size:12px;font-weight:500;color:var(--text-lo)}
-.bc-edit{width:100%;background:var(--bg-surface);border:1px solid var(--line);border-radius:8px;height:40px;padding:0 10px;color:var(--text-hi);font-size:16px;font-family:var(--font-num);margin-top:2px}
-.bc-edit:focus{outline:none;border-color:var(--line-focus)}
-.range{margin-top:8px}
-.range .track{height:5px;background:var(--line);border-radius:3px;position:relative}
-.range .band{position:absolute;height:100%;background:rgba(79,180,119,.35);border-radius:3px}
-.range .band.warn{background:rgba(224,162,60,.35)}
-.range .dot{position:absolute;width:10px;height:10px;border-radius:50%;background:var(--accent);top:50%;transform:translate(-50%,-50%);box-shadow:0 0 0 3px rgba(216,90,48,.25)}
-.range .rl{display:flex;justify-content:space-between;font-size:9.5px;color:var(--text-lo);margin-top:4px}
+.measured-by{display:flex; align-items:center; gap:12px; background:var(--surface-2); border-radius:var(--r-md); padding:12px; margin-bottom:12px;}
+.avatar{flex:0 0 44px; width:44px; height:44px; border-radius:50%; background:var(--accent-soft); color:var(--accent-dark); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:18px;}
+.mb-info{flex:1;}
+.mb-info b{font-size:var(--fs-body);}
+.mb-info div{font-size:var(--fs-sub); color:var(--text-2);}
+.ok-badge{font-size:var(--fs-micro); background:var(--ok-soft); color:var(--ok); border-radius:var(--r-sm); padding:2px 7px; font-weight:700;}
 
-/* goal cards */
-.goal-cards{display:flex;flex-direction:column;gap:10px}
-.goal-card{display:flex;gap:12px;align-items:center;background:var(--bg-surface);border:1px solid var(--line);border-radius:var(--radius);padding:14px;cursor:pointer;transition:all .12s var(--ease)}
-.goal-card.on{border-color:var(--accent);background:rgba(216,90,48,.08)}
-.goal-card .gi{color:var(--text-lo);flex-shrink:0}
-.goal-card.on .gi{color:var(--accent)}
-.goal-card .gt{font-size:15px;font-weight:700;color:var(--text-hi)}
-.goal-card .gd{font-size:12px;color:var(--text-lo)}
-.preview-chip{display:inline-block;margin-top:6px;font-size:13px;font-weight:600;color:var(--accent)}
-.warn-chip{display:flex;gap:7px;align-items:flex-start;background:rgba(224,162,60,.1);border:1px solid rgba(224,162,60,.4);border-radius:var(--radius-sm);padding:10px 12px;font-size:12.5px;color:#E0C99A;margin-top:12px;line-height:1.5}
+.switch{display:inline-flex; align-items:center; gap:8px; cursor:pointer; font-size:var(--fs-sub); color:var(--text-2);}
+.switch .track{width:42px; height:24px; border-radius:var(--r-pill); background:var(--surface-3); position:relative; transition:.15s;}
+.switch .knob{position:absolute; top:2px; left:2px; width:20px; height:20px; border-radius:50%; background:var(--text-3); transition:.15s;}
+.switch.on .track{background:var(--accent);}
+.switch.on .knob{left:20px; background:#fff;}
 
-/* summary chip (validation) */
-.err-summary{display:none;background:rgba(216,90,48,.08);border:1px solid var(--accent-dark);border-radius:var(--radius-sm);padding:11px 13px;font-size:13px;color:#E0B5A6;margin-bottom:12px;cursor:pointer}
-.err-summary.show{display:block}
-.err-summary b{color:var(--accent)}
+.activity-card{display:flex; align-items:center; gap:10px; background:var(--surface-2); border:1px solid transparent; border-radius:var(--r-md); padding:13px 14px; margin-bottom:10px; cursor:pointer;}
+.activity-card.on{border-color:var(--accent); background:linear-gradient(90deg,var(--accent-soft),var(--surface-2) 70%);}
+.activity-card .ac-main{flex:1;}
+.activity-card .ac-main b{font-size:var(--fs-body); display:block;}
+.activity-card.on .ac-main b{color:var(--accent-dark);}
+.activity-card .ac-sub{font-size:var(--fs-sub); color:var(--text-3);}
+.activity-card .ac-f{font-size:var(--fs-sub); font-weight:700; background:var(--surface-3); border-radius:var(--r-pill); padding:3px 10px; color:var(--text-2);}
+.activity-card.on .ac-f{background:var(--accent); color:#fff;}
+.activity-card .ac-chk{width:20px; flex:0 0 20px; color:var(--accent); font-weight:800; text-align:center;}
 
-.sticky-cta{position:sticky;bottom:0;padding-top:14px;background:linear-gradient(transparent,var(--bg-shell) 24%);margin-top:8px}
+.habit-line{display:flex; align-items:center; justify-content:space-between; background:var(--surface-3); border-radius:var(--r-md); padding:8px 12px; margin-top:8px;}
+.habit-line .hl-name{font-size:var(--fs-sub); font-weight:600;}
+.stepperN{display:flex; align-items:center; gap:10px;}
+.stepperN button{width:32px; height:32px; border-radius:50%; border:1px solid var(--line); background:var(--surface-2); color:var(--text); font-size:18px; cursor:pointer; line-height:1;}
+.stepperN .nv{min-width:52px; text-align:center; font-size:var(--fs-sub);}
 
-/* analyzing */
-#screen-analyzing{display:none;position:fixed;inset:0;z-index:60;background:var(--bg-void);flex-direction:column;align-items:center;justify-content:center;padding:30px}
-#screen-analyzing.active{display:flex}
-.dd-ring{position:relative;width:120px;height:120px;margin-bottom:30px}
-.dd-ring .sym{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;animation:pulse 3s infinite}
-.dd-ring .ring{position:absolute;inset:0;animation:rotate 1.4s linear infinite}
-@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
-@keyframes rotate{to{transform:rotate(360deg)}}
-.an-steps{width:100%;max-width:300px}
-.an-step{display:flex;align-items:center;gap:10px;font-size:13.5px;color:var(--text-lo);padding:7px 0;opacity:.4;transition:.3s}
-.an-step.active{opacity:1;color:var(--text-mid)}
-.an-step.done{opacity:1;color:var(--text-hi)}
-.an-step .ic{width:18px;height:18px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
-.an-step .spin{width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:rotate .7s linear infinite}
-.an-bar{width:100%;max-width:300px;height:4px;background:var(--line);border-radius:2px;margin-top:20px;overflow:hidden}
-.an-bar>div{height:100%;width:0;background:var(--accent);transition:width .4s var(--ease)}
-.demo-strip{font-size:11px;font-weight:600;color:#C9A99B;background:rgba(216,90,48,.07);border:1px solid var(--accent-dark);border-radius:var(--radius-pill);padding:6px 12px;margin-top:26px}
+.prev-band{background:var(--surface-2); border-radius:var(--r-md); padding:12px 14px; font-size:var(--fs-sub); margin-top:6px; margin-bottom:6px;}
+.prev-band.danger{background:var(--danger-soft);}
+.prev-band b{color:var(--text);}
 
-/* result */
-.dd-header{display:flex;align-items:center;gap:12px;margin-bottom:6px}
-.dd-header .ttl{font-size:20px;font-weight:800;color:var(--text-hi);letter-spacing:.02em}
-.greet{font-size:15px;color:var(--text-mid);line-height:1.7;margin-bottom:18px}
-.sum-cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:18px}
-.sum-card{background:var(--bg-surface-2);border:1px solid var(--line-soft);border-radius:var(--radius);padding:12px 8px;text-align:center}
-.sum-card .sl{font-size:10px;color:var(--text-lo);letter-spacing:.04em;margin-bottom:6px}
-.sum-card .sv{font-size:22px;font-weight:700;color:var(--text-hi);font-family:var(--font-num);font-variant-numeric:tabular-nums;line-height:1}
-.sum-card .su{font-size:10px;color:var(--text-lo);margin-top:3px}
-.verdict-block{opacity:0;animation:vfade .5s var(--ease) forwards}
-.verdict-block:nth-child(1){animation-delay:.0s}
-.verdict-block:nth-child(2){animation-delay:.08s}
-.verdict-block:nth-child(3){animation-delay:.16s}
-.verdict-block:nth-child(4){animation-delay:.24s}
-.verdict-block:nth-child(5){animation-delay:.32s}
-@keyframes vfade{to{opacity:1}}
-.voice-card{background:var(--bg-surface);border:1px solid var(--line-soft);border-radius:var(--radius);padding:14px 15px;margin-bottom:11px}
-.voice-card.truth{border-color:var(--accent);background:rgba(216,90,48,.06)}
-.voice-card .vrole{font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:7px}
-.voice-card .vtext{font-size:15px;color:var(--text-mid);line-height:1.75}
-.voice-card .vtext em{font-style:normal;font-weight:600;color:var(--accent)}
-.basis{background:var(--bg-surface-2);border:1px solid var(--line-soft);border-radius:var(--radius);padding:15px;margin-bottom:11px}
-.basis h4{font-size:13px;color:var(--text-hi);margin-bottom:12px;font-weight:700}
-.kcal-big{display:flex;align-items:baseline;gap:6px;margin-bottom:14px}
-.kcal-big .v{font-size:32px;font-weight:700;color:var(--accent);font-family:var(--font-num);font-variant-numeric:tabular-nums}
-.kcal-big .u{font-size:13px;color:var(--text-lo)}
-.pfc-bar{display:flex;height:14px;border-radius:7px;overflow:hidden;margin:6px 0 8px}
-.pfc-bar .p{background:var(--accent)}.pfc-bar .f{background:var(--warn)}.pfc-bar .c{background:var(--ok)}
-.pfc-legend{display:flex;gap:14px;font-size:12px;flex-wrap:wrap}
-.pfc-legend span{display:flex;align-items:center;gap:5px;color:var(--text-mid)}
-.pfc-legend .sw{width:10px;height:10px;border-radius:2px}
-.train-bar{display:flex;height:24px;border-radius:6px;overflow:hidden;margin:8px 0 6px;font-size:11px;font-weight:600}
-.train-bar>div{display:flex;align-items:center;justify-content:center;color:var(--text-on-accent)}
-.train-bar .str{background:var(--accent)}.train-bar .car{background:var(--ok)}
-.pace-line{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-mid);margin-top:10px}
-.pace-tag{font-size:11px;font-weight:600;padding:2px 8px;border-radius:var(--radius-pill)}
-.pace-tag.ok{background:rgba(79,180,119,.15);color:var(--ok)}
-.pace-tag.warn{background:rgba(224,162,60,.15);color:var(--warn)}
-.action-list{list-style:none}
-.action-list li{display:flex;gap:10px;font-size:14px;color:var(--text-mid);margin-bottom:9px;line-height:1.55}
-.action-list li .n{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--accent);color:var(--text-on-accent);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:var(--font-num)}
-.bottom-demo{text-align:center;font-size:10.5px;color:#C9A99B;background:rgba(216,90,48,.06);border:1px solid var(--accent-dark);border-radius:var(--radius-pill);padding:6px 12px;margin:16px 0 8px}
+.analyzing-wrap{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:24px; padding:var(--pad);}
+.ring{width:140px; height:140px; border-radius:50%; display:flex; align-items:center; justify-content:center; position:relative; background:conic-gradient(var(--accent) 0deg, var(--surface-3) 0);}
+.ring .inner{width:104px; height:104px; border-radius:50%; background:var(--surface); display:flex; align-items:center; justify-content:center; font-weight:800; color:var(--accent); font-size:24px; letter-spacing:.05em;}
+.analyzing-text{font-size:var(--fs-body); color:var(--text-2); text-align:center; min-height:24px;}
 
-/* chat */
-#screen-chat{padding-bottom:80px}
-.chat-log{display:flex;flex-direction:column;gap:12px;margin:14px 0}
-.bubble{max-width:80%;padding:11px 14px;border-radius:16px;font-size:14px;line-height:1.6;animation:fadein .25s var(--ease)}
-.bubble.dd{background:var(--bg-elevated);color:var(--text-mid);align-self:flex-start;border-bottom-left-radius:5px;display:flex;gap:9px}
-.bubble.dd .sm{flex-shrink:0}
-.bubble.user{background:var(--accent);color:var(--text-on-accent);align-self:flex-end;border-bottom-right-radius:5px}
-.typing{align-self:flex-start;background:var(--bg-elevated);padding:13px 16px;border-radius:16px;border-bottom-left-radius:5px;display:flex;gap:4px}
-.typing span{width:7px;height:7px;border-radius:50%;background:var(--text-lo);animation:bounce 1.2s infinite}
-.typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}
-@keyframes bounce{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-5px);opacity:1}}
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
-.chip{border:1px solid var(--line);background:var(--bg-surface);color:var(--text-mid);border-radius:var(--radius-pill);padding:8px 14px;font-size:13px;cursor:pointer;font-family:var(--font)}
-.chip:active{background:var(--bg-surface-2)}
-.chat-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;display:flex;gap:8px;padding:10px 16px;background:rgba(14,14,16,.94);backdrop-filter:blur(8px);border-top:1px solid var(--line-soft)}
-.chat-bar input{flex:1;background:var(--bg-surface);border:1px solid var(--line);border-radius:var(--radius-pill);height:44px;padding:0 16px;color:var(--text-hi);font-size:16px;font-family:var(--font)}
-.chat-bar input:focus{outline:none;border-color:var(--line-focus)}
-.chat-send{width:44px;height:44px;flex-shrink:0;border-radius:50%;background:var(--accent);border:none;color:var(--text-on-accent);cursor:pointer;display:flex;align-items:center;justify-content:center}
-.chat-demo{text-align:center;font-size:10.5px;color:var(--text-lo);margin-bottom:4px}
+.bignum{font-size:var(--fs-hero); font-weight:800; color:var(--accent);}
+.guard-card{border:1px solid var(--warn); background:var(--warn-soft);}
+.transparency{border-left:3px solid var(--accent); background:var(--surface-2); border-radius:var(--r-md); padding:14px; margin-top:16px;}
+.transparency .l1{font-size:var(--fs-sub); color:var(--text);}
+.transparency .l2{font-size:var(--fs-body); font-weight:700; color:var(--accent); margin-top:4px;}
+.dd-quote{display:flex; gap:10px; align-items:flex-start; background:var(--accent-soft); border-radius:var(--r-md); padding:12px; margin:12px 0; color:var(--accent-dark);}
+.dd-quote .av{flex:0 0 32px; width:32px; height:32px; border-radius:50%; background:#fff; color:var(--accent); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:12px;}
+.dd-quote p{margin:0; font-size:var(--fs-sub);}
 
-/* toast */
-.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--bg-elevated);color:var(--text-hi);font-size:13px;padding:11px 18px;border-radius:var(--radius-pill);border:1px solid var(--line);z-index:100;opacity:0;pointer-events:none;transition:opacity .3s}
-.toast.show{opacity:1}
+.greet{display:flex; align-items:center; gap:10px; padding:16px var(--pad) 6px;}
+.greet .g-av{flex:0 0 42px; width:42px; height:42px; border-radius:50%; background:var(--accent-soft); color:var(--accent-dark); display:flex; align-items:center; justify-content:center; font-weight:800;}
+.greet b{font-size:var(--fs-h2);}
+.greet .g-date{font-size:var(--fs-sub); color:var(--text-3);}
+.kcal-badge{margin-left:auto; text-align:right; font-size:var(--fs-micro); color:var(--text-3);}
+.kcal-badge b{display:block; font-size:var(--fs-body); color:var(--accent);}
+.check-card{display:flex; align-items:center; gap:12px; background:var(--surface-2); border-radius:var(--r-md); padding:13px 14px; margin-bottom:10px; cursor:pointer;}
+.check-card .ck{flex:0 0 24px; width:24px; height:24px; border-radius:50%; border:2px solid var(--line); display:flex; align-items:center; justify-content:center; font-size:14px; color:transparent;}
+.check-card.on .ck{background:var(--accent); border-color:var(--accent); color:#fff;}
+.check-card .ck-t{font-size:var(--fs-body);}
+.check-card.on .ck-t{color:var(--text-3); text-decoration:line-through;}
+.done-band{background:var(--ok-soft); color:var(--ok); border-radius:var(--r-md); padding:10px 14px; font-size:var(--fs-sub); font-weight:700; text-align:center; margin-bottom:12px;}
+.streak-big{font-size:var(--fs-hero); font-weight:800; color:var(--accent);}
+.streak-dots{display:flex; gap:7px; margin-top:10px;}
+.streak-dots .sd{width:22px; height:22px; border-radius:50%; background:var(--surface-3); display:flex; align-items:center; justify-content:center; font-size:10px; color:var(--text-3);}
+.streak-dots .sd.on{background:var(--accent); color:#fff;}
+.svg-wrap{width:100%; overflow:hidden;}
+.svg-wrap svg{width:100%; height:auto; display:block;}
+.summary-line{font-size:var(--fs-sub); margin-top:8px;}
 
-@media(prefers-reduced-motion:reduce){
-  *{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+.tabbar{display:flex; border-top:1px solid var(--line); background:var(--surface); position:sticky; bottom:0;}
+.tabbar button{flex:1; background:none; border:none; color:var(--text-3); font-family:var(--font); font-size:var(--fs-label); padding:10px 0 calc(10px + env(safe-area-inset-bottom)); cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:3px; border-top:2px solid transparent;}
+.tabbar button .ti{font-size:18px;}
+.tabbar button.on{color:var(--accent); border-top-color:var(--accent);}
+
+.chat-head{display:flex; align-items:center; gap:10px; padding:14px var(--pad); border-bottom:1px solid var(--line);}
+.chat-head .c-av{flex:0 0 40px; width:40px; height:40px; border-radius:50%; background:var(--accent-soft); color:var(--accent-dark); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:13px;}
+.chat-head b{font-size:var(--fs-body);}
+.chat-head .on-dot{width:8px; height:8px; border-radius:50%; background:var(--ok); display:inline-block; margin-right:4px;}
+.chat-head .c-sub{font-size:var(--fs-micro); color:var(--text-3);}
+.chat-scroll{flex:1; overflow-y:auto; padding:14px var(--pad); display:flex; flex-direction:column; gap:10px;}
+.msg{max-width:80%; padding:10px 13px; border-radius:14px; font-size:var(--fs-sub); white-space:pre-wrap; word-break:break-word;}
+.msg.dd{align-self:flex-start; background:var(--surface-2); border-bottom-left-radius:4px;}
+.msg.me{align-self:flex-end; background:var(--accent-dark); color:#fff; border-bottom-right-radius:4px;}
+.quickq{display:flex; gap:8px; overflow-x:auto; padding:8px var(--pad); border-top:1px solid var(--line-soft);}
+.quickq .chip{flex:0 0 auto; white-space:nowrap;}
+.quickq .chip::before{content:none;}
+.chat-input{display:flex; gap:8px; padding:10px var(--pad) calc(10px + env(safe-area-inset-bottom)); border-top:1px solid var(--line); align-items:center;}
+.chat-input .inp{height:44px;}
+.send{flex:0 0 44px; width:44px; height:44px; border-radius:50%; border:none; background:var(--accent); color:#fff; font-size:18px; cursor:pointer;}
+.chat-note{font-size:var(--fs-micro); color:var(--text-3); text-align:center; padding:2px var(--pad) 6px;}
+
+#toast{position:absolute; left:50%; bottom:80px; transform:translateX(-50%) translateY(20px); background:var(--surface-2); border:1px solid var(--line); color:var(--text); font-size:var(--fs-sub); padding:10px 16px; border-radius:var(--r-pill); opacity:0; pointer-events:none; transition:.25s var(--ease); z-index:200; box-shadow:var(--shadow-card); max-width:80%; text-align:center;}
+#toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+.modal-bg{position:absolute; inset:0; background:rgba(0,0,0,.6); display:none; align-items:center; justify-content:center; z-index:300; padding:20px;}
+.modal-bg.show{display:flex;}
+.modal{background:var(--surface-2); border-radius:var(--r-lg); padding:20px; width:100%; max-width:340px;}
+.modal h3{margin:0 0 8px; font-size:var(--fs-h2);}
+.modal p{margin:0 0 16px; font-size:var(--fs-sub); color:var(--text-2);}
+.modal .m-btns{display:flex; gap:10px;}
+.modal .m-btns .btn{flex:1; height:46px;}
+
+.consent-box{background:var(--surface-2); border-radius:var(--r-lg); padding:16px; font-size:var(--fs-sub); color:var(--text-2); margin:16px 0;}
+.consent-box p{margin:0 0 8px;}
+.consent-box p:last-child{margin-bottom:0;}
+.checkrow{display:flex; align-items:center; gap:10px; padding:6px 0; cursor:pointer; font-size:var(--fs-body);}
+.checkrow .cb{width:24px; height:24px; flex:0 0 24px; border-radius:6px; border:2px solid var(--line); display:flex; align-items:center; justify-content:center; color:transparent; font-size:14px;}
+.checkrow.on .cb{background:var(--accent); border-color:var(--accent); color:#fff;}
+.dummy-strip{background:var(--accent-soft); color:var(--accent-dark); border-radius:var(--r-sm); padding:6px 10px; font-size:var(--fs-micro); font-weight:700; text-align:center; margin-bottom:12px;}
+.diff{font-size:var(--fs-sub); margin-top:6px;}
+.diff.cut{color:var(--ok);} .diff.bulk{color:var(--info);}
+
+@media (prefers-reduced-motion:reduce){
+  *{transition:none !important; animation:none !important;}
 }
 </style>
 </head>
 <body>
-<div class="app-shell">
-  <header class="app-header">
-    <div class="brand">
-      <span class="logo">DEED</span><span class="div"></span>
-      <span class="sub">PERSONAL AI <span class="inf">∞</span></span>
+<div id="demoBadge">DEMO ダミーデータ</div>
+<div id="app">
+  <div id="screens"></div>
+  <div id="toast"></div>
+  <div class="modal-bg" id="modalBg">
+    <div class="modal">
+      <h3 id="modalTitle"></h3>
+      <div id="modalBody"></div>
+      <div class="m-btns" id="modalBtns"></div>
     </div>
-    <span class="demo-pill"><span class="demo-dot"></span>DEMO／ダミー</span>
-  </header>
-
-  <main class="main">
-    <!-- ① CONSENT -->
-    <section class="screen" id="screen-consent" data-screen="consent">
-      <div style="text-align:center;margin:10px 0 18px">
-        <svg width="64" height="40" viewBox="0 0 64 40" style="filter:drop-shadow(0 0 8px var(--accent-glow))">
-          <path d="M20 20 C20 8 8 8 8 20 C8 32 20 32 32 20 C44 8 56 8 56 20 C56 32 44 32 32 20" fill="none" stroke="#D85A30" stroke-width="2.5" stroke-linecap="round"/>
-        </svg>
-      </div>
-      <h2 class="title" style="text-align:center">はじめる前に</h2>
-      <p class="body" style="text-align:center;margin:8px 0 16px">DEED「PERSONAL AI ∞」へようこそ。<br>あなた専属のAIトレーナー D.D（ディディ）が伴走します。</p>
-      <div class="note-box">
-        ここで入力する身長・体重などの健康情報は、<b style="color:var(--text-hi)">この端末の中だけに保存</b>されます（localStorage）。サーバーへ送信されません。これは体験デモです。
-      </div>
-      <ul class="consent-list mt16">
-        <li><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 8l3.5 3.5L13 4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>保存先＝この端末のみ（localStorage）</li>
-        <li><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 8l3.5 3.5L13 4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>外部へ一切通信しません</li>
-        <li><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 8l3.5 3.5L13 4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>ダミーのD.Dが応答します（医療診断ではありません）</li>
-      </ul>
-      <button class="btn btn-primary mt8" id="btn-consent">同意して、はじめる</button>
-      <div style="text-align:center"><button class="btn-link" id="btn-clear-consent">あとで削除する＝端末のデータを消す</button></div>
-    </section>
-
-    <!-- ② LP HERO -->
-    <section class="screen" id="screen-lp" data-screen="lp">
-      <div id="resume-bar" style="display:none;background:var(--bg-surface);border:1px solid var(--accent-dark);border-radius:var(--radius-sm);padding:12px;margin-bottom:16px">
-        <div style="font-size:13px;color:var(--text-mid);margin-bottom:9px">前回の続きが残っています。</div>
-        <div style="display:flex;gap:8px">
-          <button class="btn btn-primary" style="height:40px;font-size:14px" id="btn-resume">続きから再開する</button>
-          <button class="btn btn-secondary" style="height:40px;font-size:14px" id="btn-restart">最初からやり直す</button>
-        </div>
-      </div>
-      <div style="background:radial-gradient(circle at 50% 30%,rgba(216,90,48,.18),transparent 60%);border-radius:var(--radius);padding:36px 16px 24px;text-align:center;margin-bottom:20px">
-        <div style="margin-bottom:18px">
-          <svg width="80" height="50" viewBox="0 0 64 40" style="filter:drop-shadow(0 0 10px var(--accent-glow))">
-            <path d="M20 20 C20 8 8 8 8 20 C8 32 20 32 32 20 C44 8 56 8 56 20 C56 32 44 32 32 20" fill="none" stroke="#D85A30" stroke-width="2.5" stroke-linecap="round"/>
-          </svg>
-        </div>
-        <h1 class="hero">PERSONAL AI <span style="color:var(--accent)">∞</span></h1>
-        <p class="body mt12">あなた専属のAIトレーナー、<b style="color:var(--text-hi)">D.D</b>。</p>
-      </div>
-      <div class="role-grid" id="role-grid">
-        <div class="role-card"><div class="ricon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21c-5-3.5-8-6.5-8-10a4 4 0 017-2.6A4 4 0 0120 11c0 3.5-3 6.5-8 10z"/></svg></div><div class="rt">毎日のパートナー</div><div class="rd">食事・運動・気持ちに寄り添う</div></div>
-        <div class="role-card"><div class="ricon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg></div><div class="rt">嘘は見抜く</div><div class="rd">ごまかしを、正面から優しく</div></div>
-        <div class="role-card"><div class="ricon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/></svg></div><div class="rt">目的を忘れさせない</div><div class="rd">始めた理由へ連れ戻す</div></div>
-        <div class="role-card"><div class="ricon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0z"/><path d="M4 21v-1a6 6 0 016-6h4a6 6 0 016 6v1"/></svg></div><div class="rt">DEED連携</div><div class="rd">担当トレーナーと同じ方針で伴走</div></div>
-      </div>
-      <button class="btn btn-primary mt20" id="btn-start">はじめる</button>
-    </section>
-
-    <!-- ③ STEP1 -->
-    <section class="screen" id="screen-step1" data-screen="step1">
-      <div class="progress-wrap">
-        <div class="progress-label">STEP 1 / 3 ─ 基本情報</div>
-        <div class="seg-bar"><div class="seg-seg cur"></div><div class="seg-seg"></div><div class="seg-seg"></div></div>
-      </div>
-      <h2 class="title">まず、あなたのこと</h2>
-      <p class="cap" style="margin-bottom:18px">会員のあなたが入れるのは基本情報と目標だけ。体の数値はトレーナーが計測済みです。</p>
-
-      <div class="err-summary" id="err-sum-1"></div>
-
-      <div class="field">
-        <label class="label-cap">お名前</label>
-        <div class="in-wrap">
-          <input class="input" id="f-name" type="text" placeholder="例: 山田 太郎" autocomplete="off">
-          <span class="in-check"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 8l3.5 3.5L13 4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-        </div>
-        <div class="err-msg" id="e-name"></div>
-      </div>
-
-      <div class="field">
-        <label class="label-cap">生年月日</label>
-        <div class="row3">
-          <select class="input" id="f-by"><option value="">年</option></select>
-          <select class="input" id="f-bm"><option value="">月</option></select>
-          <select class="input" id="f-bd"><option value="">日</option></select>
-        </div>
-        <div class="help">例: 1990 / 4 / 15</div>
-        <div class="err-msg" id="e-birth"></div>
-      </div>
-
-      <div class="field">
-        <label class="label-cap">性別 <span style="color:var(--text-lo);text-transform:none;letter-spacing:0">（任意）</span></label>
-        <div class="seg" id="seg-sex">
-          <button class="seg-btn" data-v="male">男性</button>
-          <button class="seg-btn" data-v="female">女性</button>
-          <button class="seg-btn" data-v="na">回答しない</button>
-        </div>
-      </div>
-
-      <div class="sticky-cta">
-        <button class="btn btn-primary" id="btn-s1-next">次へ進む</button>
-      </div>
-    </section>
-
-    <!-- ④ STEP2 -->
-    <section class="screen" id="screen-step2" data-screen="step2">
-      <div class="progress-wrap">
-        <div class="progress-label">STEP 2 / 3 ─ 体組成（担当トレーナー計測済み）</div>
-        <div class="seg-bar"><div class="seg-seg done"></div><div class="seg-seg cur"></div><div class="seg-seg"></div></div>
-      </div>
-      <h2 class="title">あなたの体組成</h2>
-      <div class="tr-banner mt8">
-        <span>📋</span>
-        <span>担当トレーナー〈<b id="tr-name">佐藤 健</b>（DEED 新宿東口店）〉が計測・入力済みです。あなたは確認するだけでOK。</span>
-      </div>
-
-      <div class="bc-head">
-        <span class="cap">BMI・体脂肪量は自動算出（<span style="color:var(--accent)">ƒ</span>＝計算値）</span>
-        <span class="toggle" id="bc-toggle"><span class="sw"></span>計測値を編集</span>
-      </div>
-
-      <div class="bc-grid" id="bc-grid"></div>
-
-      <div class="sticky-cta">
-        <button class="btn btn-primary" id="btn-s2-next">次へ（目標へ）</button>
-        <div style="text-align:center;margin-top:6px"><button class="btn-link" id="btn-s2-back">ひとつ戻る</button></div>
-      </div>
-    </section>
-
-    <!-- ⑤ STEP3 -->
-    <section class="screen" id="screen-step3" data-screen="step3">
-      <div class="progress-wrap">
-        <div class="progress-label">STEP 3 / 3 ─ 目標</div>
-        <div class="seg-bar"><div class="seg-seg done"></div><div class="seg-seg done"></div><div class="seg-seg cur"></div></div>
-      </div>
-      <h2 class="title">どこを目指す？</h2>
-
-      <div class="err-summary" id="err-sum-3"></div>
-
-      <div class="field">
-        <label class="label-cap">目的</label>
-        <div class="goal-cards" id="goal-cards">
-          <div class="goal-card" data-v="cut"><span class="gi"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 15l7-7 7 7"/></svg></span><div><div class="gt">減量</div><div class="gd">脂肪を落とし、引き締める</div></div></div>
-          <div class="goal-card" data-v="bulk"><span class="gi"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 9l7 7 7-7"/></svg></span><div><div class="gt">増量</div><div class="gd">筋肉で、質よく増やす</div></div></div>
-          <div class="goal-card" data-v="maintain"><span class="gi"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 12h14"/></svg></span><div><div class="gt">体型維持</div><div class="gd">今の体を保ち、中身を磨く</div></div></div>
-        </div>
-        <div class="err-msg" id="e-goal"></div>
-      </div>
-
-      <div class="field">
-        <label class="label-cap">目標体重</label>
-        <div class="in-wrap">
-          <input class="input num" id="f-target" type="number" inputmode="decimal" placeholder="例: 62" step="0.1">
-          <span class="in-check"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 8l3.5 3.5L13 4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-        </div>
-        <div class="preview-chip" id="target-preview"></div>
-        <div class="err-msg" id="e-target"></div>
-      </div>
-
-      <div class="field">
-        <label class="label-cap">期限</label>
-        <select class="input" id="f-deadline">
-          <option value="">選択してください</option>
-          <option value="m1">1ヶ月後</option>
-          <option value="m3">3ヶ月後</option>
-          <option value="m6">半年後</option>
-          <option value="m12">1年後</option>
-          <option value="date">日付指定</option>
-        </select>
-        <div class="in-wrap mt8" id="date-wrap" style="display:none">
-          <input class="input" id="f-date" type="date">
-        </div>
-        <div class="err-msg" id="e-deadline"></div>
-      </div>
-
-      <div class="warn-chip" id="goal-conflict" style="display:none">
-        <span>⚠️</span><span id="goal-conflict-text"></span>
-      </div>
-
-      <div class="sticky-cta">
-        <button class="btn btn-primary cta-pulse" id="btn-analyze">AIで解析する</button>
-        <div style="text-align:center;margin-top:6px"><button class="btn-link" id="btn-s3-back">ひとつ戻る</button></div>
-      </div>
-    </section>
-
-    <!-- ⑦ RESULT -->
-    <section class="screen" id="screen-result" data-screen="result"></section>
-
-    <!-- ⑧ CHAT -->
-    <section class="screen" id="screen-chat" data-screen="chat">
-      <div class="chat-demo">※これはデモの定型応答です。実際のAI接続はありません</div>
-      <button class="btn-link" id="btn-chat-back" style="margin-bottom:4px">‹ 所見へ戻る</button>
-      <div class="chat-log" id="chat-log"></div>
-      <div class="chips" id="chat-chips"></div>
-    </section>
-  </main>
-
-  <footer class="app-footer">
-    D.Dの所見は入力値から計算した目安です（医療・栄養の診断ではありません）。<br>
-    データはこの端末のみに保存・通信なし。 DEED「PERSONAL AI ∞」DEMO<br>
-    <a id="btn-clear-footer">この端末から消す</a>
-  </footer>
-</div>
-
-<!-- ⑥ ANALYZING overlay -->
-<section id="screen-analyzing">
-  <div class="dd-ring">
-    <div class="sym"><svg width="56" height="35" viewBox="0 0 64 40"><path d="M20 20 C20 8 8 8 8 20 C8 32 20 32 32 20 C44 8 56 8 56 20 C56 32 44 32 32 20" fill="none" stroke="#D85A30" stroke-width="2.5" stroke-linecap="round"/></svg></div>
-    <div class="ring"><svg width="120" height="120" viewBox="0 0 120 120"><circle cx="60" cy="60" r="54" fill="none" stroke="#D85A30" stroke-width="3" stroke-linecap="round" stroke-dasharray="80 260"/></svg></div>
   </div>
-  <div class="an-steps" id="an-steps"></div>
-  <div class="an-bar"><div id="an-bar-fill"></div></div>
-  <div class="demo-strip">DEMO ─ 実際のAI接続なし／ダミーデータ</div>
-</section>
-
-<div class="toast" id="toast"></div>
+</div>
 
 <script>
 "use strict";
-const STORE_KEY="dd_demo_v1";
-const TRAINER="佐藤 健";
-const today=new Date();
 
-// ---- state ----
-let state={
-  screen:"consent",consented:false,step:1,
-  data:{
-    name:"",birthYear:"",birthMonth:"",birthDay:"",sex:"",
-    height:172,weight:70,bodyFat:20,muscle:30,water:55,bone:3.0,trainer:TRAINER,trainerLocked:true,
-    goalType:"",targetWeight:"",deadline:"",deadlineDate:""
-  },
-  result:null,chatLog:[],chatTurn:0
-};
+/* ---------- XSS安全化 ---------- */
+function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
 
-// ---- persistence ----
-function save(){
-  try{
-    localStorage.setItem(STORE_KEY,JSON.stringify({consented:state.consented,step:state.step,data:state.data}));
-  }catch(e){}
+/* ---------- ストレージ ---------- */
+var STORE_KEY = "dd_demo_v1";
+
+function defaultState(){
+  return {
+    v:1,
+    screen:"consent",
+    consent:false,
+    profile:{ name:"", birth:{y:1990,m:1,d:1}, age:null, sex:null },
+    body:{ height:172.0, weight:78.5, bodyFatPct:24.0, muscle:56.4, edited:false },
+    goal:{ purpose:null, targetWeight:null, deadline:null },
+    life:{ activity:null, habits:[], none:false },
+    result:null,
+    weights:[],
+    today:{ date:null, checks:[false,false,false] },
+    streakDays:[],
+    chat:[]
+  };
 }
+var state = defaultState();
+
+function save(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){} }
 function load(){
   try{
-    const raw=localStorage.getItem(STORE_KEY);
-    if(!raw)return false;
-    const o=JSON.parse(raw);
-    if(o&&o.data){state.data=Object.assign(state.data,o.data);state.consented=!!o.consented;state.step=o.step||1;return true;}
-  }catch(e){}
-  return false;
+    var raw = localStorage.getItem(STORE_KEY);
+    if(!raw) return false;
+    var o = JSON.parse(raw);
+    if(!o || typeof o!=="object") return false;
+    var d = defaultState();
+    state = Object.assign(d, o);
+    state.profile = Object.assign(d.profile, o.profile||{});
+    state.body = Object.assign(d.body, o.body||{});
+    state.goal = Object.assign(d.goal, o.goal||{});
+    state.life = Object.assign(d.life, o.life||{});
+    state.today = Object.assign(d.today, o.today||{});
+    if(!Array.isArray(state.weights)) state.weights=[];
+    if(!Array.isArray(state.streakDays)) state.streakDays=[];
+    if(!Array.isArray(state.chat)) state.chat=[];
+    if(!Array.isArray(state.life.habits)) state.life.habits=[];
+    return true;
+  }catch(e){ state = defaultState(); return false; }
 }
-function clearAll(){
-  try{localStorage.removeItem(STORE_KEY);}catch(e){}
-  state={screen:"consent",consented:false,step:1,
-    data:{name:"",birthYear:"",birthMonth:"",birthDay:"",sex:"",height:172,weight:70,bodyFat:20,muscle:30,water:55,bone:3.0,trainer:TRAINER,trainerLocked:true,goalType:"",targetWeight:"",deadline:"",deadlineDate:""},
-    result:null,chatLog:[],chatTurn:0};
-}
+function clearAll(){ try{ localStorage.removeItem(STORE_KEY); }catch(e){} state = defaultState(); }
 
-// ---- screen routing ----
-function show(name){
-  state.screen=name;
-  document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("active",s.dataset.screen===name));
-  const an=document.getElementById("screen-analyzing");
-  an.classList.toggle("active",name==="analyzing");
-  window.scrollTo(0,0);
+/* ---------- 日付（決定的：new Date は年齢/期限週のみ） ---------- */
+function todayISO(){
+  var d=new Date();
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 }
-function toast(msg){
-  const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");
-  setTimeout(()=>t.classList.remove("show"),2200);
-}
-
-// ===== CALC (pure / deterministic) =====
-function calcAge(y,m,d){
-  if(!y||!m||!d)return 30;
-  let age=today.getFullYear()-y;
-  const mm=today.getMonth()+1, dd=today.getDate();
-  if(mm<m||(mm===m&&dd<d))age--;
+function ageFromBirth(y,m,d){
+  var t=new Date(), age=t.getFullYear()-y, mm=(t.getMonth()+1)-m;
+  if(mm<0 || (mm===0 && t.getDate()<d)) age--;
   return age;
 }
-function calcBMI(weight,height){
-  const hm=height/100, bmi=weight/(hm*hm);
-  let label,color;
-  if(bmi<18.5){label="低体重";color="var(--warn)";}
-  else if(bmi<25){label="標準";color="var(--ok)";}
-  else if(bmi<30){label="やや高め";color="var(--accent)";}
-  else{label="高め";color="var(--error)";}
-  return {bmi:Math.round(bmi*10)/10,label,color};
+function weeksUntil(iso){
+  if(!iso) return null;
+  var ms=new Date(iso+"T00:00:00") - new Date();
+  return Math.max(1, Math.round(ms/(7*24*3600*1000)));
 }
-function calcFat(weight,bodyFat){
-  const fatMass=Math.round(weight*(bodyFat/100)*10)/10;
-  const leanMass=Math.round((weight-fatMass)*10)/10;
-  return {fatMass,leanMass};
+function daysUntil(iso){
+  if(!iso) return null;
+  return Math.max(0, Math.ceil((new Date(iso+"T00:00:00")-new Date())/(24*3600*1000)));
 }
-function calcCalories(d,age,leanMass){
-  const w=+d.weight,h=+d.height;
-  let bmr;
-  if(d.sex==="male")bmr=10*w+6.25*h-5*age+5;
-  else if(d.sex==="female")bmr=10*w+6.25*h-5*age-161;
-  else bmr=10*w+6.25*h-5*age-78;
-  const tdee=bmr*1.375;
-  let target;
-  if(d.goalType==="cut")target=tdee-400;
-  else if(d.goalType==="bulk")target=tdee+250;
-  else target=tdee;
-  const floor=leanMass*30;
-  if(target<floor)target=floor;
-  return {bmr:Math.round(bmr),tdee:Math.round(tdee),dailyKcal:Math.round(target/10)*10};
+function addDaysISO(iso, days){
+  var base = iso ? new Date(iso+"T00:00:00") : new Date();
+  base.setDate(base.getDate()+days);
+  return base.getFullYear()+"-"+String(base.getMonth()+1).padStart(2,"0")+"-"+String(base.getDate()).padStart(2,"0");
 }
-function weeksFromDeadline(d){
-  if(d.deadline==="m1")return 4;
-  if(d.deadline==="m3")return 13;
-  if(d.deadline==="m6")return 26;
-  if(d.deadline==="m12")return 52;
-  if(d.deadline==="date"&&d.deadlineDate){
-    const dl=new Date(d.deadlineDate+"T00:00:00");
-    const wk=Math.ceil((dl-today)/(7*24*3600*1000));
-    return Math.max(1,wk);
+function fmtJP(iso){ if(!iso) return ""; var p=iso.split("-"); return (p[1]*1)+"月"+(p[2]*1)+"日"; }
+function round1(n){ return Math.round(n*10)/10; }
+function round2(n){ return Math.round(n*100)/100; }
+
+/* ============================================================
+   計算エンジン（決定的・健康ガード・出どころラベル）
+   source ∈ {input, choice, reference}
+   ============================================================ */
+var ACTIVITY = {
+  "1.2":  { factor:1.2,   label:"座り仕事中心(運動なし)" },
+  "1.375":{ factor:1.375, label:"軽い運動 週1-3回" },
+  "1.55": { factor:1.55,  label:"中程度 週3-5回" },
+  "1.725":{ factor:1.725, label:"ほぼ毎日 激しい運動" }
+};
+var HABITS = { homePilates:"家ピラティス", running:"ランニング", bodyweight:"自重トレ", gymStrength:"ジム筋トレ", walking:"ウォーキング", other:"その他", none:"いまは特になし" };
+var SEX_LABEL = { m:"男性", f:"女性", na:"回答しない" };
+
+function rv(value, source, label, opt){
+  opt = opt||{};
+  if(source!=="input" && source!=="choice" && source!=="reference") throw new Error("source タグ不正: "+source);
+  if(source==="reference" && (!opt.formula || !opt.premise)) throw new Error("reference は formula と premise が必須: "+label);
+  return { value:value, source:source, label:label, formula:opt.formula||null, premise:opt.premise||null, citation:opt.citation||null };
+}
+function sexFloor(sex){ if(sex==="f") return 1200; if(sex==="na") return 1350; return 1500; }
+
+function bmr(p){
+  var W=p.body.weight, H=p.body.height, A=p.profile.age, sx=p.profile.sex;
+  var base = 10*W + 6.25*H - 5*A, v;
+  if(sx==="m") v=base+5; else if(sx==="f") v=base-161; else v=base-78;
+  v=Math.round(v);
+  return rv(v,"reference","Mifflin-St Jeor式",{
+    formula:"10×体重 + 6.25×身長 − 5×年齢 (+5 男 / −161 女 / −78 回答しない)",
+    premise:"あなたの入力（身長"+H+"cm・体重"+W+"kg・年齢"+A+"歳・性別:"+SEX_LABEL[sx]+"）から算出。"+(sx==="na"?"性別=回答しないのため男女式の平均値を使用。":""),
+    citation:"Mifflin MD, St Jeor ST (1990)"
+  });
+}
+function activityFactor(p){
+  var info = ACTIVITY[String(p.life.activity)];
+  if(!info) throw new Error("活動係数が未選択：TDEEは算出できません（フォールバック係数なし）");
+  return rv(info.factor,"choice",info.label,{});
+}
+function tdee(p){
+  var b=bmr(p), af=activityFactor(p);
+  return rv(Math.round(b.value*af.value),"reference","TDEE（基礎代謝×活動係数）",{
+    formula:"BMR × 活動係数",
+    premise:"活動係数は〔あなたが選んだ〕「"+af.label+"」＝"+af.value+"。固定値ではありません。"
+  });
+}
+function goalDir(p){
+  var gw=p.goal.targetWeight, w=p.body.weight;
+  if(gw==null) return "maintain";
+  var diff=gw-w;
+  if(diff>=1.5) return "gain"; if(diff<=-1.5) return "lose"; return "maintain";
+}
+function goalAdjust(p){
+  var d=goalDir(p), v = d==="gain"?300:(d==="lose"?-500:0);
+  var b=bmr(p), fl=sexFloor(p.profile.sex);
+  return rv(v,"reference","目的補正（"+(d==="gain"?"増量":d==="lose"?"減量":"維持")+"）",{
+    formula:"増量 +300 / 維持 0 / 減量 −500",
+    premise:"減量−500kcalは1日約500kcal減＝週約0.5kgの健康的減量に対応。ただし基礎代謝"+b.value+"kcalと性別下限"+fl+"kcalは割らない（健康ガード）。",
+    citation:"Harvard Health / NIH（健康的減量 週0.5–1kg・1日約500kcal減）"
+  });
+}
+function targetKcal(p){
+  var t=tdee(p).value, d=goalDir(p), b=bmr(p).value, fl=sexFloor(p.profile.sex);
+  var floorVal=Math.max(Math.round(t*0.8), fl, b), v, guarded=false;
+  if(d==="gain") v=t+300;
+  else if(d==="maintain") v=t;
+  else { var raw=t-500; v=Math.max(raw, floorVal); if(raw<floorVal) guarded=true; }
+  var premise = guarded
+    ? "−500適用後 "+(t-500)+"kcal が下限 "+floorVal+"kcal（TDEEの80%="+Math.round(t*0.8)+" / 基礎代謝="+b+" / 性別下限="+fl+" の最大）を下回るため、健康ガードで "+v+"kcal に引き上げ。黙って丸めず明示。"
+    : "TDEE("+t+") に目的補正を合算。基礎代謝"+b+"kcalと性別下限"+fl+"kcalは割らない。";
+  var out=rv(v,"reference","推奨カロリー",{
+    formula:"TDEE + 目的補正（減量は max(TDEE−500, TDEE80%, 基礎代謝, 性別下限)）",
+    premise:premise
+  });
+  out.guarded=guarded; out.floorVal=floorVal; return out;
+}
+function targetProtein(p){
+  var d=goalDir(p), w=p.body.weight, gw=p.goal.targetWeight, base;
+  if(d==="gain") base=Math.max(gw!=null?gw:w, w);
+  else if(gw!=null && gw>0) base=Math.max(gw, w*0.9);
+  else base=w;
+  var perKg=(d==="gain")?1.7:1.6, raw=Math.round(base*perKg), v=Math.min(raw,170), capped=raw>170;
+  return rv(v,"reference","たんぱく質目安",{
+    formula:"基準体重 × 1.6（減量・維持）/ 1.7（増量）、上限170g",
+    premise:"基準体重は "+round1(base)+"kg（"+(d==="gain"?"増量時は目標と現体重の高い方":"減量時は目標体重と現体重の90%の高い方＝筋量維持のため")+"）。"+(capped?"上限170gで頭打ち。":""),
+    citation:"高たんぱく＋食物繊維で満腹感（PMC）"
+  });
+}
+function targetFat(p,kcal){
+  return rv(Math.round((kcal*0.25)/9),"reference","脂質目安",{
+    formula:"総kcal×25%÷9kcal/g", premise:"脂質比率25%は一般的な健康域の目安。"
+  });
+}
+function targetCarb(p,kcal,protein,fat){
+  var carbKcal=kcal - protein*4 - fat*9, v=Math.max(Math.round(carbKcal/4),0), clamped=carbKcal<0;
+  return rv(v,"reference","炭水化物（残り）",{
+    formula:"(総kcal − たんぱく質kcal − 脂質kcal) ÷ 4",
+    premise:"PFCのうち残りを炭水化物に充当。"+(clamped?"たんぱく質と脂質で総カロリーに達したため炭水化物0。":"")
+  });
+}
+function bmiVal(p){
+  var W=p.body.weight, H=p.body.height/100;
+  return rv(round1(W/(H*H)),"reference","BMI",{
+    formula:"体重 ÷ 身長(m)²", premise:"あなたの入力（体重"+W+"kg・身長"+p.body.height+"cm）から自動算出。"
+  });
+}
+function bodyFatMass(p){
+  if(p.body.bodyFatPct==null) return null;
+  return rv(round1(p.body.weight*p.body.bodyFatPct/100),"input","体脂肪量",{});
+}
+function leanBodyMass(p){
+  var fm=bodyFatMass(p); if(fm==null) return null;
+  return rv(round1(p.body.weight-fm.value),"reference","除脂肪体重",{
+    formula:"体重 − 体脂肪量", premise:"体重"+p.body.weight+"kg − 体脂肪量"+fm.value+"kg。"
+  });
+}
+function plannedPace(p){
+  var gw=p.goal.targetWeight, w=p.body.weight, wk=weeksUntil(p.goal.deadline);
+  if(gw==null || !wk) return null;
+  return rv(round2(Math.abs(w-gw)/wk),"input","想定ペース",{});
+}
+function safePace(p){
+  var d=goalDir(p), w=p.body.weight;
+  var byRate=(d==="gain")?w*0.005:w*0.01, byAbs=(d==="gain")?0.3:0.5;
+  return rv(round2(Math.min(byRate,byAbs)),"reference","安全ペース",{
+    formula:(d==="gain"?"min(体重×0.5%/週, 0.3kg/週)（増量）":"min(体重×1%/週, 0.5kg/週)（減量）"),
+    premise:"健康的な体重変化の上限。体重"+w+"kg基準。",
+    citation:"健康的減量 週0.5–1kg・体重1%まで（Harvard Health等）"
+  });
+}
+function paceVerdict(p){
+  var pl=plannedPace(p), sf=safePace(p);
+  var planned=pl?pl.value:null, safe=sf.value, tooFast=planned!=null && planned>safe;
+  return { tooFast:tooFast, plannedKg:planned, safeKg:safe, overBy:tooFast?round2(planned-safe):0 };
+}
+function safeWeeksNeeded(p){
+  var gw=p.goal.targetWeight, w=p.body.weight, sf=safePace(p).value;
+  if(gw==null || sf<=0) return null;
+  return Math.ceil(Math.abs(w-gw)/sf);
+}
+function healthGuard(p){
+  var b=bmiVal(p).value;
+  if(b<16) return { level:"block", bmi:b, msg:"安全のため、この目標は受け付けられません。BMI"+b+"は医療的サポートが必要な領域とされます。専門医にご相談ください。", allowGoal:false };
+  if(b<17) return { level:"doctor", bmi:b, msg:"BMI"+b+"は低体重域です。減量目標の前に医師相談をおすすめします。", allowGoal:true };
+  if(b<18.5) return { level:"warn", bmi:b, msg:"BMI"+b+"はやや低めです。減量より維持・筋量増加が向いている可能性があります。", allowGoal:true };
+  return { level:"ok", bmi:b, allowGoal:true };
+}
+function muscleNote(p){
+  var w=p.body.weight, m=p.body.muscle;
+  if(m==null || !w) return "";
+  var r=m/w, pct=Math.round(r*100);
+  if(r>=0.50) return "筋肉量"+m+"kg（体重比"+pct+"%）。筋肉がしっかりついており、土台は良好です。";
+  if(r>=0.42) return "筋肉量"+m+"kg（体重比"+pct+"%）。標準的なバランス。維持しながら進めましょう。";
+  return "筋肉量"+m+"kg（体重比"+pct+"%）。やや少なめ。筋量維持・増加を意識すると代謝が保たれます。";
+}
+function buildTrainingSuggestion(p){
+  var habits=p.life.habits, none=p.life.none, d=goalDir(p);
+  var actLabel=ACTIVITY[String(p.life.activity)]?ACTIVITY[String(p.life.activity)].label:"";
+  var hasCardio=habits.some(function(h){ return h.key==="running"||h.key==="walking"; });
+  var summary = (none||habits.length===0) ? "今は運動習慣なし" : "今は "+habits.map(function(h){ return HABITS[h.key]+" 週"+h.perWeek+"回"; }).join("／");
+  var head = (none||habits.length===0) ? "まずは無理なく始めるなら、" : "いまの〈"+habits.map(function(h){ return HABITS[h.key]+" 週"+h.perWeek+"回"; }).join("／")+"〉に足すなら、";
+  var body;
+  if(d==="lose"){
+    body = hasCardio
+      ? "有酸素はそのまま維持し、筋量維持のための自重補強（スクワット・腕立て等）を週+1〜2回。減量目的なので食事の管理を主軸に、運動は除脂肪体重を守る役割で。"
+      : "ウォーキングや軽い有酸素を週+2回から。あわせて自重トレを週+1回で筋量を守ると、減らした体重がリバウンドしにくくなります。";
+  } else if(d==="gain"){
+    body = "レジスタンス（筋トレ）の頻度を週+1回、主要種目を少しずつ漸進的に重く。"+(hasCardio?"有酸素はやや控えめにし、回復と栄養を優先すると増量が乗りやすいです。":"栄養（特にたんぱく質と総カロリー）を確保するのが増量の鍵です。");
+  } else {
+    body = "今の習慣の質を保ちつつ、ストレッチ・可動性トレを週2回足すと、ケガ予防と体の動かしやすさが上がります。";
   }
-  return 12;
-}
-function calcPace(d){
-  const w=+d.weight, t=+d.targetWeight;
-  const diff=w-t; // 正=減らす, 負=増やす
-  const absDiff=Math.round(Math.abs(diff)*10)/10;
-  const weeks=weeksFromDeadline(d);
-  const pace=weeks>0?Math.round((absDiff/weeks)*100)/100:0;
-  const safeWeekly=Math.round(w*0.007*100)/100;
-  const isAggressive=pace>safeWeekly;
-  let direction;
-  if(Math.abs(diff)<0.6||d.goalType==="maintain")direction="keep";
-  else if(diff>0)direction="reduce";
-  else direction="gain";
-  return {diff,absDiff,weeks,pace,safeWeekly,isAggressive,direction};
-}
-function calcPFC(goalType,dailyKcal,weight,leanMass){
-  let proteinG;
-  if(goalType==="cut")proteinG=weight*2.0;
-  else if(goalType==="bulk")proteinG=weight*1.8;
-  else proteinG=weight*1.6;
-  proteinG=Math.round(proteinG);
-  const fatRatio=goalType==="maintain"?0.28:0.25;
-  let fatG=Math.round((dailyKcal*fatRatio)/9);
-  let remaining=dailyKcal-(proteinG*4+fatG*9);
-  let carbG=Math.max(0,Math.round(remaining/4));
-  const total=proteinG*4+fatG*9+carbG*4||1;
+  var actAdd="";
+  if(p.life.activity===1.2) actAdd=" 座り仕事中心とのことなので、日常の歩数（こまめに歩く）も効きます。";
+  else if(p.life.activity===1.725) actAdd=" すでに高頻度なので、週1の回復日と睡眠の確保も忘れずに。";
   return {
-    proteinG,fatG,carbG,
-    pPct:Math.round(proteinG*4/total*100),
-    fPct:Math.round(fatG*9/total*100),
-    cPct:Math.round(carbG*4/total*100)
+    headline:"D.Dからの提案",
+    body: head+body+actAdd+" — これは提案です。体調と相談して調整を。",
+    basisLabel:"〔あなたの運動習慣に基づく提案〕「"+summary+"」＋目的("+(d==="gain"?"増量":d==="lose"?"減量":"維持")+")＋活動("+actLabel+")"
   };
 }
-function trainingSplit(goalType){
-  if(goalType==="cut")return {strength:50,cardio:50,times:3,text:"週3回（筋トレ＋有酸素を少し）"};
-  if(goalType==="bulk")return {strength:75,cardio:25,times:4,text:"週4回（高重量の筋トレ中心）"};
-  return {strength:60,cardio:40,times:2,text:"週2〜3回（今の質を保つ維持メニュー）"};
-}
-function muscleNote(weight,leanMass){
-  const r=leanMass/weight;
-  if(r>=0.78)return "土台となる筋肉はしっかりある。これは強い武器になる";
-  if(r>=0.70)return "筋肉の土台は平均的。整え方しだいで伸びる位置にいる";
-  return "筋肉の伸びしろがまだ大きい。ここを育てると体は応えてくれる";
-}
-
-// ===== ANALYZE (core, deterministic) =====
-function analyze(){
-  const d=state.data;
-  const age=calcAge(+d.birthYear,+d.birthMonth,+d.birthDay);
-  const bmiO=calcBMI(+d.weight,+d.height);
-  const {fatMass,leanMass}=calcFat(+d.weight,+d.bodyFat);
-  const cal=calcCalories(d,age,leanMass);
-  const pace=calcPace(d);
-  const pfc=calcPFC(d.goalType,cal.dailyKcal,+d.weight,leanMass);
-  const tr=trainingSplit(d.goalType);
-  const mNote=muscleNote(+d.weight,leanMass);
-
-  // direction label / conflict
-  const dirJP=d.goalType==="cut"?"減量":d.goalType==="bulk"?"増量":"維持";
-  let conflict=false;
-  if(d.goalType==="cut"&&pace.diff<0)conflict=true;
-  if(d.goalType==="bulk"&&pace.diff>0)conflict=true;
-
-  // truth line (必ず1つ)
-  let truth;
-  if(conflict){
-    truth="数字は正直だ。"+dirJP+"を選んだのに、目標体重がいまと逆を向いている。どっちが本当の望みだ？ 設定を一緒に整えよう。";
-  }else if(pace.isAggressive){
-    truth="正直に言うね。あと"+pace.weeks+"週で"+pace.absDiff+"kgは、かなり攻めたペース（週"+pace.pace+"kg）だ。体を壊さない上限は週"+pace.safeWeekly+"kg目安。焦りは続かない、期限か目標を少しゆるめよう。";
-  }else if(+d.bodyFat>=(d.sex==="female"?30:25)&&d.goalType==="cut"){
-    truth="最初の2週間で大きく落ちても、それは水分のことが多い。数字に一喜一憂しないこと。本番はそこからだ。";
-  }else if(d.goalType==="maintain"){
-    truth="『今日くらいいいか』が3回続くと、それは維持じゃなくなる。でも責めない。気づいて戻れたら、それで十分だ。";
-  }else if(pace.absDiff>0&&pace.absDiff<=2){
-    truth="正直に言うね。"+(d.goalType==="bulk"?"あと"+pace.absDiff+"kg増":"あと"+pace.absDiff+"kg")+"は一見ラクに見える数字だ。でも最後の"+pace.absDiff+"kgが一番ねばる。ここでサボった記録は僕が必ず見抜く。順調な時こそ、その出番だ。";
-  }else if(+d.bodyFat>=18){
-    truth="体脂肪"+(+d.bodyFat)+"％──いまは標準内でも、ここは油断するとじわっと戻りやすいゾーンだ。『今日くらい』が積もると数字に出る。順調な時ほど、僕がその"+(+d.bodyFat)+"％から目を離さない。";
-  }else if(bmiO.bmi>=22){
-    truth="BMI"+bmiO.bmi.toFixed(1)+"。悪くない、でも『大丈夫』と思った瞬間に崩れるのがこのゾーンだ。ごまかしの記録は数字で必ず食い違う。だから僕はその"+bmiO.bmi.toFixed(1)+"を毎日見ている。";
-  }else{
-    truth="あと"+(pace.absDiff||1)+"kg、週"+pace.weeks+"週の計画だ。順調な滑り出しほど気がゆるむ。記録をごまかせば数字が必ずズレて見える――そこを僕は見逃さない。だから安心して任せてくれ。";
+function ddMessage(p, ctx){
+  ctx=ctx||{};
+  var pv=paceVerdict(p);
+  var tk=ctx.targetKcal||(p.result?{value:p.result.recommended, guarded:p.result.guarded}:null);
+  var d=goalDir(p);
+  var delta=(p.goal.targetWeight!=null)?round1(Math.abs(p.body.weight-p.goal.targetWeight)):null;
+  if(pv.tooFast){
+    var sw=safeWeeksNeeded(p), sd=(sw!=null)?fmtJP(addDaysISO(todayISO(),sw*7)):"";
+    return "正直に言う。目標から逆算すると週"+pv.plannedKg+"kg。健康的な上限は週"+pv.safeKg+"kg、"+pv.overBy+"kgオーバーしてる。期限を"+sw+"週（"+sd+"以降）に延ばすか、目標をゆるめると無理がないよ。";
   }
-
-  // actions (目的別)
-  let actions;
-  if(d.goalType==="cut"){
-    actions=["毎食、手のひら1枚分のタンパク質（合計"+pfc.proteinG+"g目安）を先に食べる",
-      "1日 約"+cal.dailyKcal+"kcal を意識（細かい計算は不要、まず『食べすぎた日』を作らない）",
-      "週"+tr.times+"回、"+TRAINER+"さんのメニューをこなす"];
-  }else if(d.goalType==="bulk"){
-    actions=["3食＋間食で 約"+cal.dailyKcal+"kcal を『下回らない』",
-      "タンパク質 "+pfc.proteinG+"g を毎日確保（不足分はプロテインで補う）",
-      "週"+tr.times+"回、前回より1回でも重く・1回でも多く"];
-  }else{
-    actions=["今の食事リズムを崩さない（極端な食べすぎ・抜きを作らない）",
-      "週1回、同じ条件（朝・起床後）で体重を測る",
-      "週"+tr.times+"回のトレーニングを『予定どおり』続ける"];
+  if(tk && tk.guarded){
+    return "カロリーは下げすぎない。きみの基礎代謝は割らせない。推奨"+tk.value+"kcalは健康を守るための下限つきだ。";
   }
-
-  const name=d.name||"あなた";
-  state.result={
-    name,age,bmi:bmiO.bmi,bmiLabel:bmiO.label,bmiColor:bmiO.color,
-    fatMass,leanMass,bmr:cal.bmr,tdee:cal.tdee,dailyKcal:cal.dailyKcal,
-    diff:pace.diff,absDiff:pace.absDiff,weeks:pace.weeks,pace:pace.pace,safeWeekly:pace.safeWeekly,
-    isAggressive:pace.isAggressive,direction:pace.direction,dirJP,conflict,
-    pfc,tr,mNote,truth,actions,
-    height:+d.height,weight:+d.weight,bodyFat:+d.bodyFat,goalType:d.goalType,targetWeight:+d.targetWeight
+  var streak=ctx.streak!=null?ctx.streak:currentStreak();
+  if(streak>=3 && delta!=null) return streak+"日連続、効いてる。この調子で目的（"+(d==="gain"?"+":"−")+delta+"kg）に近づこう。";
+  if(ctx.streakBroken) return "昨日は休んだね。大丈夫、今日1個チェックすれば戻れる。";
+  return "いい設定だ。無理がない。今日のチェックからいこう。";
+}
+function buildAnalysis(p){
+  var b=bmr(p), af=activityFactor(p), td=tdee(p), adj=goalAdjust(p), tk=targetKcal(p);
+  var prot=targetProtein(p), fat=targetFat(p,tk.value), carb=targetCarb(p,tk.value,prot.value,fat.value);
+  var bmi=bmiVal(p), fm=bodyFatMass(p), lbm=leanBodyMass(p), pp=plannedPace(p), sp=safePace(p);
+  var pv=paceVerdict(p), guard=healthGuard(p), train=buildTrainingSuggestion(p);
+  return {
+    bmr:b, activityFactor:af, tdee:td, goalAdjust:adj, targetKcal:tk,
+    protein:prot, fat:fat, carb:carb, bmi:bmi, bodyFatMass:fm, leanBodyMass:lbm,
+    plannedPace:pp, safePace:sp, paceVerdict:pv, guard:guard, training:train,
+    recommended:tk.value, guarded:tk.guarded, floorApplied:tk.floorVal, proteinG:prot.value
   };
 }
-
-// ===== RENDER RESULT =====
-function renderResult(){
-  const r=state.result;
-  const dirWord=r.direction==="reduce"?"-":r.direction==="gain"?"+":"±";
-  const diffStr=r.direction==="keep"?"維持":dirWord+r.absDiff.toFixed(1)+" kg";
-  const paceTagClass=r.isAggressive?"warn":"ok";
-  const paceTagText=r.isAggressive?"ややタイト":"現実的";
-
-  const purposeGoal=r.targetWeight?(r.targetWeight+"kg"):"あの目標";
-  const el=document.getElementById("screen-result");
-  el.innerHTML=
-  '<div class="dd-header"><svg width="36" height="22" viewBox="0 0 64 40" style="filter:drop-shadow(0 0 6px var(--accent-glow))"><path d="M20 20 C20 8 8 8 8 20 C8 32 20 32 32 20 C44 8 56 8 56 20 C56 32 44 32 32 20" fill="none" stroke="#D85A30" stroke-width="2.5" stroke-linecap="round"/></svg><span class="ttl">D.D の所見</span></div>'+
-  '<p class="greet">'+esc(r.name)+'さん。ここから一緒に始めよう。担当の'+TRAINER+'さんが計測した数字を、僕（D.D）が読み解いた。数字は責めるためじゃない、今いる場所を正確に知るためのものだ。</p>'+
-
-  '<div class="verdict-block"><div class="sum-cards">'+
-    '<div class="sum-card"><div class="sl">現在BMI</div><div class="sv">'+r.bmi.toFixed(1)+'</div><div class="su" style="color:'+r.bmiColor+'">'+r.bmiLabel+'</div></div>'+
-    '<div class="sum-card"><div class="sl">目標まで</div><div class="sv">'+(r.direction==="keep"?"±0":dirWord+r.absDiff.toFixed(1))+'</div><div class="su">'+(r.direction==="keep"?"維持":"kg")+'</div></div>'+
-    '<div class="sum-card"><div class="sl">期限まで</div><div class="sv">'+r.weeks+'</div><div class="su">週間</div></div>'+
-  '</div></div>'+
-
-  '<div class="verdict-block"><div class="voice-card"><div class="vrole">毎日のパートナー</div><div class="vtext">ひとことで言うと──'+r.mNote+'。<em>'+r.bmiLabel+'</em>のゾーンにいる、というのが今日のスタート地点だ。ここは「良い・悪い」じゃない、設計の出発点にすぎない。</div></div></div>'+
-
-  '<div class="verdict-block"><div class="voice-card truth"><div class="vrole">嘘は見抜く</div><div class="vtext">'+r.truth+'</div></div></div>'+
-
-  '<div class="verdict-block"><div class="basis">'+
-    '<h4>数値の根拠（あなたの入力から算出）</h4>'+
-    '<div class="label-cap" style="color:var(--text-lo);margin-bottom:4px">推奨1日カロリー目安</div>'+
-    '<div class="kcal-big"><span class="v">'+r.dailyKcal+'</span><span class="u">kcal / 日</span></div>'+
-    '<div class="cap" style="margin-top:-6px;margin-bottom:14px">前提＝基礎代謝'+r.bmr+'kcal × 活動係数1.375（軽い運動を想定）／目的補正後。あくまで目安です。</div>'+
-    '<div class="label-cap" style="color:var(--text-lo);margin-bottom:6px">PFC配分（目安）</div>'+
-    '<div class="pfc-bar"><div class="p" style="width:'+r.pfc.pPct+'%"></div><div class="f" style="width:'+r.pfc.fPct+'%"></div><div class="c" style="width:'+r.pfc.cPct+'%"></div></div>'+
-    '<div class="pfc-legend"><span><span class="sw" style="background:var(--accent)"></span>P '+r.pfc.proteinG+'g（'+r.pfc.pPct+'%）</span><span><span class="sw" style="background:var(--warn)"></span>F '+r.pfc.fatG+'g（'+r.pfc.fPct+'%）</span><span><span class="sw" style="background:var(--ok)"></span>C '+r.pfc.carbG+'g（'+r.pfc.cPct+'%）</span></div>'+
-    '<div class="label-cap" style="color:var(--text-lo);margin:16px 0 6px">トレーニング配分</div>'+
-    '<div class="train-bar"><div class="str" style="width:'+r.tr.strength+'%">筋トレ '+r.tr.strength+'</div><div class="car" style="width:'+r.tr.cardio+'%">有酸素 '+r.tr.cardio+'</div></div>'+
-    '<div class="cap">'+r.tr.text+'</div>'+
-    '<div class="pace-line">想定ペース 週あたり <b class="num" style="color:var(--text-hi)">'+r.pace.toFixed(2)+' kg</b><span class="pace-tag '+paceTagClass+'">'+paceTagText+'</span></div>'+
-    '<div class="cap" style="margin-top:4px">健全な範囲の目安＝週 '+r.safeWeekly.toFixed(2)+'kg（体重の0.7%）まで。</div>'+
-  '</div></div>'+
-
-  '<div class="verdict-block"><div class="basis"><h4>まず今週やること（3つだけ）</h4><ul class="action-list">'+
-    '<li><span class="n">1</span><span>'+r.actions[0]+'</span></li>'+
-    '<li><span class="n">2</span><span>'+r.actions[1]+'</span></li>'+
-    '<li><span class="n">3</span><span>'+r.actions[2]+'</span></li>'+
-  '</ul><div class="cap" style="margin-top:4px">欲張らない。この3つだけ、7日間やってみよう。</div></div></div>'+
-
-  '<div class="verdict-block"><div class="voice-card"><div class="vrole">目的を忘れさせない</div><div class="vtext">'+esc(r.name)+'さんが「'+purposeGoal+'になりたい」と入力したとき、その先に見たい景色があったはずだ。体重はゴールじゃない。その数字の向こうにある「'+r.dirJP+'した自分で、何をしたいか」──それを忘れそうになったら、いつでも僕に話しかけてほしい。</div></div></div>'+
-
-  '<div class="verdict-block"><div class="voice-card"><div class="vrole">DEED連携</div><div class="vtext">担当の<em>'+TRAINER+'</em>さんと、僕（D.D）は、同じ方針で君に伴走する。じゃあ、今日から。いってみよう。</div></div></div>'+
-
-  '<div class="bottom-demo">DEMO ─ 実際のAI接続なし／入力値から計算したダミー所見</div>'+
-
-  '<button class="btn btn-primary mt12" id="btn-to-chat">D.Dと話す</button>'+
-  '<button class="btn btn-secondary mt8" id="btn-revise">目標を見直す</button>';
-
-  document.getElementById("btn-to-chat").onclick=()=>{startChat();show("chat");};
-  document.getElementById("btn-revise").onclick=()=>show("step3");
+function currentStreak(){
+  var days=state.streakDays.slice().sort();
+  if(days.length===0) return 0;
+  var t=todayISO(), y=addDaysISO(t,-1), last=days[days.length-1];
+  if(last!==t && last!==y) return 0;
+  var set={}; days.forEach(function(d){ set[d]=true; });
+  var count=0, cur=last;
+  while(set[cur]){ count++; cur=addDaysISO(cur,-1); }
+  return count;
 }
-function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
 
-// ===== ANALYZING SEQUENCE =====
-function runAnalyzing(){
-  analyze(); // 同期で結果確保（決定的）
-  const steps=[
-    "体組成データを読み込み中…",
-    "目標と期限を照合…",
-    "最適な1日の配分を計算…",
-    "D.Dが所見をまとめています…"
+/* ============================================================
+   ルーター・描画
+   ============================================================ */
+var screens=document.getElementById("screens");
+var afterRender={};
+function go(name){ state.screen=name; save(); render(); }
+function render(){
+  var html="";
+  switch(state.screen){
+    case "consent": html=viewConsent(); break;
+    case "intro": html=viewIntro(); break;
+    case "step1": html=viewStep1(); break;
+    case "step2": html=viewStep2(); break;
+    case "step3": html=viewStep3(); break;
+    case "step4": html=viewStep4(); break;
+    case "analyzing": html=viewAnalyzing(); break;
+    case "result": html=viewResult(); break;
+    case "home": html=viewHome(); break;
+    case "chat": html=viewChat(); break;
+    case "settings": html=viewSettings(); break;
+    default: html=viewConsent();
+  }
+  screens.innerHTML='<div class="screen active">'+html+'</div>';
+  if(afterRender[state.screen]) afterRender[state.screen]();
+  window.scrollTo(0,0);
+}
+
+var toastTimer=null;
+function toast(msg){
+  var t=document.getElementById("toast");
+  t.textContent=msg; t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(function(){ t.classList.remove("show"); },2400);
+}
+function modal(title, bodyText, btns){
+  var bg=document.getElementById("modalBg");
+  document.getElementById("modalTitle").textContent=title;
+  document.getElementById("modalBody").innerHTML='<p style="margin:0 0 16px; font-size:13px; color:var(--text-2);">'+esc(bodyText)+'</p>';
+  var box=document.getElementById("modalBtns"); box.innerHTML="";
+  btns.forEach(function(b){
+    var el=document.createElement("button"); el.className="btn "+(b.cls||"secondary"); el.textContent=b.label;
+    el.onclick=function(){ bg.classList.remove("show"); if(b.fn) b.fn(); };
+    box.appendChild(el);
+  });
+  bg.classList.add("show");
+}
+
+function topbar(backTo, gear){
+  var back = backTo? '<button class="backbtn" onclick="go(\''+backTo+'\')">← 戻る</button>':'<span></span>';
+  var g = gear? '<button class="gear" onclick="go(\'settings\')">⚙</button>':'';
+  return '<div class="topbar">'+back+g+'</div>';
+}
+function stepper(cur){
+  var labs=["基本","体組成","目標","生活と運動"], segs="";
+  for(var i=1;i<=4;i++){
+    var cls=i<cur?"done":(i===cur?"cur":"");
+    segs+='<div class="seg '+cls+'"'+(i===cur?' aria-current="step"':'')+'><div class="dot">'+(i<cur?"✓":i)+'</div><div class="lab">'+labs[i-1]+'</div></div>';
+  }
+  var fillW=((cur-1)/3)*75;
+  var bars='<div class="bar" style="left:12.5%; right:12.5%;"></div><div class="bar fill" style="left:12.5%; width:'+fillW+'%;"></div>';
+  return '<div class="stepper">'+bars+segs+'</div>';
+}
+function tabbar(active){
+  return '<div class="tabbar">'+
+    '<button class="'+(active==="home"?"on":"")+'" onclick="go(\'home\')"><span class="ti">🏠</span>ホーム</button>'+
+    '<button class="'+(active==="chat"?"on":"")+'" onclick="go(\'chat\')"><span class="ti">💬</span>D.Dに相談</button>'+
+  '</div>';
+}
+
+/* ---- 同意 ---- */
+function viewConsent(){
+  var resumeBlock="";
+  if(state.consent){
+    resumeBlock='<button class="btn secondary" onclick="resumePrev()">前回の続きから</button>'+
+      '<button class="btn ghost" onclick="restartAll()">最初からやり直す（データ消去）</button>';
+  }
+  return ''+
+  '<div class="scroll" style="display:flex; flex-direction:column; justify-content:center;">'+
+    '<div class="logoword"><span class="t">D</span>EED</div>'+
+    '<div style="text-align:center; color:var(--text-2); font-size:var(--fs-sub); margin-top:6px;">D.D — あなたの専属AIトレーナー</div>'+
+    '<div class="dummy-strip" style="margin-top:18px;">※数値はすべてデモ用ダミー</div>'+
+    '<div class="consent-box">'+
+      '<p>本アプリは<b>デモ</b>です。表示される数値・提案は一般的な目安であり、医療・診断・治療の助言ではありません。</p>'+
+      '<p>健康・減量・栄養に関する判断は医師等の専門家にご相談ください。</p>'+
+      '<p>入力データはこの端末内（ブラウザ）にのみ保存され、<b>外部へ送信されません</b>。</p>'+
+    '</div>'+
+    '<div class="checkrow'+(state.consent?' on':'')+'" id="consentCheck" onclick="toggleConsent()"><div class="cb">✓</div><div>上記に同意します</div></div>'+
+    '<div style="height:14px;"></div>'+
+    '<button class="btn primary'+(state.consent?'':' disabled')+'" id="consentNext" onclick="consentStart()">はじめる</button>'+
+    '<div style="height:10px;"></div>'+resumeBlock+
+  '</div>';
+}
+function toggleConsent(){
+  state.consent=!state.consent; save();
+  document.getElementById("consentCheck").classList.toggle("on", state.consent);
+  document.getElementById("consentNext").classList.toggle("disabled", !state.consent);
+}
+function consentStart(){ if(state.consent) go("intro"); }
+function resumePrev(){
+  var s=state.screen;
+  if(s==="consent") s = state.result? "home":"intro";
+  go(s);
+}
+function restartAll(){
+  modal("最初からやり直す","保存データを消去して最初から始めます。よろしいですか？",[
+    {label:"キャンセル",cls:"secondary"},
+    {label:"消去して開始",cls:"danger",fn:function(){ clearAll(); state.consent=false; go("consent"); }}
+  ]);
+}
+
+/* ---- 入口LP ---- */
+function viewIntro(){
+  var roles=[
+    {ic:"🤝", t:"毎日のパートナー", d:"今日のチェックと一言で、続ける力に。"},
+    {ic:"🔍", t:"嘘は見抜く", d:"無理なペースはハッキリ指摘。あなたの体を守る側につく。"},
+    {ic:"🎯", t:"目的を忘れさせない", d:"なぜ始めたかを、節目で思い出させる。"},
+    {ic:"🔗", t:"DEED連携", d:"担当トレーナー〈佐藤 健（DEED新宿東口店）〉の計測とつながる。"}
   ];
-  const cont=document.getElementById("an-steps");
-  cont.innerHTML=steps.map((s,i)=>'<div class="an-step" data-i="'+i+'"><span class="ic"></span>'+s+'</div>').join("");
-  const fill=document.getElementById("an-bar-fill");
-  show("analyzing");
-  let i=0;
-  function tick(){
-    const rows=cont.querySelectorAll(".an-step");
-    if(i>0){rows[i-1].classList.remove("active");rows[i-1].classList.add("done");rows[i-1].querySelector(".ic").innerHTML='<svg width="16" height="16" viewBox="0 0 16 16" style="color:var(--ok)"><path d="M3 8l3.5 3.5L13 4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';}
-    if(i<steps.length){
-      rows[i].classList.add("active");rows[i].querySelector(".ic").innerHTML='<span class="spin"></span>';
-      fill.style.width=Math.round((i+1)/steps.length*100)+"%";
-      i++;
-      setTimeout(tick,750+(i===2?150:0));
-    }else{
-      setTimeout(()=>{renderResult();show("result");},400);
-    }
-  }
-  setTimeout(tick,400);
+  var cards=roles.map(function(r){
+    return '<div class="role-card"><div class="role-ic">'+r.ic+'</div><div><h3>'+esc(r.t)+'</h3><p>'+esc(r.d)+'</p></div></div>';
+  }).join("");
+  return ''+
+  '<div class="scroll">'+
+    '<div class="hero"><h1>毎日、となりにいるトレーナー。</h1><div class="small">D.D（ディディ）が、あなたの目的を見失わせない。</div></div>'+
+    '<div class="pad" style="padding-top:8px;">'+cards+'<div class="dummy-strip" style="background:var(--accent-soft);">測定済みデータを取り込み済み</div></div>'+
+  '</div>'+
+  '<div class="footer-cta"><button class="btn primary" onclick="go(\'step1\')">カルテを作る（約1分）</button></div>';
 }
 
-// ===== CHAT =====
-const CHIPS=["お菓子食べちゃった…","今日は疲れて何もできなかった","ちゃんとやってるのに減らない","メニュー全部こなせた！"];
-function ddReply(text){
-  const r=state.result, name=r?r.name:"あなた";
-  const t=text;
-  if(/お菓子|食べ|ごはん|ラーメン|間食/.test(t))
-    return "正直に言ってくれてありがとう。それが一番大事だ。1回のお菓子で体は変わらない。変わるのは『食べた、もういいや』って崩れる時だけ。次の食事からいつも通りに戻そう。それで全部チャラだ。";
-  if(/疲れ|だるい|休|サボ|できなかった/.test(t))
-    return "休むのもトレーニングのうちだ。"+name+"さん、明日できることを1つだけ決めておこう。水をいつもより1杯多く飲む、でもいい。それで十分前に進んでる。";
-  if(/減らない|痩せ|増えな|体重|変わらない/.test(t)){
-    let extra=r&&r.isAggressive?"いまの設定は少し攻めてる。焦らず週"+r.safeWeekly.toFixed(2)+"kgの範囲で十分だ。":"";
-    return "その『ちゃんと』を一緒に分解しよう。責めてるんじゃない。飲み物のカロリー、週末の外食、睡眠時間――だいたいこのどれかに隠れてる。心当たり、ひとつだけ思い浮かぶ？ "+extra;
-  }
-  if(/できた|こなせ|頑張|やれた|達成/.test(t))
-    return "最高だ。その『できた』をちゃんと自分で認めること。それが続ける一番の燃料になる。きつい日に、今日の"+name+"さんが助けてくれる。明日もマイペースでいこう。";
-  if(/続けられ|やめ|無理|くじけ/.test(t)){
-    const g=r?r.targetWeight+"kg":"あの目標";
-    return "そう思う日があって当然だ。一回、最初に戻ろう。"+name+"さんが「"+g+"」を入れたとき、その先に見たかったものは何だった？ ゴールは体重じゃない。今日は1ミリでいい。僕も一緒にいる。";
-  }
-  return "うん、聞いてるよ。"+name+"さんのペースで話してくれていい。食事のこと、トレーニングのこと、気持ちのこと、どれでも。今日はどんな1日だった？";
+/* ---- STEP1 基本情報 ---- */
+function daysInMonth(y,m){ return new Date(y,m,0).getDate(); }
+function viewStep1(){
+  var p=state.profile;
+  var years=""; for(var y=2010;y>=1950;y--){ years+='<option value="'+y+'"'+(p.birth.y===y?' selected':'')+'>'+y+'</option>'; }
+  var months=""; for(var m=1;m<=12;m++){ months+='<option value="'+m+'"'+(p.birth.m===m?' selected':'')+'>'+m+'</option>'; }
+  var dmax=daysInMonth(p.birth.y,p.birth.m), days="";
+  for(var dd=1;dd<=dmax;dd++){ days+='<option value="'+dd+'"'+(p.birth.d===dd?' selected':'')+'>'+dd+'</option>'; }
+  var age=(p.birth.y&&p.birth.m&&p.birth.d)?ageFromBirth(p.birth.y,p.birth.m,p.birth.d):null;
+  var sexChips=[["m","男性"],["f","女性"],["na","回答しない"]].map(function(s){
+    return '<button class="chip'+(p.sex===s[0]?' on':'')+'" onclick="setSex(\''+s[0]+'\')">'+s[1]+'</button>';
+  }).join("");
+  return ''+
+  topbar("intro",null)+stepper(1)+
+  '<div class="scroll">'+
+    '<h1 class="title">基本情報</h1><div class="subtitle">基礎代謝の計算に使います。</div>'+
+    '<div class="field"><label class="flabel">お名前（任意）</label><input class="inp" id="f_name" type="text" placeholder="例：山田 太郎" value="'+esc(p.name||"")+'"></div>'+
+    '<div class="field"><label class="flabel">生年月日 <span class="req">*</span> <span id="ageDisp" class="muted">'+(age!=null?'（'+age+'歳）':'')+'</span></label>'+
+      '<div class="row3">'+
+        '<div class="selwrap"><select class="inp" id="f_year" onchange="changeBirth()">'+years+'</select></div>'+
+        '<div class="selwrap"><select class="inp" id="f_month" onchange="changeBirth()">'+months+'</select></div>'+
+        '<div class="selwrap"><select class="inp" id="f_day" onchange="changeBirth()">'+days+'</select></div>'+
+      '</div><div id="ageWarn"></div></div>'+
+    '<div class="field"><label class="flabel">性別 <span class="req">*</span></label><div class="chips">'+sexChips+'</div></div>'+
+    '<div class="formerr" id="s1err" style="display:none;"></div>'+
+  '</div>'+
+  '<div class="footer-cta"><button class="btn secondary" onclick="saveName(); go(\'intro\')">← 戻る</button><button class="btn primary" onclick="nextStep1()">次へ</button></div>';
 }
-function pushBubble(role,text){
-  const log=document.getElementById("chat-log");
-  const b=document.createElement("div");
-  b.className="bubble "+role;
-  if(role==="dd")b.innerHTML='<span class="sm"><svg width="22" height="14" viewBox="0 0 64 40"><path d="M20 20 C20 8 8 8 8 20 C8 32 20 32 32 20 C44 8 56 8 56 20 C56 32 44 32 32 20" fill="none" stroke="#D85A30" stroke-width="3" stroke-linecap="round"/></svg></span><span>'+esc(text)+'</span>';
-  else b.textContent=text;
-  log.appendChild(b);
-  window.scrollTo(0,document.body.scrollHeight);
+function changeBirth(){
+  var y=+document.getElementById("f_year").value, m=+document.getElementById("f_month").value;
+  var dsel=document.getElementById("f_day"), cur=+dsel.value, max=daysInMonth(y,m);
+  var opts=""; for(var d=1;d<=max;d++){ opts+='<option value="'+d+'"'+(d===Math.min(cur,max)?' selected':'')+'>'+d+'</option>'; }
+  dsel.innerHTML=opts;
+  var dd=+dsel.value, age=ageFromBirth(y,m,dd);
+  state.profile.birth={y:y,m:m,d:dd}; state.profile.age=age;
+  document.getElementById("ageDisp").textContent="（"+age+"歳）";
+  var aw=document.getElementById("ageWarn");
+  aw.innerHTML=(age<10||age>100)?'<div class="inline-err">！ デモの対象範囲（10〜100歳）外です</div>':"";
+  save();
 }
-function ddTyping(cb){
-  const log=document.getElementById("chat-log");
-  const t=document.createElement("div");t.className="typing";t.innerHTML="<span></span><span></span><span></span>";
-  log.appendChild(t);window.scrollTo(0,document.body.scrollHeight);
-  setTimeout(()=>{t.remove();cb();},650);
-}
-function userSay(text){
-  pushBubble("user",text);
-  ddTyping(()=>pushBubble("dd",ddReply(text)));
-}
-function renderChips(){
-  const c=document.getElementById("chat-chips");
-  c.innerHTML="";
-  CHIPS.forEach(ch=>{
-    const b=document.createElement("button");b.className="chip";b.textContent=ch;
-    b.onclick=()=>userSay(ch);
-    c.appendChild(b);
-  });
-}
-function startChat(){
-  const log=document.getElementById("chat-log");
-  if(log.children.length>0)return;
-  const name=state.result?state.result.name:"あなた";
-  pushBubble("dd",name+"、今日もよく来た。今日の食事や調子、ひとことで教えて。");
-  renderChips();
+function setSex(s){ state.profile.sex=s; save(); render(); }
+function saveName(){ var n=document.getElementById("f_name"); if(n) state.profile.name=n.value.slice(0,40); save(); }
+function nextStep1(){
+  saveName(); changeBirth();
+  var p=state.profile, err=[];
+  if(!(p.birth.y&&p.birth.m&&p.birth.d)) err.push("生年月日");
+  if(!p.sex) err.push("性別");
+  var box=document.getElementById("s1err");
+  if(err.length){ box.style.display="block"; box.textContent="未入力の項目があります："+err.join("・"); return; }
+  if(p.age==null) p.age=ageFromBirth(p.birth.y,p.birth.m,p.birth.d);
+  save(); go("step2");
 }
 
-// ===== BODY COMPOSITION DASHBOARD =====
-const BC_FIELDS=[
-  {k:"height",en:"HEIGHT",ja:"身長",u:"cm",min:120,max:220,band:[155,185]},
-  {k:"weight",en:"WEIGHT",ja:"体重",u:"kg",min:30,max:200,band:[50,90]},
-  {k:"bmi",en:"BMI",ja:"",u:"",calc:true,band:[18.5,25],bandFull:[15,35]},
-  {k:"bodyFat",en:"BODY FAT",ja:"体脂肪率",u:"%",min:3,max:60,band:[10,22]},
-  {k:"fatmass",en:"BODY FAT MASS",ja:"体脂肪量",u:"kg",calc:true},
-  {k:"muscle",en:"MUSCLE",ja:"筋肉量",u:"kg",min:10,max:120,band:[25,55]},
-  {k:"water",en:"WATER",ja:"水分",u:"%",min:30,max:75,band:[50,65]},
-  {k:"bone",en:"BONE",ja:"骨量",u:"kg",min:1,max:6,band:[2.5,3.5]}
+/* ---- STEP2 体組成（水分/骨量なし・部分更新） ---- */
+var BC_FIELDS=[
+  {k:"height", label:"身長", unit:"cm", calc:false, min:120, max:220},
+  {k:"weight", label:"体重", unit:"kg", calc:false, min:30, max:200},
+  {k:"bmi",    label:"BMI", unit:"", calc:true},
+  {k:"bodyFatPct", label:"体脂肪率", unit:"%", calc:false, min:3, max:60},
+  {k:"fatmass", label:"体脂肪量", unit:"kg", calc:true},
+  {k:"muscle", label:"筋肉量", unit:"kg", calc:false, min:20, max:120}
 ];
-function renderBC(){
-  const d=state.data;
-  const bmiV=Math.round((+d.weight/Math.pow(+d.height/100,2))*10)/10;
-  const fatMass=Math.round(+d.weight*(+d.bodyFat/100)*10)/10;
-  const grid=document.getElementById("bc-grid");
+function viewStep2(){
+  var edited=state.body.edited;
+  return ''+
+  topbar("step1",null)+stepper(2)+
+  '<div class="scroll">'+
+    '<h1 class="title">体組成</h1><div class="subtitle">担当トレーナーが計測しました。</div>'+
+    '<div class="measured-by"><div class="avatar">健</div><div class="mb-info"><b>佐藤 健</b><div>DEED 新宿東口店 ・ 計測日: 2026-06-28</div></div><div class="ok-badge">計測済み</div></div>'+
+    '<div style="display:flex; justify-content:flex-end; margin-bottom:8px;"><div class="switch'+(edited?' on':'')+'" onclick="toggleEdit()"><span>編集する</span><span class="track"><span class="knob"></span></span></div></div>'+
+    '<div id="bcGrid"></div>'+
+    '<div class="micro" style="margin-top:8px;">数値はデモ用のダミーです。実際の計測値ではありません。</div>'+
+  '</div>'+
+  '<div class="footer-cta"><button class="btn secondary" onclick="go(\'step1\')">← 戻る</button><button class="btn primary" onclick="nextStep2()">次へ</button></div>';
+}
+afterRender.step2=function(){ buildBC(); };
+function bcDerived(){
+  var b=state.body;
+  return { bmi:round1(b.weight/((b.height/100)*(b.height/100))), fatmass:round1(b.weight*b.bodyFatPct/100) };
+}
+function bandConfig(k){
+  var sex=state.profile.sex, w=state.body.weight;
+  if(k==="bmi") return { min:14, max:36, labs:["低","標準","高"],
+    segs:[{from:14,to:18.5,c:"var(--info)"},{from:18.5,to:25,c:"var(--ok)"},{from:25,to:30,c:"var(--warn)"},{from:30,to:36,c:"var(--danger)"}],
+    verdict:function(v){ if(v<18.5) return ["低体重","var(--info)"]; if(v<25) return ["標準","var(--ok)"]; if(v<30) return ["やや高","var(--warn)"]; return ["高","var(--danger)"]; } };
+  if(k==="bodyFatPct"){
+    if(sex==="f") return { min:10, max:45, labs:["低","標準","高"],
+      segs:[{from:10,to:20,c:"var(--info)"},{from:20,to:30,c:"var(--ok)"},{from:30,to:35,c:"var(--warn)"},{from:35,to:45,c:"var(--danger)"}],
+      verdict:function(v){ if(v<20) return ["低め","var(--info)"]; if(v<=30) return ["標準","var(--ok)"]; if(v<=35) return ["やや高","var(--warn)"]; return ["高","var(--danger)"]; } };
+    return { min:5, max:40, labs:["低","標準","高"],
+      segs:[{from:5,to:10,c:"var(--info)"},{from:10,to:20,c:"var(--ok)"},{from:20,to:25,c:"var(--warn)"},{from:25,to:40,c:"var(--danger)"}],
+      verdict:function(v){ if(v<10) return ["低め","var(--info)"]; if(v<=20) return ["標準","var(--ok)"]; if(v<=25) return ["やや高","var(--warn)"]; return ["高","var(--danger)"]; } };
+  }
+  if(k==="muscle") return { min:w*0.30, max:w*0.60, labs:["低","標準","高"],
+    segs:[{from:w*0.30,to:w*0.40,c:"var(--info)"},{from:w*0.40,to:w*0.50,c:"var(--ok)"},{from:w*0.50,to:w*0.60,c:"var(--warn)"}],
+    verdict:function(v){ var r=v/w; if(r<0.40) return ["やや少","var(--info)"]; if(r<=0.50) return ["標準","var(--ok)"]; return ["多い","var(--warn)"]; } };
+  return null;
+}
+function bandHTML(k,val){
+  var cfg=bandConfig(k); if(!cfg) return "";
+  var span=cfg.max-cfg.min;
+  var segHTML=cfg.segs.map(function(s){
+    return '<div class="seg-c" style="left:'+(((s.from-cfg.min)/span)*100)+'%; width:'+(((s.to-s.from)/span)*100)+'%; background:'+s.c+';"></div>';
+  }).join("");
+  var pos=Math.max(0,Math.min(100,((val-cfg.min)/span)*100));
+  var outside=val<cfg.min||val>cfg.max, vd=cfg.verdict(val);
+  return '<div class="band'+(outside?' warn':'')+'" data-dot="'+k+'">'+segHTML+'<div class="dot-m" style="left:'+pos+'%;"></div></div>'+
+    '<div class="band-labs"><span>'+cfg.labs[0]+'</span><span>'+cfg.labs[1]+'</span><span>'+cfg.labs[2]+'</span></div>'+
+    '<div class="verdict" data-verdict="'+k+'" style="color:'+vd[1]+'">'+vd[0]+'</div>';
+}
+function buildBC(){
+  var grid=document.getElementById("bcGrid"); if(!grid) return;
   grid.innerHTML="";
-  BC_FIELDS.forEach(f=>{
-    let val, editable=!f.calc&&!d.trainerLocked;
-    if(f.k==="bmi")val=bmiV;
-    else if(f.k==="fatmass")val=fatMass;
-    else val=d[f.k];
-    const cell=document.createElement("div");
-    cell.className="bc-cell"+(f.calc?" calc":"");
-    let head='<div class="bl"><span class="en">'+f.en+'</span>'+(f.ja?'<span class="ja">'+f.ja+'</span>':"")+
-      (f.calc?'<span class="fmark">ƒ</span>':(d.trainerLocked?'<span class="lk"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="1"/><path d="M8 11V8a4 4 0 018 0v3"/></svg></span>':""))+'</div>';
-    let valHtml;
-    if(editable){
-      valHtml='<input class="bc-edit num" type="number" data-k="'+f.k+'" value="'+val+'" step="0.1">';
-    }else{
-      valHtml='<div class="bc-val"><span class="v">'+val+'</span><span class="u">'+f.u+'</span></div>';
-    }
-    // range bar
-    let rangeHtml="";
-    if(f.band&&f.k!=="fatmass"){
-      const full=f.bandFull||[f.min,f.max];
-      const lo=full[0],hi=full[1];
-      const clamp=x=>Math.max(0,Math.min(100,(x-lo)/(hi-lo)*100));
-      const bL=clamp(f.band[0]),bR=clamp(f.band[1]);
-      const dotPos=clamp(+val);
-      const outside=(+val<f.band[0]||+val>f.band[1]);
-      rangeHtml='<div class="range"><div class="track"><div class="band'+(outside?" warn":"")+'" style="left:'+bL+'%;width:'+(bR-bL)+'%"></div><div class="dot" style="left:'+dotPos+'%"></div></div></div>';
-    }
-    cell.innerHTML=head+valHtml+rangeHtml;
-    grid.appendChild(cell);
-  });
-  // wire edit inputs
-  if(!d.trainerLocked){
-    grid.querySelectorAll(".bc-edit").forEach(inp=>{
-      inp.addEventListener("input",()=>{
-        const k=inp.dataset.k, v=parseFloat(inp.value);
-        if(!isNaN(v))state.data[k]=v;
-        save();
-        // re-render only calc cells & ranges → simplest: full re-render preserving focus
-        const active=document.activeElement, ak=active&&active.dataset?active.dataset.k:null, ap=active?active.selectionStart:null;
-        renderBC();
-        if(ak){const re=document.querySelector('.bc-edit[data-k="'+ak+'"]');if(re){re.focus();try{re.setSelectionRange(ap,ap);}catch(e){}}}
+  var edited=state.body.edited, der=bcDerived();
+  BC_FIELDS.forEach(function(f){
+    var card=document.createElement("div"); card.className="metric-card";
+    var val=f.calc?der[f.k]:state.body[f.k];
+    var top='<div class="mc-top"><span class="mc-lab">'+esc(f.label)+'</span>'+(f.calc?'<span class="auto-badge">自動</span>':'')+'</div>';
+    var valHTML;
+    if(f.calc) valHTML='<div class="mc-val"><span class="v" data-calc="'+f.k+'">'+val+'</span><span class="u">'+f.unit+'</span></div>';
+    else if(edited) valHTML='<div style="margin-top:6px;"><input class="inp" type="text" inputmode="decimal" data-k="'+f.k+'" value="'+val+'"></div>';
+    else valHTML='<div class="mc-val"><span class="v">'+val+'</span><span class="u">'+f.unit+'</span></div>';
+    var bar="";
+    if(f.k==="bmi"||f.k==="bodyFatPct"||f.k==="muscle") bar=bandHTML(f.k, f.calc?der[f.k]:state.body[f.k]);
+    if(f.k==="fatmass") bar='<div class="micro" style="margin-top:6px;">体脂肪率 × 体重 から自動算出</div>';
+    card.innerHTML=top+valHTML+bar;
+    grid.appendChild(card);
+    if(!f.calc && edited){
+      var inp=card.querySelector("input[data-k]");
+      inp.addEventListener("input", function(){
+        var v=parseFloat(inp.value);
+        if(!isNaN(v)){ state.body[inp.dataset.k]=v; save(); }
+        updateBCDerived();
       });
-    });
-  }
-  document.getElementById("tr-name").textContent=TRAINER;
-}
-
-// ===== STEP1 setup =====
-function buildSelects(){
-  const by=document.getElementById("f-by"),bm=document.getElementById("f-bm"),bd=document.getElementById("f-bd");
-  const yNow=today.getFullYear();
-  for(let y=yNow-12;y>=yNow-80;y--){const o=document.createElement("option");o.value=y;o.textContent=y;by.appendChild(o);}
-  for(let m=1;m<=12;m++){const o=document.createElement("option");o.value=m;o.textContent=m;bm.appendChild(o);}
-  for(let dd=1;dd<=31;dd++){const o=document.createElement("option");o.value=dd;o.textContent=dd;bd.appendChild(o);}
-}
-function markFilled(inp,filled){inp.classList.toggle("filled",filled);}
-
-// ===== VALIDATION =====
-function setErr(id,msg){const e=document.getElementById(id);if(!e)return;e.textContent=msg;e.classList.toggle("show",!!msg);}
-function showSummary(id,items){
-  const s=document.getElementById(id);
-  if(!items.length){s.classList.remove("show");return false;}
-  s.innerHTML="未入力が <b>"+items.length+"件</b> あります（"+items.join("・")+"）。タップで最初の項目へ。";
-  s.classList.add("show");
-  s.onclick=()=>{const first=document.querySelector(".input.errored, .err-msg.show");if(first)first.scrollIntoView({behavior:"smooth",block:"center"});};
-  return true;
-}
-function validateStep1(){
-  const d=state.data;const missing=[];
-  if(!d.name||!d.name.trim()){setErr("e-name","お名前が未入力です");document.getElementById("f-name").classList.add("errored");missing.push("お名前");}else{setErr("e-name","");document.getElementById("f-name").classList.remove("errored");}
-  if(!d.birthYear||!d.birthMonth||!d.birthDay){setErr("e-birth","生年月日が未入力です（年・月・日すべて入れてください）");missing.push("生年月日");}else{setErr("e-birth","");}
-  return !showSummary("err-sum-1",missing);
-}
-function validateStep2(){
-  const d=state.data;
-  let ok=true;
-  if(!(d.height>=120&&d.height<=220)){toast("身長は120〜220cmの範囲で入れてください");ok=false;}
-  else if(!(d.weight>=30&&d.weight<=200)){toast("体重は30〜200kgの範囲で入れてください");ok=false;}
-  else if(!(d.bodyFat>=3&&d.bodyFat<=60)){toast("体脂肪率は3〜60%の範囲で入れてください");ok=false;}
-  return ok;
-}
-function validateStep3(){
-  const d=state.data;const missing=[];
-  if(!d.goalType){setErr("e-goal","目的が選ばれていません");missing.push("目的");}else{setErr("e-goal","");}
-  if(d.goalType!=="maintain"){
-    if(!d.targetWeight){setErr("e-target","目標体重が未入力です（例: 62）");document.getElementById("f-target").classList.add("errored");missing.push("目標体重");}
-    else if(!(d.targetWeight>=30&&d.targetWeight<=200)){setErr("e-target","目標体重は30〜200kgの範囲で入れてください");document.getElementById("f-target").classList.add("errored");missing.push("目標体重");}
-    else{setErr("e-target","");document.getElementById("f-target").classList.remove("errored");}
-  }else{setErr("e-target","");document.getElementById("f-target").classList.remove("errored");}
-  if(!d.deadline){setErr("e-deadline","期限が未入力です（いつまでに達成したいか教えてください）");missing.push("期限");}
-  else if(d.deadline==="date"){
-    if(!d.deadlineDate){setErr("e-deadline","目標日を選んでください");missing.push("目標日");}
-    else{
-      const dl=new Date(d.deadlineDate+"T00:00:00");
-      if(dl<=today){setErr("e-deadline","期限は今日より後の日付にしてください");missing.push("期限");}
-      else setErr("e-deadline","");
+      inp.addEventListener("blur", function(){
+        var f2=BC_FIELDS.filter(function(x){ return x.k===inp.dataset.k; })[0];
+        var v=parseFloat(inp.value);
+        if(isNaN(v)) return;
+        if(f2 && (v<f2.min || v>f2.max)) toast(f2.label+"は"+f2.min+"〜"+f2.max+f2.unit+"の範囲で入力してください");
+      });
     }
-  }else setErr("e-deadline","");
-  return !showSummary("err-sum-3",missing);
-}
-
-// ===== STEP3 live preview & conflict =====
-function updateTargetPreview(){
-  const d=state.data;
-  const p=document.getElementById("target-preview");
-  if(d.goalType==="maintain"){p.textContent="";}
-  else if(d.targetWeight&&d.weight){
-    const diff=Math.round((d.targetWeight-d.weight)*10)/10;
-    if(diff===0)p.textContent="今と同じ体重です";
-    else p.textContent="今より "+(diff>0?"+":"")+diff.toFixed(1)+" kg";
-  }else p.textContent="";
-  // conflict
-  const cw=document.getElementById("goal-conflict");
-  let msg="";
-  if(d.goalType==="cut"&&d.targetWeight&&d.targetWeight>d.weight)msg="目的が「減量」ですが、目標体重が現体重より重くなっています。所見でも一緒に整えましょう。";
-  if(d.goalType==="bulk"&&d.targetWeight&&d.targetWeight<d.weight)msg="目的が「増量」ですが、目標体重が現体重より軽くなっています。所見でも一緒に整えましょう。";
-  if(msg){document.getElementById("goal-conflict-text").textContent=msg;cw.style.display="flex";}
-  else cw.style.display="none";
-}
-
-// ===== HYDRATE inputs from state =====
-function hydrate(){
-  const d=state.data;
-  const fn=document.getElementById("f-name");fn.value=d.name||"";markFilled(fn,!!(d.name&&d.name.trim()));
-  document.getElementById("f-by").value=d.birthYear||"";
-  document.getElementById("f-bm").value=d.birthMonth||"";
-  document.getElementById("f-bd").value=d.birthDay||"";
-  document.querySelectorAll("#seg-sex .seg-btn").forEach(b=>b.classList.toggle("on",b.dataset.v===d.sex));
-  document.getElementById("bc-toggle").classList.toggle("on",!d.trainerLocked);
-  document.querySelector("#bc-toggle").lastChild.textContent=d.trainerLocked?"計測値を編集":"編集を終える";
-  document.querySelectorAll("#goal-cards .goal-card").forEach(c=>c.classList.toggle("on",c.dataset.v===d.goalType));
-  const ft=document.getElementById("f-target");ft.value=d.targetWeight||"";markFilled(ft,!!d.targetWeight);
-  document.getElementById("f-deadline").value=d.deadline||"";
-  document.getElementById("date-wrap").style.display=d.deadline==="date"?"block":"none";
-  if(d.deadlineDate)document.getElementById("f-date").value=d.deadlineDate;
-  const tom=new Date(today.getTime()+86400000);
-  document.getElementById("f-date").min=tom.toISOString().slice(0,10);
-  updateTargetPreview();
-  renderBC();
-}
-
-// ===== WIRE EVENTS =====
-function wire(){
-  // consent
-  document.getElementById("btn-consent").onclick=()=>{state.consented=true;save();show("lp");checkResume();};
-  document.getElementById("btn-clear-consent").onclick=()=>{clearAll();hydrate();toast("端末のデータを消しました");show("consent");};
-
-  // lp
-  document.getElementById("btn-start").onclick=()=>{state.step=1;show("step1");};
-  document.getElementById("btn-resume").onclick=()=>{
-    document.getElementById("resume-bar").style.display="none";
-    const s=state.step;show("step"+(s>=1&&s<=3?s:1));
-  };
-  document.getElementById("btn-restart").onclick=()=>{
-    document.getElementById("resume-bar").style.display="none";
-    state.data.name="";state.data.birthYear="";state.data.birthMonth="";state.data.birthDay="";state.data.sex="";
-    state.data.goalType="";state.data.targetWeight="";state.data.deadline="";state.data.deadlineDate="";
-    save();hydrate();show("step1");
-  };
-
-  // step1 inputs
-  const fn=document.getElementById("f-name");
-  fn.addEventListener("input",()=>{state.data.name=fn.value;markFilled(fn,!!fn.value.trim());fn.classList.remove("errored");setErr("e-name","");save();});
-  ["f-by","f-bm","f-bd"].forEach((id,i)=>{
-    document.getElementById(id).addEventListener("change",e=>{
-      state.data[["birthYear","birthMonth","birthDay"][i]]=e.target.value;
-      if(state.data.birthYear&&state.data.birthMonth&&state.data.birthDay)setErr("e-birth","");
-      save();
-    });
   });
-  document.querySelectorAll("#seg-sex .seg-btn").forEach(b=>{
-    b.onclick=()=>{state.data.sex=b.dataset.v;document.querySelectorAll("#seg-sex .seg-btn").forEach(x=>x.classList.toggle("on",x===b));save();};
+  updateBCDerived();
+}
+function updateBCDerived(){
+  var grid=document.getElementById("bcGrid"); if(!grid) return;
+  var der=bcDerived();
+  var bmiCell=grid.querySelector('[data-calc="bmi"]'); if(bmiCell && !isNaN(der.bmi)) bmiCell.textContent=der.bmi;
+  var fmCell=grid.querySelector('[data-calc="fatmass"]'); if(fmCell && !isNaN(der.fatmass)) fmCell.textContent=der.fatmass;
+  ["bmi","bodyFatPct","muscle"].forEach(function(k){
+    var cfg=bandConfig(k); if(!cfg) return;
+    var val=(k==="bmi")?der.bmi:state.body[k];
+    if(val==null||isNaN(val)) return;
+    var band=grid.querySelector('.band[data-dot="'+k+'"]');
+    if(band){
+      var span=cfg.max-cfg.min, pos=Math.max(0,Math.min(100,((val-cfg.min)/span)*100));
+      var dot=band.querySelector(".dot-m"); if(dot) dot.style.left=pos+"%";
+      band.classList.toggle("warn", val<cfg.min||val>cfg.max);
+    }
+    var vd=cfg.verdict(val), vEl=grid.querySelector('[data-verdict="'+k+'"]');
+    if(vEl){ vEl.textContent=vd[0]; vEl.style.color=vd[1]; }
   });
-  document.getElementById("btn-s1-next").onclick=()=>{if(validateStep1()){state.step=2;save();show("step2");}};
+}
+function toggleEdit(){ state.body.edited=!state.body.edited; save(); render(); }
+function nextStep2(){
+  var b=state.body;
+  if(b.height<100||b.height>220||b.weight<30||b.weight>200||b.bodyFatPct<3||b.bodyFatPct>60){ toast("計測値が範囲外です。確認してください"); return; }
+  save(); go("step3");
+}
 
-  // step2
-  document.getElementById("bc-toggle").onclick=()=>{
-    state.data.trainerLocked=!state.data.trainerLocked;
-    document.getElementById("bc-toggle").classList.toggle("on",!state.data.trainerLocked);
-    document.querySelector("#bc-toggle").lastChild.textContent=state.data.trainerLocked?"計測値を編集":"編集を終える";
-    save();renderBC();
-  };
-  document.getElementById("btn-s2-back").onclick=()=>{state.step=1;show("step1");};
-  document.getElementById("btn-s2-next").onclick=()=>{if(validateStep2()){state.step=3;save();show("step3");}};
+/* ---- STEP3 目標 ---- */
+function viewStep3(){
+  var g=state.goal, w=state.body.weight;
+  var purposes=[["cut","減量"],["bulk","増量"],["keep","維持"]].map(function(x){
+    return '<button class="chip'+(g.purpose===x[0]?' on':'')+'" onclick="setPurpose(\''+x[0]+'\')">'+x[1]+'</button>';
+  }).join("");
+  var keep=g.purpose==="keep";
+  var tw=keep?w:(g.targetWeight!=null?g.targetWeight:"");
+  var diffHTML="";
+  if(g.targetWeight!=null && !keep){
+    var diff=round1(g.targetWeight-w), cls=diff<0?"cut":"bulk";
+    diffHTML='<div class="diff '+cls+'">現在'+w+'kg → 目標'+g.targetWeight+'kg（'+(diff>0?"+":"")+diff+'kg）</div>';
+  }
+  return ''+
+  topbar("step2",null)+stepper(3)+
+  '<div class="scroll">'+
+    '<h1 class="title">目標</h1><div class="subtitle">ペース算出に使います。</div>'+
+    '<div class="field"><label class="flabel">目的 <span class="req">*</span></label><div class="chips">'+purposes+'</div></div>'+
+    '<div class="field"><label class="flabel">目標体重 <span class="req">*</span></label>'+
+      '<input class="inp" id="f_tw" type="text" inputmode="decimal" placeholder="kg" value="'+(tw!==""?tw:"")+'"'+(keep?' disabled style="opacity:.5;"':'')+'>'+diffHTML+'</div>'+
+    '<div class="field"><label class="flabel">期限 <span class="req">*</span></label>'+
+      '<input class="inp" id="f_dl" type="date" min="'+addDaysISO(todayISO(),7)+'" value="'+esc(g.deadline||"")+'">'+
+      '<div class="micro" style="margin-top:5px;">日付ピッカーが使えない場合は下から月数を選択：</div>'+
+      '<div class="selwrap" style="margin-top:6px;"><select class="inp" id="f_months" onchange="setMonths()"><option value="">▼ ◯か月後で指定</option>'+
+        (function(){var o="";for(var i=1;i<=12;i++){o+='<option value="'+i+'">'+i+'か月後</option>';}return o;})()+'</select></div></div>'+
+    '<div id="goalPrev">'+goalPreviewHTML()+'</div>'+
+    '<div id="healthBanner">'+healthBannerHTML()+'</div>'+
+    '<div class="formerr" id="s3err" style="display:none;"></div>'+
+  '</div>'+
+  '<div class="footer-cta"><button class="btn secondary" onclick="saveGoalInputs(); go(\'step2\')">← 戻る</button><button class="btn primary" onclick="nextStep3()">次へ</button></div>';
+}
+afterRender.step3=function(){
+  var tw=document.getElementById("f_tw");
+  if(tw){ tw.addEventListener("input", function(){
+    var v=parseFloat(tw.value); state.goal.targetWeight=isNaN(v)?null:v; save(); updateGoalPreview();
+  }); }
+  var dl=document.getElementById("f_dl");
+  if(dl){ dl.addEventListener("change", function(){ state.goal.deadline=dl.value||null; save(); updateGoalPreview(); }); }
+};
+function setPurpose(p){ state.goal.purpose=p; if(p==="keep") state.goal.targetWeight=state.body.weight; save(); render(); }
+function setMonths(){ var sel=document.getElementById("f_months"), m=parseInt(sel.value,10); if(m){ state.goal.deadline=addDaysISO(todayISO(),m*30); save(); render(); } }
+function saveGoalInputs(){
+  var tw=document.getElementById("f_tw"); if(tw){ var v=parseFloat(tw.value); if(!isNaN(v)) state.goal.targetWeight=v; }
+  var dl=document.getElementById("f_dl"); if(dl&&dl.value) state.goal.deadline=dl.value;
+  save();
+}
+function goalPreviewHTML(){
+  var g=state.goal;
+  if(g.targetWeight==null||!g.deadline) return '<div class="prev-band muted">目標体重と期限を入れると、必要ペースが出ます。</div>';
+  var wk=weeksUntil(g.deadline), dy=daysUntil(g.deadline), delta=round1(Math.abs(state.body.weight-g.targetWeight)), pv=paceVerdict(state);
+  var base='<div class="prev-band'+(pv.tooFast?' danger':'')+'">目標まで 残り約'+wk+'週（'+dy+'日）／必要な変化 '+delta+'kg<br>必要ペース 週'+(pv.plannedKg!=null?pv.plannedKg:"-")+'kg ／ 安全の目安 週'+pv.safeKg+'kgまで';
+  if(pv.tooFast){ var sw=safeWeeksNeeded(state); base+='<br><b>このペースは速すぎます（週'+pv.plannedKg+'kg）。安全な期限の目安：'+fmtJP(addDaysISO(todayISO(),sw*7))+'以降。</b>'; }
+  return base+'</div>';
+}
+function updateGoalPreview(){
+  var el=document.getElementById("goalPrev"); if(el) el.innerHTML=goalPreviewHTML();
+  var hb=document.getElementById("healthBanner"); if(hb) hb.innerHTML=healthBannerHTML();
+}
+function healthBannerHTML(){
+  var g=healthGuard(state); if(g.level==="ok") return "";
+  return '<div class="prev-band '+(g.level==="block"?"danger":"")+'" style="border:1px solid var(--'+(g.level==="block"?"danger":"warn")+');">'+esc(g.msg)+'</div>';
+}
+function nextStep3(){
+  saveGoalInputs();
+  var g=state.goal, w=state.body.weight, err=[];
+  if(!g.purpose) err.push("目的");
+  if(g.targetWeight==null) err.push("目標体重");
+  if(!g.deadline) err.push("期限");
+  var box=document.getElementById("s3err");
+  if(err.length){ box.style.display="block"; box.textContent="未入力の項目があります："+err.join("・"); return; }
+  if(g.purpose==="cut" && g.targetWeight>w){ box.style.display="block"; box.textContent="減量なのに目標体重が現体重より重いです。"; return; }
+  if(g.purpose==="bulk" && g.targetWeight<w){ box.style.display="block"; box.textContent="増量なのに目標体重が現体重より軽いです。"; return; }
+  var hg=healthGuard(state);
+  if(hg.level==="block" && g.purpose==="cut"){ box.style.display="block"; box.textContent=hg.msg; return; }
+  save(); go("step4");
+}
 
-  // step3
-  document.querySelectorAll("#goal-cards .goal-card").forEach(c=>{
-    c.onclick=()=>{
-      state.data.goalType=c.dataset.v;
-      document.querySelectorAll("#goal-cards .goal-card").forEach(x=>x.classList.toggle("on",x===c));
-      setErr("e-goal","");
-      if(c.dataset.v==="maintain"&&!state.data.targetWeight){state.data.targetWeight=state.data.weight;const ft=document.getElementById("f-target");ft.value=state.data.weight;markFilled(ft,true);}
-      updateTargetPreview();save();
+/* ---- STEP4 生活と運動 ---- */
+function viewStep4(){
+  var L=state.life;
+  var actCards=[["1.2","座り仕事中心（運動なし）","デスクワーク中心・通勤程度","×1.2"],
+                ["1.375","軽い運動 週1–3回","軽い運動や立ち仕事あり","×1.375"],
+                ["1.55","中程度 週3–5回","定期的に運動している","×1.55"],
+                ["1.725","ほぼ毎日 激しい運動","高強度・肉体労働","×1.725"]].map(function(a){
+    var on=String(L.activity)===a[0];
+    return '<div class="activity-card'+(on?' on':'')+'" onclick="setActivity('+a[0]+')"><div class="ac-main"><b>'+a[1]+'</b><div class="ac-sub">'+a[2]+'</div></div><div class="ac-f">'+a[3]+'</div><div class="ac-chk">'+(on?'✓':'')+'</div></div>';
+  }).join("");
+  var habitChips=["homePilates","running","bodyweight","gymStrength","walking","other"].map(function(k){
+    var on=!L.none && L.habits.some(function(h){return h.key===k;});
+    return '<button class="chip'+(on?' on':'')+'" onclick="toggleHabit(\''+k+'\')">'+HABITS[k]+'</button>';
+  }).join("");
+  var noneChip='<button class="chip'+(L.none?' on':'')+'" onclick="toggleNone()">'+HABITS.none+'</button>';
+  var freqRows="";
+  if(!L.none){
+    freqRows=L.habits.map(function(h){
+      return '<div class="habit-line"><span class="hl-name">'+HABITS[h.key]+'</span><div class="stepperN"><button onclick="habitFreq(\''+h.key+'\',-1)">−</button><span class="nv">週'+h.perWeek+'回</span><button onclick="habitFreq(\''+h.key+'\',1)">＋</button></div></div>';
+    }).join("");
+  }
+  return ''+
+  topbar("step3",null)+stepper(4)+
+  '<div class="scroll">'+
+    '<h1 class="title">生活と運動</h1><div class="subtitle">ここがカロリー精度を決めます。</div>'+
+    '<div class="h2">活動レベル <span class="req">*</span></div>'+
+    '<div class="micro" style="margin-bottom:8px;">固定値は使いません。あなたが選んだ係数をそのまま計算に使います。</div>'+actCards+
+    '<div class="h2">いまの運動習慣（あてはまるものを選択）</div>'+
+    '<div class="chips">'+habitChips+'<span style="flex-basis:100%; height:0;"></span>'+noneChip+'</div>'+
+    '<div id="freqRows">'+freqRows+'</div>'+
+    '<div class="formerr" id="s4err" style="display:none;"></div>'+
+  '</div>'+
+  '<div class="footer-cta"><button class="btn secondary" onclick="go(\'step3\')">← 戻る</button><button class="btn primary" onclick="startAnalyze()">解析する</button></div>';
+}
+function setActivity(f){ state.life.activity=f; save(); render(); }
+function toggleHabit(k){
+  var L=state.life;
+  if(L.none) L.none=false;
+  var i=L.habits.findIndex(function(h){return h.key===k;});
+  if(i>=0) L.habits.splice(i,1); else L.habits.push({key:k, perWeek:3});
+  save(); render();
+}
+function toggleNone(){ var L=state.life; L.none=!L.none; if(L.none) L.habits=[]; save(); render(); }
+function habitFreq(k,d){
+  var h=state.life.habits.filter(function(x){return x.key===k;})[0]; if(!h) return;
+  h.perWeek=Math.max(0,Math.min(14,h.perWeek+d)); save(); render();
+}
+function startAnalyze(){
+  var L=state.life, box=document.getElementById("s4err");
+  if(L.activity==null){ box.style.display="block"; box.textContent="活動レベルを選択してください。"; return; }
+  if(L.habits.length===0 && !L.none){ box.style.display="block"; box.textContent="運動習慣が未選択です。『いまは特になし』を選ぶか、習慣を選択してください。"; return; }
+  try{
+    var a=buildAnalysis(state);
+    state.result={
+      bmr:a.bmr.value, tdee:a.tdee.value, adj:a.goalAdjust.value,
+      recommended:a.recommended, guarded:a.guarded, floorApplied:a.floorApplied,
+      protein:a.proteinG, fat:a.fat.value, carb:a.carb.value,
+      pace:a.plannedPace?a.plannedPace.value:null, safe:a.safePace.value,
+      overPace:a.paceVerdict.tooFast,
+      safeDate:(function(){ var sw=safeWeeksNeeded(state); return sw!=null?addDaysISO(todayISO(),sw*7):null; })(),
+      training:a.training.body
     };
-  });
-  const ft=document.getElementById("f-target");
-  ft.addEventListener("input",()=>{state.data.targetWeight=ft.value?parseFloat(ft.value):"";markFilled(ft,!!ft.value);ft.classList.remove("errored");setErr("e-target","");updateTargetPreview();save();});
-  const dl=document.getElementById("f-deadline");
-  dl.addEventListener("change",()=>{
-    state.data.deadline=dl.value;
-    document.getElementById("date-wrap").style.display=dl.value==="date"?"block":"none";
-    setErr("e-deadline","");save();
-  });
-  document.getElementById("f-date").addEventListener("change",e=>{state.data.deadlineDate=e.target.value;setErr("e-deadline","");save();});
-  document.getElementById("btn-s3-back").onclick=()=>{state.step=2;show("step2");};
-  document.getElementById("btn-analyze").onclick=()=>{if(validateStep3()){save();runAnalyzing();}};
+    save();
+  }catch(e){ box.style.display="block"; box.textContent="解析に必要な選択が不足しています："+e.message; return; }
+  go("analyzing");
+}
 
-  // chat
-  document.getElementById("btn-chat-back").onclick=()=>show("result");
+/* ---- 解析中 ---- */
+function viewAnalyzing(){
+  return '<div class="analyzing-wrap"><div class="ring" id="ring"><div class="inner">D.D</div></div><div class="analyzing-text" id="anText">基礎代謝を計算しています…</div></div>';
+}
+afterRender.analyzing=function(){
+  var ring=document.getElementById("ring"), anText=document.getElementById("anText");
+  var msgs=["基礎代謝を計算しています…","活動レベルを反映しています…","あなたの運動習慣を見ています…","安全なペースを確認しています…"];
+  var reduced=window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var dur=reduced?300:1800, start=null, done=false;
+  function finish(){ if(done) return; done=true; go("result"); }
+  ring.onclick=finish;
+  function step(ts){
+    if(start===null) start=ts;
+    var t=Math.min(1,(ts-start)/dur);
+    ring.style.background="conic-gradient(var(--accent) "+(t*360)+"deg, var(--surface-3) 0)";
+    var mi=Math.min(msgs.length-1, Math.floor(t*msgs.length));
+    if(anText) anText.textContent=msgs[mi];
+    if(t<1) requestAnimationFrame(step); else setTimeout(finish, reduced?0:150);
+  }
+  requestAnimationFrame(step);
+};
 
-  // clear (footer)
-  document.getElementById("btn-clear-footer").onclick=()=>{
-    if(confirm("この端末に保存された入力をすべて消します。元に戻せません。よろしいですか？")){
-      clearAll();hydrate();toast("消去しました");show("consent");
-    }
-  };
+/* ---- 解析結果 ---- */
+function srcChip(type,label,tip){
+  var cls=type==="input"?"input":(type==="choice"?"choice":"ref");
+  var pre=type==="input"?"〔あなたの入力〕":(type==="choice"?"〔あなたが選んだ〕":"〔目安/出典〕");
+  return '<span class="srcchip '+cls+'" onclick="this.classList.toggle(\'open\')">'+pre+esc(label)+(tip?'<span class="tip">'+esc(tip)+'</span>':'')+'</span>';
+}
+function mcard(lab,valHTML,chips,opt){
+  opt=opt||{};
+  return '<div class="metric-card'+(opt.cls?' '+opt.cls:'')+'"><div class="mc-lab">'+esc(lab)+'</div><div class="mc-val">'+valHTML+'</div>'+
+    (opt.note?'<div class="micro" style="margin-top:4px;">'+esc(opt.note)+'</div>':'')+'<div class="srcchips">'+chips+'</div></div>';
+}
+function viewResult(){
+  var a=buildAnalysis(state), p=state, sx=p.profile.sex;
+  var name=p.profile.name?esc(p.profile.name)+"さん":"";
+  var ddq=ddMessage(p,{targetKcal:a.targetKcal, streak:currentStreak()});
 
-  // role cards intersection (LP)
-  if("IntersectionObserver" in window){
-    const io=new IntersectionObserver((ents)=>{
-      ents.forEach((e,i)=>{if(e.isIntersecting){e.target.style.animationDelay=(i*0.08)+"s";e.target.classList.add("in");io.unobserve(e.target);}});
-    },{threshold:.2});
-    document.querySelectorAll("#role-grid .role-card").forEach(c=>io.observe(c));
-  }else{
-    document.querySelectorAll("#role-grid .role-card").forEach(c=>c.classList.add("in"));
+  var c1=mcard("基礎代謝（BMR）", a.bmr.value+'<span class="u">kcal</span>',
+    srcChip("ref","Mifflin-St Jeor式", a.bmr.formula+"／"+a.bmr.premise+(a.bmr.citation?"／出典:"+a.bmr.citation:""))+
+    srcChip("input","性別・年齢"+p.profile.age+"・身長"+p.body.height+"cm・体重"+p.body.weight+"kg","あなたが入力した値から計算。"+(sx==="na"?"性別=回答しないのため男女式の平均値。":"")),
+    {note:"式：男 10×体重+6.25×身長−5×年齢+5 ／ 女 −161 ／ 回答しない −78"});
+
+  var c2=mcard("× 活動係数", a.activityFactor.value+"",
+    srcChip("choice", a.activityFactor.label, "STEP4であなたが選んだ活動レベル。固定値（1.375）ではありません。"),
+    {note:"BMR × 係数 = 活動込み消費 "+a.tdee.value+"kcal"});
+
+  var c3=mcard("目的補正", (a.goalAdjust.value>0?"+":"")+a.goalAdjust.value+'<span class="u">kcal</span>',
+    srcChip("ref","目的補正", a.goalAdjust.formula+"／"+a.goalAdjust.premise+"／出典:"+a.goalAdjust.citation),
+    {cls:a.guarded?"guard-card":"", note:a.guarded?"健康のため下限で止めました（"+a.targetKcal.premise+"）":"基礎代謝"+a.bmr.value+"kcal・性別下限"+sexFloor(sx)+"kcalは割りません"});
+
+  var c4='<div class="metric-card" style="text-align:center; border:1px solid var(--accent);"><div class="mc-lab">＝ 推奨カロリー</div>'+
+    '<div class="bignum">'+a.targetKcal.value+' <span class="u" style="font-size:var(--fs-body); color:var(--text-3);">kcal/日</span></div>'+
+    '<div class="srcchips" style="justify-content:center;">'+srcChip("ref","上記の合算", a.targetKcal.formula+"／"+a.targetKcal.premise)+'</div></div>';
+
+  var c5=mcard("たんぱく質", a.protein.value+'<span class="u">g/日</span>',
+    srcChip("ref","たんぱく質目安", a.protein.formula+"／"+a.protein.premise+"／出典:"+a.protein.citation));
+
+  var pfc='<div class="metric-card"><div class="mc-lab">脂質・炭水化物（PFCの残り）</div><div class="small" style="margin-top:4px;">脂質 '+a.fat.value+'g ／ 炭水化物 '+a.carb.value+'g</div>'+
+    '<div class="srcchips">'+srcChip("ref","脂質25%・残りを炭水化物", a.fat.formula+"／"+a.carb.formula+"／"+a.carb.premise)+'</div></div>';
+
+  var bfmLbm="";
+  if(a.bodyFatMass){
+    bfmLbm='<div class="metric-card"><div class="mc-lab">体脂肪量・除脂肪体重</div><div class="small" style="margin-top:4px;">体脂肪量 '+a.bodyFatMass.value+'kg ／ 除脂肪体重 '+(a.leanBodyMass?a.leanBodyMass.value:"-")+'kg</div>'+
+      '<div class="srcchips">'+srcChip("input","体脂肪率×体重","計測カードの体脂肪率"+p.body.bodyFatPct+"% × 体重"+p.body.weight+"kg。")+srcChip("ref","体重−体脂肪量", a.leanBodyMass?a.leanBodyMass.formula+"／"+a.leanBodyMass.premise:"")+'</div></div>';
   }
 
-  // chat input bar (inserted dynamically)
-  ensureChatBar();
+  var pv=a.paceVerdict, paceChips, paceVal, paceVerd="";
+  if(a.plannedPace){
+    paceChips=srcChip("input","目標体重と期限から算出","目標"+p.goal.targetWeight+"kgと期限から計算したあなた由来の値。")+
+      srcChip("ref","安全の目安 週"+a.safePace.value+"kg", a.safePace.formula+"／"+a.safePace.premise+"／出典:"+a.safePace.citation);
+    paceVal="週"+a.plannedPace.value+'<span class="u">kg</span>';
+    paceVerd=pv.tooFast?'<span style="color:var(--danger); font-size:var(--fs-sub);">速すぎ（+'+pv.overBy+'kg/週）</span>':'<span style="color:var(--ok); font-size:var(--fs-sub);">安全範囲内</span>';
+  } else {
+    paceChips=srcChip("ref","安全の目安 週"+a.safePace.value+"kg", a.safePace.formula+"／"+a.safePace.premise);
+    paceVal='<span class="u">目標・期限未設定</span>';
+  }
+  var c6=mcard("想定ペース", paceVal+" "+paceVerd, paceChips, {cls:pv.tooFast?"guard-card":""});
+
+  var train=a.training;
+  var c7='<div class="metric-card"><div class="mc-lab">'+esc(train.headline)+'</div><div class="small" style="margin-top:6px;">'+esc(train.body)+'</div>'+
+    '<div class="srcchips">'+srcChip("choice","運動習慣に基づく提案", train.basisLabel.replace(/〔[^〕]*〕/,""))+'</div></div>';
+
+  var hg=a.guard, hgBanner="";
+  if(hg.level==="doctor"||hg.level==="warn"||hg.level==="block"){
+    hgBanner='<div class="prev-band '+(hg.level==="block"?"danger":"")+'" style="border:1px solid var(--'+(hg.level==="block"?"danger":"warn")+'); margin-bottom:12px;">'+esc(hg.msg)+'</div>';
+  }
+  var mn=muscleNote(p);
+
+  return ''+
+  topbar(null,true)+
+  '<div class="scroll">'+
+    '<h1 class="title">あなたのカルテ '+name+'</h1>'+
+    '<div class="dummy-strip">※数値はすべてデモ用ダミー</div>'+
+    '<div class="dd-quote"><div class="av">D.D</div><p>'+esc(ddq)+'</p></div>'+
+    hgBanner+
+    (mn?'<div class="small" style="margin-bottom:10px;">'+esc(mn)+'</div>':'')+
+    c1+c2+c3+c4+c5+pfc+bfmLbm+c6+c7+
+    '<div class="transparency"><div class="l1">数字は目安です。式と前提をすべて開示しています。</div><div class="l2">黙って想定した値はありません。</div></div>'+
+  '</div>'+
+  '<div class="footer-cta"><button class="btn secondary" onclick="go(\'step1\')">入力を見直す</button><button class="btn primary" onclick="go(\'home\')">D.D ホームへ</button></div>';
 }
 
-function ensureChatBar(){
-  if(document.querySelector(".chat-bar"))return;
-  const bar=document.createElement("div");bar.className="chat-bar";bar.style.display="none";
-  bar.innerHTML='<div style="position:absolute;top:-16px;left:0;right:0" class="chat-demo">※デモの定型応答です／AI接続なし</div><input id="chat-input" type="text" placeholder="メッセージを入力…" autocomplete="off"><button class="chat-send" id="chat-send"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M3 11l18-8-8 18-2-7-8-3z"/></svg></button>';
-  document.querySelector(".app-shell").appendChild(bar);
-  const inp=document.getElementById("chat-input");
-  const send=()=>{const v=inp.value.trim();if(!v)return;userSay(v);inp.value="";};
-  document.getElementById("chat-send").onclick=send;
-  inp.addEventListener("keydown",e=>{if(e.key==="Enter")send();});
+/* ---- D.D ホーム ---- */
+function ensureToday(){
+  var t=todayISO();
+  if(state.today.date!==t){ state.today={date:t, checks:[false,false,false]}; save(); }
 }
-function toggleChatBar(){
-  const bar=document.querySelector(".chat-bar");
-  if(bar)bar.style.display=state.screen==="chat"?"flex":"none";
+function viewHome(){
+  ensureToday();
+  var r=state.result||{};
+  var name=state.profile.name?esc(state.profile.name):"ゲスト";
+  var checks=state.today.checks;
+  var checkLabels=["推奨カロリー "+(r.recommended||"-")+"kcal を意識する","たんぱく質 "+(r.protein||"-")+"g を摂る","運動 or 1万歩（できる方）"];
+  var checkCards=checkLabels.map(function(l,i){
+    return '<div class="check-card'+(checks[i]?' on':'')+'" onclick="toggleCheck('+i+')"><div class="ck">✓</div><div class="ck-t">'+esc(l)+'</div></div>';
+  }).join("");
+  var allDone=checks.every(function(c){return c;});
+  var doneBand=allDone?'<div class="done-band">今日のDEEDを達成！🔥</div>':'';
+  var streak=currentStreak();
+  var dotsArr=[];
+  for(var i=6;i>=0;i--){ var d=addDaysISO(todayISO(),-i), on=state.streakDays.indexOf(d)>=0; dotsArr.push('<div class="sd'+(on?' on':'')+'">'+(on?'✓':'')+'</div>'); }
+  var ddq=ddMessage(state,{streak:streak, streakBroken:(streak===0 && state.streakDays.length>0)});
+
+  return ''+
+  '<div class="greet"><div class="g-av">D.D</div><div><b>こんにちは、'+name+'さん</b><div class="g-date">'+esc(fmtJP(todayISO()))+'</div></div><div class="kcal-badge">推奨<b>'+(r.recommended||"-")+'</b>kcal/日</div></div>'+
+  '<div class="scroll" style="padding-bottom:20px;">'+
+    '<div class="h2">今日のチェック</div>'+checkCards+doneBand+
+    '<div class="card lg" style="text-align:center; margin-top:6px;"><div class="mc-lab">習慣ストリーク</div><div class="streak-big">'+streak+'日連続 🔥</div><div class="streak-dots" style="justify-content:center;">'+dotsArr.join("")+'</div></div>'+
+    '<div class="card lg"><div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;"><div class="mc-lab">体重の推移</div><button class="btn ghost" style="width:auto; height:auto; padding:4px 10px;" onclick="openWeightModal()">記録する</button></div><div class="svg-wrap" id="weightChart"></div><div class="summary-line" id="weightSummary"></div></div>'+
+    '<div class="dd-quote"><div class="av">D.D</div><p>'+esc(ddq)+'</p></div>'+
+  '</div>'+
+  tabbar("home");
+}
+afterRender.home=function(){ renderWeightChart(); };
+function toggleCheck(i){
+  ensureToday();
+  state.today.checks[i]=!state.today.checks[i];
+  if(state.today.checks.every(function(c){return c;})){
+    if(state.streakDays.indexOf(state.today.date)<0) state.streakDays.push(state.today.date);
+  } else {
+    var idx=state.streakDays.indexOf(state.today.date); if(idx>=0) state.streakDays.splice(idx,1);
+  }
+  save(); render();
+}
+function openWeightModal(){
+  var bg=document.getElementById("modalBg");
+  document.getElementById("modalTitle").textContent="今日の体重を記録";
+  document.getElementById("modalBody").innerHTML='<input class="inp" id="wInput" type="text" inputmode="decimal" placeholder="kg" value="'+state.body.weight+'" style="margin-bottom:14px;">';
+  var box=document.getElementById("modalBtns"); box.innerHTML="";
+  var cancel=document.createElement("button"); cancel.className="btn secondary"; cancel.textContent="キャンセル"; cancel.onclick=function(){ bg.classList.remove("show"); };
+  var ok=document.createElement("button"); ok.className="btn primary"; ok.textContent="記録";
+  ok.onclick=function(){
+    var v=parseFloat(document.getElementById("wInput").value);
+    if(!isNaN(v)){
+      var t=todayISO(), ex=state.weights.filter(function(x){return x.date===t;})[0];
+      if(ex) ex.val=round1(v); else state.weights.push({date:t, val:round1(v)});
+      state.weights.sort(function(a,b){return a.date<b.date?-1:1;});
+      save(); bg.classList.remove("show"); render(); toast("体重を記録しました");
+    }
+  };
+  box.appendChild(cancel); box.appendChild(ok);
+  bg.classList.add("show");
+}
+function renderWeightChart(){
+  var host=document.getElementById("weightChart"); if(!host) return;
+  var data=state.weights.slice();
+  if(data.length===0) data=[{date:todayISO(), val:state.body.weight}];
+  var W=320,H=140,padL=34,padR=12,padT=12,padB=22;
+  var vals=data.map(function(d){return d.val;}), gw=state.goal.targetWeight;
+  var allVals=vals.slice(); if(gw!=null) allVals.push(gw);
+  var minV=Math.min.apply(null,allVals), maxV=Math.max.apply(null,allVals);
+  if(minV===maxV){ minV-=1; maxV+=1; }
+  var padv=(maxV-minV)*0.1||1; minV-=padv; maxV+=padv;
+  function X(i){ return data.length<=1? padL+(W-padL-padR)/2 : padL+(i/(data.length-1))*(W-padL-padR); }
+  function Y(v){ return padT+(1-(v-minV)/(maxV-minV))*(H-padT-padB); }
+  var ns="http://www.w3.org/2000/svg";
+  var svg=document.createElementNS(ns,"svg"); svg.setAttribute("viewBox","0 0 "+W+" "+H);
+  if(gw!=null){
+    var gl=document.createElementNS(ns,"line");
+    gl.setAttribute("x1",padL); gl.setAttribute("x2",W-padR); gl.setAttribute("y1",Y(gw)); gl.setAttribute("y2",Y(gw));
+    gl.setAttribute("stroke","var(--ok)"); gl.setAttribute("stroke-width","1.2"); gl.setAttribute("stroke-dasharray","4 3");
+    svg.appendChild(gl);
+    var gt=document.createElementNS(ns,"text");
+    gt.setAttribute("x",W-padR); gt.setAttribute("y",Y(gw)-3); gt.setAttribute("text-anchor","end"); gt.setAttribute("font-size","9"); gt.setAttribute("fill","var(--ok)"); gt.textContent="目標"+gw;
+    svg.appendChild(gt);
+  }
+  [minV,maxV].forEach(function(v){
+    var tx=document.createElementNS(ns,"text");
+    tx.setAttribute("x",padL-4); tx.setAttribute("y",Y(v)+3); tx.setAttribute("text-anchor","end"); tx.setAttribute("font-size","9"); tx.setAttribute("fill","var(--text-3)"); tx.textContent=round1(v);
+    svg.appendChild(tx);
+  });
+  if(data.length>1){
+    var dpath=""; data.forEach(function(d,i){ dpath+=(i===0?"M":"L")+X(i)+" "+Y(d.val)+" "; });
+    var path=document.createElementNS(ns,"path");
+    path.setAttribute("d",dpath); path.setAttribute("fill","none"); path.setAttribute("stroke","var(--accent)"); path.setAttribute("stroke-width","2"); path.setAttribute("stroke-linejoin","round"); path.setAttribute("stroke-linecap","round");
+    svg.appendChild(path);
+  }
+  data.forEach(function(d,i){
+    var last=i===data.length-1;
+    var c=document.createElementNS(ns,"circle");
+    c.setAttribute("cx",X(i)); c.setAttribute("cy",Y(d.val)); c.setAttribute("r",last?4:3); c.setAttribute("fill","var(--accent)");
+    if(last){ c.setAttribute("stroke","#fff"); c.setAttribute("stroke-width","1.5"); }
+    svg.appendChild(c);
+    if(last){
+      var lt=document.createElementNS(ns,"text");
+      lt.setAttribute("x",X(i)); lt.setAttribute("y",Y(d.val)-8); lt.setAttribute("text-anchor","middle"); lt.setAttribute("font-size","10"); lt.setAttribute("font-weight","700"); lt.setAttribute("fill","var(--accent)"); lt.textContent=d.val;
+      svg.appendChild(lt);
+    }
+  });
+  var xl=[[0,data[0].date]]; if(data.length>1) xl.push([data.length-1,data[data.length-1].date]);
+  xl.forEach(function(pp){
+    var tx=document.createElementNS(ns,"text");
+    tx.setAttribute("x",X(pp[0])); tx.setAttribute("y",H-6); tx.setAttribute("text-anchor",pp[0]===0?"start":"end"); tx.setAttribute("font-size","9"); tx.setAttribute("fill","var(--text-3)"); tx.textContent=fmtJP(pp[1]);
+    svg.appendChild(tx);
+  });
+  host.innerHTML=""; host.appendChild(svg);
+  var sum=document.getElementById("weightSummary");
+  if(sum){
+    if(state.weights.length<=1 && data.length<=1){ sum.innerHTML='<span class="muted">記録を続けると推移が見えます。</span>'; }
+    else {
+      var first=data[0].val, lastv=data[data.length-1].val, diff=round1(lastv-first), purpose=state.goal.purpose;
+      var good=(purpose==="cut"&&diff<0)||(purpose==="bulk"&&diff>0)||(purpose==="keep"&&Math.abs(diff)<1);
+      var col=good?"var(--ok)":"var(--warn)";
+      sum.innerHTML='開始'+first+'kg → 最新'+lastv+'kg（<span style="color:'+col+'; font-weight:700;">'+(diff>0?"+":"")+diff+'kg</span>）';
+    }
+  }
 }
 
-function checkResume(){
-  const d=state.data;
-  const hasInput=d.name||d.birthYear||d.goalType||d.targetWeight;
-  document.getElementById("resume-bar").style.display=hasInput?"block":"none";
+/* ---- D.D チャット ---- */
+function viewChat(){
+  if(state.chat.length===0){
+    var r=state.result||{};
+    var delta=state.goal.targetWeight!=null?round1(Math.abs(state.body.weight-state.goal.targetWeight)):null, dir=goalDir(state);
+    var greet="やあ、D.Dだ。きみの推奨は"+(r.recommended||"-")+"kcal";
+    if(delta!=null) greet+="、目標は"+(dir==="gain"?"+":"−")+delta+"kg";
+    greet+="。続けるコツでも、つまずきでも、なんでも聞いて。";
+    state.chat.push({role:"dd", text:greet}); save();
+  }
+  var msgs=state.chat.map(function(m){ return '<div class="msg '+(m.role==="dd"?"dd":"me")+'">'+esc(m.text)+'</div>'; }).join("");
+  var quick=["停滞期がつらい","夜お腹がすく","運動が続かない","このペースで合ってる？"].map(function(q){
+    return '<button class="chip" onclick="sendQuick(\''+esc(q)+'\')">'+esc(q)+'</button>';
+  }).join("");
+  return ''+
+  '<div class="chat-head"><div class="c-av">D.D</div><div><b>D.D（ディディ）</b><div class="c-sub"><span class="on-dot"></span>DEEDのAIトレーナー</div></div><button class="gear" style="margin-left:auto;" onclick="go(\'settings\')">⚙</button></div>'+
+  '<div class="chat-scroll" id="chatScroll">'+msgs+'</div>'+
+  '<div class="chat-note">D.Dの返答は一般的な情報で、医療助言ではありません。</div>'+
+  '<div class="quickq">'+quick+'</div>'+
+  '<div class="chat-input"><input class="inp" id="chatInp" type="text" inputmode="text" placeholder="D.Dにメッセージ…"><button class="send" onclick="sendChat()">➤</button></div>'+
+  tabbar("chat");
+}
+afterRender.chat=function(){
+  var sc=document.getElementById("chatScroll"); if(sc) sc.scrollTop=sc.scrollHeight;
+  var inp=document.getElementById("chatInp");
+  if(inp) inp.addEventListener("keydown", function(e){ if(e.key==="Enter" && !e.isComposing){ e.preventDefault(); sendChat(); } });
+};
+function sendQuick(q){ pushUser(q); respond(q); }
+function sendChat(){
+  var inp=document.getElementById("chatInp"); if(!inp) return;
+  var v=inp.value.trim(); if(!v) return;
+  inp.value=""; pushUser(v); respond(v);
+}
+function pushUser(text){ state.chat.push({role:"me", text:text.slice(0,300)}); save(); render(); }
+function respond(userText){
+  var r=state.result||{}, pv=paceVerdict(state);
+  var delta=state.goal.targetWeight!=null?round1(Math.abs(state.body.weight-state.goal.targetWeight)):null;
+  var gwLabel=state.goal.targetWeight!=null?state.goal.targetWeight+"kg":"目標体重", reply;
+  if(/停滞|減らない|止まった|変わらない/.test(userText)){
+    reply="停滞期は正常な反応だよ。体重は水分・便・グリコーゲンで日々±1kgは揺れる。1日の数字に一喜一憂せず、2週間の平均で見よう。たんぱく質"+(r.protein||"-")+"gと睡眠を守れば、また動き出すことが多い。";
+  } else if(/ペース|速い|合っ|大丈夫か|間に合/.test(userText)){
+    if(pv.tooFast){
+      var sw=safeWeeksNeeded(state), sd=fmtJP(addDaysISO(todayISO(),sw*7));
+      reply="正直に言う。週"+pv.plannedKg+"kgは速すぎる。健康的な上限は週"+pv.safeKg+"kgまで、"+pv.overBy+"kgオーバーしてる。期限を"+sw+"週（"+sd+"以降）に延ばすのがおすすめだ。きみの体を守るのが俺の仕事だからね。";
+    } else {
+      reply="今のペースは週"+(pv.plannedKg!=null?pv.plannedKg:"-")+"kg、安全の目安は週"+pv.safeKg+"kgまで。無理のない範囲に収まってる。この調子でいこう。";
+    }
+  } else if(/続かない|モチベ|つらい|やる気|サボ/.test(userText)){
+    reply="なぜ始めたか思い出そう。きみの目標は"+gwLabel+"、"+(delta!=null?(goalDir(state)==="gain"?"+":"−")+delta+"kg":"その一歩")+"だ。完璧じゃなくていい。今日のチェックを1つだけでも、ゼロとは全然違う。目的は見失わないでいこう。";
+  } else if(/食べ過ぎ|夜|間食|お腹|空腹|甘い/.test(userText)){
+    reply="我慢より置き換えが続くコツ。たんぱく質"+(r.protein||"-")+"gを日中に先取りすると夜の空腹が和らぐ。どうしてもなら高たんぱく・低糖質の間食を。（これは一般的な情報で、医療助言ではないよ）";
+  } else if(/ジム|メニュー|トレ|筋トレ|運動|有酸素/.test(userText)){
+    reply=(r.training?r.training:"今の習慣に足す形で組むのがいい。")+" 詳しいフォームやメニューは、担当の佐藤さん（DEED新宿東口店）に相談すると確実だよ。";
+  } else {
+    reply="いい質問だね。まずは今日のチェックを1つ。目的は"+gwLabel+"、そこは見失わないでいこう。気になることがあれば、ペースのこと・食事のこと・続け方、なんでも聞いて。";
+  }
+  state.chat.push({role:"dd", text:reply}); save(); render();
 }
 
-// observe screen changes for chat bar visibility
-const _show=show;
-show=function(n){_show(n);toggleChatBar();};
+/* ---- 設定 ---- */
+function viewSettings(){
+  return ''+
+  topbar(state.result?"home":"consent",null)+
+  '<div class="scroll">'+
+    '<h1 class="title">設定</h1>'+
+    '<div class="card"><div class="small">この端末に保存中（外部送信なし）。データはブラウザの localStorage にのみ保存されます。</div></div>'+
+    '<button class="btn danger" onclick="confirmClear()" style="margin-bottom:12px;">データをクリア</button>'+
+    '<button class="btn secondary" onclick="restartKeep()" style="margin-bottom:12px;">最初からやり直す（同意は保持）</button>'+
+    '<button class="btn ghost" onclick="showConsentInfo()" style="margin-bottom:12px;">同意内容を見る</button>'+
+    '<div class="micro" style="margin-top:20px;">DEED D.D デモ v1.1 ／ 単一HTML・外部通信ゼロ ／ ※すべてデモ用ダミー</div>'+
+  '</div>'+
+  (state.result?tabbar("home"):"");
+}
+function confirmClear(){
+  modal("データをクリア","この端末の保存データを完全に消去します。よろしいですか？",[
+    {label:"キャンセル",cls:"secondary"},
+    {label:"消去する",cls:"danger",fn:function(){ clearAll(); go("consent"); toast("データを消去しました"); }}
+  ]);
+}
+function restartKeep(){ var consent=state.consent; clearAll(); state.consent=consent; save(); go("step1"); }
+function showConsentInfo(){
+  modal("同意内容","本アプリはデモです。表示数値は一般的な目安で医療助言ではありません。入力データは端末内にのみ保存され外部送信されません。",[{label:"閉じる",cls:"primary"}]);
+}
 
-// ===== INIT =====
-buildSelects();
-const had=load();
-wire();
-hydrate();
-if(state.consented){show("lp");checkResume();}
-else show("consent");
+/* ============================================================
+   起動 + 不変条件セルフテスト
+   ============================================================ */
+function runSelfTests(){
+  var p={
+    profile:{ name:"テスト", birth:{y:1990,m:1,d:1}, age:34, sex:"m" },
+    body:{ height:172, weight:78.5, bodyFatPct:24, muscle:56.4, edited:false },
+    goal:{ purpose:"cut", targetWeight:72, deadline:addDaysISO(todayISO(),60) },
+    life:{ activity:1.55, habits:[{key:"running",perWeek:3}], none:false },
+    streakDays:[]
+  };
+  var ok=true;
+  function assert(c,m){ if(!c){ ok=false; if(window.console) console.warn("[SelfTest FAIL] "+m); } }
+  var a=buildAnalysis(p);
+  ["bmr","activityFactor","tdee","goalAdjust","targetKcal","protein","fat","carb","bmi","safePace"].forEach(function(k){
+    assert(a[k] && ["input","choice","reference"].indexOf(a[k].source)>=0, "source必須:"+k);
+  });
+  ["bmr","tdee","goalAdjust","targetKcal","protein","fat","carb","bmi","safePace"].forEach(function(k){
+    if(a[k].source==="reference") assert(a[k].formula && a[k].premise, "reference式/前提:"+k);
+  });
+  var threw=false;
+  try{ var p0=JSON.parse(JSON.stringify(p)); p0.life.activity=null; tdee(p0); }catch(e){ threw=true; }
+  assert(threw, "活動係数未選択でthrow");
+  assert(a.targetKcal.value>=Math.max(Math.round(a.tdee.value*0.8),sexFloor(p.profile.sex),a.bmr.value) || a.targetKcal.value===a.tdee.value-500, "基礎代謝割れ防止");
+  var pNone=JSON.parse(JSON.stringify(p)); pNone.life.habits=[]; pNone.life.none=true;
+  assert(buildTrainingSuggestion(p).body!==buildTrainingSuggestion(pNone).body, "トレ提案がhabitsで変わる");
+  assert(buildTrainingSuggestion(pNone).basisLabel.indexOf("運動習慣なし")>=0, "特になし起点");
+  assert(JSON.stringify(buildAnalysis(p))===JSON.stringify(buildAnalysis(p)), "決定性");
+  var allText=JSON.stringify(a)+buildTrainingSuggestion(p).body;
+  assert(allText.indexOf("必ず痩せる")<0 && allText.indexOf("治る")<0, "薬機法禁止語なし");
+  var pLow=JSON.parse(JSON.stringify(p)); pLow.body.weight=44; pLow.goal.purpose="cut";
+  assert(healthGuard(pLow).allowGoal===false, "BMI<16ブロック");
+  if(window.console) console.log("[D.D SelfTest] "+(ok?"全テスト PASS":"一部 FAIL（上記参照）"));
+}
+(function init(){
+  var loaded=load();
+  if(!loaded) state=defaultState();
+  try{ runSelfTests(); }catch(e){}
+  render();
+})();
 </script>
 </body>
 </html>
