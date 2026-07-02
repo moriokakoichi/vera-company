@@ -6,17 +6,20 @@
 <meta name="robots" content="noindex,nofollow">
 <title>DEED D.D デモ</title>
 <!--
-  ===== 実装ハード制約チェックリスト（全✅で完成）=====
-  [✅] 1 単一ファイル・CSS/JS全インライン（<style>1個・<script>1個・<link>/<img src>/@import/url(http) なし）
+  ===== 実装ハード制約チェックリスト（全✅で完成・v3）=====
+  [✅] 1 単一ファイル・CSS/JS全インライン（<style>1個・<script>1個・外部<link>/@import/url(http)なし。
+        ※<img src="data:image/...">は端末内で生成したdataURLであり外部リソースには該当しない）
   [✅] 2 外部リソース読込ゼロ（CDN/Webフォント/Tailwind/Chart.js禁止・グラフはinline SVGをJSで構築）
   [✅] 3 ネットワーク通信ゼロ（fetch/XHR/WebSocket/EventSource/sendBeacon 不使用・Claude/Anthropic参照なし）
   [✅] 4 システムフォントのみ
   [✅] 5 noindex meta
   [✅] 6 デモバッジ「DEMO ダミーデータ」常設
-  [✅] 7 localStorage 保存・再開・クリア（キー dd_demo_v1）
-  [✅] 8 決定的（Math.random 不使用・new Date は年齢/期限週のみ）
-  [✅] 9 XSS（ユーザー文字列は esc() 経由）
+  [✅] 7 localStorage 保存・再開・クリア（キー dd_demo_v1 据え置き・v1→v2非破壊migration・QuotaExceededガード＝写真を古い順に落として再試行し必ず通知）
+  [✅] 8 決定的（Math.random 不使用・new Date は年齢/期限/日付キー/月初判定のみ。写真はユーザー入力＝決定性の対象外）
+  [✅] 9 XSS（ユーザー文字列は esc() 経由・読み込みJSON内のdataURLは正規表現で厳格検証）
   [✅] 10 プレースホルダ/未実装コメント禁止（全機能実装）
+  [✅] 11 v3: 写真非解析の正直バッジ（2か所常設）・スタッフ画面デモ注記・退会ロック・DEED_FORMULA一元CONFIG（一般値(仮)→リード式差し替え前提）
+  ※スタッフ閲覧フラグ(staffView)は保存しない＝リロードで会員ビューに戻り合言葉を再要求する。仕様でありバグではない。
 -->
 <style>
 :root{
@@ -266,6 +269,32 @@ h1.title{font-size:var(--fs-h1); font-weight:700; margin:4px 0 2px;}
 .diff{font-size:var(--fs-sub); margin-top:6px;}
 .diff.cut{color:var(--ok);} .diff.bulk{color:var(--info);}
 
+/* ---- v3 追加クラス ---- */
+.honest-strip{background:var(--surface-2); border-left:3px solid var(--info); color:var(--text-2); font-size:var(--fs-micro); border-radius:var(--r-sm); padding:8px 10px; margin-bottom:12px; line-height:1.5;}
+.seg3{display:flex; gap:8px;}
+.seg3 button{flex:1; height:40px; border-radius:var(--r-md); border:1px solid var(--line); background:var(--surface-3); color:var(--text-2); font-family:var(--font); font-size:var(--fs-sub); cursor:pointer;}
+.seg3 button.on{background:var(--accent-soft); border-color:var(--accent); color:var(--accent-dark); font-weight:700;}
+.ms-row{display:flex; gap:8px; justify-content:center; margin-top:10px; flex-wrap:wrap;}
+.ms-pill{flex:0 0 auto; font-size:var(--fs-micro); font-weight:700; border-radius:var(--r-pill); padding:4px 10px; background:var(--surface-3); color:var(--text-3);}
+.ms-pill.on{background:var(--accent-soft); color:var(--accent-dark);}
+.meal-row{display:flex; gap:10px; background:var(--surface-2); border-radius:var(--r-md); padding:10px; margin-bottom:8px; align-items:flex-start;}
+.meal-thumb{flex:0 0 48px; width:48px; height:48px; border-radius:var(--r-sm); background:var(--surface-3); display:flex; align-items:center; justify-content:center; font-size:20px; overflow:hidden; color:var(--text-3);}
+.meal-thumb img{width:100%; height:100%; object-fit:cover; display:block;}
+.mini-chip{display:inline-block; font-size:var(--fs-micro); background:var(--surface-3); color:var(--text-2); border-radius:var(--r-sm); padding:1px 6px; margin:2px 3px 0 0;}
+.dd-quote.strict{border:1px solid var(--danger);}
+.ba-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+.ba-slot{aspect-ratio:3/4; background:var(--surface-3); border-radius:var(--r-md); display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--text-3); font-size:var(--fs-sub); overflow:hidden; text-align:center;}
+.ba-slot img{width:100%; height:100%; object-fit:cover; display:block;}
+.ba-cap{font-size:var(--fs-micro); color:var(--text-3); text-align:center; margin-top:4px;}
+.photo-prev{width:120px; height:120px; border-radius:var(--r-md); object-fit:cover; display:block; margin:8px 0;}
+.warn-strip{background:var(--warn-soft); color:var(--warn); border-radius:var(--r-sm); padding:8px 10px; font-size:var(--fs-micro); font-weight:700; margin-bottom:12px;}
+.strict-item{border-left:3px solid var(--danger); background:var(--danger-soft); border-radius:var(--r-sm); padding:8px 10px; font-size:var(--fs-sub); margin-bottom:8px;}
+.grid3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;}
+.g-item{background:var(--surface-3); border-radius:var(--r-md); padding:10px; text-align:center;}
+.g-item .gv{font-size:var(--fs-h2); font-weight:700;}
+.g-item .gl{font-size:var(--fs-micro); color:var(--text-3);}
+.tabbar button{font-size:var(--fs-micro);}
+
 @media (prefers-reduced-motion:reduce){
   *{transition:none !important; animation:none !important;}
 }
@@ -296,8 +325,9 @@ var STORE_KEY = "dd_demo_v1";
 
 function defaultState(){
   return {
-    v:1,
+    v:2,  /* スキーマ版番号（保存キー名 dd_demo_v1 とは独立。キーは据え置き） */
     screen:"consent",
+    tab:"home",
     consent:false,
     profile:{ name:"", birth:{y:1990,m:1,d:1}, age:null, sex:null },
     body:{ height:172.0, weight:78.5, bodyFatPct:24.0, muscle:56.4, edited:false },
@@ -307,29 +337,128 @@ function defaultState(){
     weights:[],
     today:{ date:null, checks:[false,false,false] },
     streakDays:[],
-    chat:[]
+    chat:[],
+    meals:[],
+    girths:[],
+    photos:{ start:null, latest:null },
+    strictLog:[],
+    memberStatus:"active",
+    milestonesSeen:[]
   };
 }
 var state = defaultState();
 
-function save(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){} }
+/* 保存: QuotaExceededガード付き。容量超過時は最古の食事写真→最新体写真→開始体写真の順に
+   落として再試行し、必ずトーストで通知する（保存失敗を黙って握りつぶさない＝誠実の原則） */
+function isQuotaErr(e){ return !!e && (e.name==="QuotaExceededError" || e.code===22 || e.code===1014 || e.name==="NS_ERROR_DOM_QUOTA_REACHED"); }
+var saveEnvFailNotified=false; /* 非クォータ失敗の通知は1回だけ（連打防止） */
+function save(){
+  /* 回数固定でなく「落とせる写真が無くなるまで」再試行。各反復は必ず写真を1枚落とすか
+     returnするため無限ループにならない（写真枚数は有限） */
+  for(;;){
+    try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); return true; }
+    catch(e){
+      if(!isQuotaErr(e)){
+        /* SecurityError等（プライベートブラウジング等）も黙って握りつぶさない＝誠実の原則 */
+        if(!saveEnvFailNotified){ saveEnvFailNotified=true; toast("この環境ではデータを保存できません（リロードで記録が消えます）。ブラウザの設定をご確認ください"); }
+        return false;
+      }
+      var withPhoto=state.meals.filter(function(m){ return m.photo; });
+      if(withPhoto.length>0){ withPhoto[0].photo=null; withPhoto[0].photoRemoved=true; toast("保存容量のため古い食事写真を1枚削除しました（記録は残っています）"); continue; }
+      if(state.photos.latest){ state.photos.latest=null; toast("保存容量のため最新の記録写真を削除しました"); continue; }
+      if(state.photos.start){ state.photos.start=null; toast("保存容量のため開始の記録写真を削除しました"); continue; }
+      toast("この端末の保存領域が足りません。設定からデータ書き出し→全消去をご検討ください");
+      return false;
+    }
+  }
+}
+/* v1→v2 migration（読み込み時のメモリ内変換のみ・元データは書き換えない） */
+function migrateState(o){
+  if(!o.v || o.v===1){ o=Object.assign({}, o); o.v=2; }
+  return o;
+}
+/* 読み込みJSON内のdataURLは厳格検証（XSS/不正データ対策） */
+function sanitizeDataURL(u){
+  return (typeof u==="string" && /^data:image\/(jpeg|jpg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(u)) ? u : null;
+}
+function normPhoto(ph){
+  if(!ph || typeof ph!=="object") return null;
+  var u=sanitizeDataURL(ph.dataURL);
+  if(!u || typeof ph.date!=="string") return null;
+  return { date:ph.date, dataURL:u };
+}
+/* normalize: defaultState を土台に o を上書きする正方向マージ
+   （v2のload()はネスト内欠損キーがデフォルト補完されないマージ方向バグがあったため修正） */
+function normalizeState(o){
+  var d=defaultState(), s={};
+  Object.keys(d).forEach(function(k){ s[k]=d[k]; });
+  Object.keys(o).forEach(function(k){ s[k]=o[k]; });
+  s.profile=Object.assign(defaultState().profile, o.profile||{});
+  s.body=Object.assign(defaultState().body, o.body||{});
+  s.goal=Object.assign(defaultState().goal, o.goal||{});
+  s.life=Object.assign(defaultState().life, o.life||{});
+  s.today=Object.assign(defaultState().today, o.today||{});
+  /* today.checks: 配列以外（破損JSON）でviewHomeがTypeErrorにならないよう常にboolean 3要素へ正規化 */
+  s.today.checks = Array.isArray(s.today.checks) ? [0,1,2].map(function(i){ return s.today.checks[i]===true; }) : [false,false,false];
+  /* result: インポートJSON経由でinnerHTMLに連結されるため厳格検証（数値のみ通す＝esc不要のまま安全）。
+     必須数値が欠損/不正なら result=null（カルテ再作成へ誘導） */
+  if(s.result && typeof s.result==="object"){
+    var r0=s.result, rn={}, rOK=true;
+    ["bmr","tdee","adj","recommended","protein","fat","carb","safe","floorApplied"].forEach(function(k){
+      if(typeof r0[k]==="number" && isFinite(r0[k])) rn[k]=r0[k]; else rOK=false;
+    });
+    rn.pace=(typeof r0.pace==="number" && isFinite(r0.pace))?r0.pace:null; /* paceは正規exportでもnullあり得る */
+    rn.guarded=!!r0.guarded; rn.overPace=!!r0.overPace;
+    rn.safeDate=(typeof r0.safeDate==="string" && /^\d{4}-\d{2}-\d{2}$/.test(r0.safeDate))?r0.safeDate:null;
+    rn.training=(typeof r0.training==="string")?r0.training:"";
+    s.result=rOK?rn:null;
+  } else { s.result=null; }
+  if(!Array.isArray(s.weights)) s.weights=[];
+  s.weights=s.weights.filter(function(e){ return e && typeof e.date==="string" && typeof e.val==="number" && isFinite(e.val); });
+  if(!Array.isArray(s.streakDays)) s.streakDays=[];
+  if(!Array.isArray(s.chat)) s.chat=[];
+  if(!Array.isArray(s.life.habits)) s.life.habits=[];
+  if(!Array.isArray(s.meals)) s.meals=[];
+  s.meals=s.meals.filter(function(m){ return m && typeof m==="object"; }).map(function(m){
+    return {
+      id: typeof m.id==="string" ? m.id : "m?",
+      date: typeof m.date==="string" ? m.date : "",
+      slot: ["morning","noon","evening","snack"].indexOf(m.slot)>=0 ? m.slot : "noon",
+      tags: Array.isArray(m.tags) ? m.tags.filter(function(t){ return !!MEAL_TAGS[t]; }) : [],
+      amount: ["low","mid","high"].indexOf(m.amount)>=0 ? m.amount : "mid",
+      photo: sanitizeDataURL(m.photo),
+      photoRemoved: !!m.photoRemoved,
+      comment: (m.comment && typeof m.comment.text==="string")
+        ? { text:m.comment.text, severity:(m.comment.severity==="strict"?"strict":(m.comment.severity==="warn"?"warn":"ok")), basis:String(m.comment.basis||"") }
+        : null
+    };
+  });
+  if(!Array.isArray(s.girths)) s.girths=[];
+  s.girths=s.girths.filter(function(x){ return x && typeof x.date==="string"; }).map(function(x){
+    return { date:x.date,
+      waist:(typeof x.waist==="number" && isFinite(x.waist))?x.waist:null,
+      chest:(typeof x.chest==="number" && isFinite(x.chest))?x.chest:null };
+  });
+  /* 写真10件上限をインポート/読込経路でも強制（超過stateの持ち込みでsave()のクォータ再試行を破らない） */
+  var npWith=s.meals.filter(function(m){ return m.photo; });
+  while(npWith.length>10){ var npOld=npWith.shift(); npOld.photo=null; npOld.photoRemoved=true; }
+  if(!s.photos || typeof s.photos!=="object") s.photos={start:null,latest:null};
+  s.photos={ start:normPhoto(s.photos.start), latest:normPhoto(s.photos.latest) };
+  if(!Array.isArray(s.strictLog)) s.strictLog=[];
+  s.strictLog=s.strictLog.filter(function(x){ return x && typeof x.date==="string" && typeof x.text==="string"; }).slice(-20);
+  if(s.memberStatus!=="active" && s.memberStatus!=="resigned") s.memberStatus="active";
+  if(!Array.isArray(s.milestonesSeen)) s.milestonesSeen=[];
+  if(["home","meals","body","chat","settings"].indexOf(s.tab)<0) s.tab="home";
+  s.v=2;
+  return s;
+}
 function load(){
   try{
     var raw = localStorage.getItem(STORE_KEY);
     if(!raw) return false;
     var o = JSON.parse(raw);
     if(!o || typeof o!=="object") return false;
-    var d = defaultState();
-    state = Object.assign(d, o);
-    state.profile = Object.assign(d.profile, o.profile||{});
-    state.body = Object.assign(d.body, o.body||{});
-    state.goal = Object.assign(d.goal, o.goal||{});
-    state.life = Object.assign(d.life, o.life||{});
-    state.today = Object.assign(d.today, o.today||{});
-    if(!Array.isArray(state.weights)) state.weights=[];
-    if(!Array.isArray(state.streakDays)) state.streakDays=[];
-    if(!Array.isArray(state.chat)) state.chat=[];
-    if(!Array.isArray(state.life.habits)) state.life.habits=[];
+    state = normalizeState(migrateState(o));
     return true;
   }catch(e){ state = defaultState(); return false; }
 }
@@ -367,12 +496,27 @@ function round2(n){ return Math.round(n*100)/100; }
    計算エンジン（決定的・健康ガード・出どころラベル）
    source ∈ {input, choice, reference}
    ============================================================ */
-var ACTIVITY = {
-  "1.2":  { factor:1.2,   label:"座り仕事中心(運動なし)" },
-  "1.375":{ factor:1.375, label:"軽い運動 週1-3回" },
-  "1.55": { factor:1.55,  label:"中程度 週3-5回" },
-  "1.725":{ factor:1.725, label:"ほぼ毎日 激しい運動" }
+/* ============================================================
+   DEED_FORMULA — 係数・補正の一元CONFIG
+   MTG方針(2026-07-01): 現在は「一般値(仮)」。正式には“リード式”
+   （リードのスクールで教える係数体系）に差し替える。
+   ★このオブジェクトを書き換えるだけで全画面（カルテ/食事/からだ/スタッフ）に反映★
+   ============================================================ */
+var DEED_FORMULA = {
+  label: "一般値(仮)・正式にはリード式に差し替え予定",
+  activity: {
+    "1.2":  { factor:1.2,   label:"座り仕事中心(運動なし)" },
+    "1.375":{ factor:1.375, label:"軽い運動 週1-3回" },
+    "1.55": { factor:1.55,  label:"中程度 週3-5回" },
+    "1.725":{ factor:1.725, label:"ほぼ毎日 激しい運動" }
+  },
+  goalAdjust: { lose:-500, gain:300, keep:0 },
+  protein: { perKgDefault:1.6, perKgGain:1.7, capG:170 },
+  fatRatio: 0.25,
+  safePace: { losePctPerWeek:0.01, loseAbsKg:0.5, gainPctPerWeek:0.005, gainAbsKg:0.3 },
+  kcalFloor: { m:1500, f:1200, na:1350, tdeeRatio:0.8 }
 };
+var ACTIVITY = DEED_FORMULA.activity; /* 既存参照の互換エイリアス */
 var HABITS = { homePilates:"家ピラティス", running:"ランニング", bodyweight:"自重トレ", gymStrength:"ジム筋トレ", walking:"ウォーキング", other:"その他", none:"いまは特になし" };
 var SEX_LABEL = { m:"男性", f:"女性", na:"回答しない" };
 
@@ -382,7 +526,7 @@ function rv(value, source, label, opt){
   if(source==="reference" && (!opt.formula || !opt.premise)) throw new Error("reference は formula と premise が必須: "+label);
   return { value:value, source:source, label:label, formula:opt.formula||null, premise:opt.premise||null, citation:opt.citation||null };
 }
-function sexFloor(sex){ if(sex==="f") return 1200; if(sex==="na") return 1350; return 1500; }
+function sexFloor(sex){ var F=DEED_FORMULA.kcalFloor; if(sex==="f") return F.f; if(sex==="na") return F.na; return F.m; }
 
 function bmr(p){
   var W=p.body.weight, H=p.body.height, A=p.profile.age, sx=p.profile.sex;
@@ -414,22 +558,24 @@ function goalDir(p){
   if(diff>=1.5) return "gain"; if(diff<=-1.5) return "lose"; return "maintain";
 }
 function goalAdjust(p){
-  var d=goalDir(p), v = d==="gain"?300:(d==="lose"?-500:0);
+  var GA=DEED_FORMULA.goalAdjust;
+  var d=goalDir(p), v = d==="gain"?GA.gain:(d==="lose"?GA.lose:GA.keep);
   var b=bmr(p), fl=sexFloor(p.profile.sex);
   return rv(v,"reference","目的補正（"+(d==="gain"?"増量":d==="lose"?"減量":"維持")+"）",{
-    formula:"増量 +300 / 維持 0 / 減量 −500",
-    premise:"減量−500kcalは1日約500kcal減＝週約0.5kgの健康的減量に対応。ただし基礎代謝"+b.value+"kcalと性別下限"+fl+"kcalは割らない（健康ガード）。",
+    formula:"増量 +"+GA.gain+" / 維持 "+GA.keep+" / 減量 "+GA.lose+"（一般値(仮)・リード式に差し替え予定）",
+    premise:"減量"+GA.lose+"kcalは1日約500kcal減＝週約0.5kgの健康的減量に対応。ただし基礎代謝"+b.value+"kcalと性別下限"+fl+"kcalは割らない（健康ガード）。",
     citation:"Harvard Health / NIH（健康的減量 週0.5–1kg・1日約500kcal減）"
   });
 }
 function targetKcal(p){
+  var F=DEED_FORMULA;
   var t=tdee(p).value, d=goalDir(p), b=bmr(p).value, fl=sexFloor(p.profile.sex);
-  var floorVal=Math.max(Math.round(t*0.8), fl, b), v, guarded=false;
-  if(d==="gain") v=t+300;
-  else if(d==="maintain") v=t;
-  else { var raw=t-500; v=Math.max(raw, floorVal); if(raw<floorVal) guarded=true; }
+  var floorVal=Math.max(Math.round(t*F.kcalFloor.tdeeRatio), fl, b), v, guarded=false;
+  if(d==="gain") v=t+F.goalAdjust.gain;
+  else if(d==="maintain") v=t+F.goalAdjust.keep;
+  else { var raw=t+F.goalAdjust.lose; v=Math.max(raw, floorVal); if(raw<floorVal) guarded=true; }
   var premise = guarded
-    ? "−500適用後 "+(t-500)+"kcal が下限 "+floorVal+"kcal（TDEEの80%="+Math.round(t*0.8)+" / 基礎代謝="+b+" / 性別下限="+fl+" の最大）を下回るため、健康ガードで "+v+"kcal に引き上げ。黙って丸めず明示。"
+    ? (F.goalAdjust.lose)+"適用後 "+(t+F.goalAdjust.lose)+"kcal が下限 "+floorVal+"kcal（TDEEの"+Math.round(F.kcalFloor.tdeeRatio*100)+"%="+Math.round(t*F.kcalFloor.tdeeRatio)+" / 基礎代謝="+b+" / 性別下限="+fl+" の最大）を下回るため、健康ガードで "+v+"kcal に引き上げ。黙って丸めず明示。"
     : "TDEE("+t+") に目的補正を合算。基礎代謝"+b+"kcalと性別下限"+fl+"kcalは割らない。";
   var out=rv(v,"reference","推奨カロリー",{
     formula:"TDEE + 目的補正（減量は max(TDEE−500, TDEE80%, 基礎代謝, 性別下限)）",
@@ -442,16 +588,18 @@ function targetProtein(p){
   if(d==="gain") base=Math.max(gw!=null?gw:w, w);
   else if(gw!=null && gw>0) base=Math.max(gw, w*0.9);
   else base=w;
-  var perKg=(d==="gain")?1.7:1.6, raw=Math.round(base*perKg), v=Math.min(raw,170), capped=raw>170;
+  var PR=DEED_FORMULA.protein;
+  var perKg=(d==="gain")?PR.perKgGain:PR.perKgDefault, raw=Math.round(base*perKg), v=Math.min(raw,PR.capG), capped=raw>PR.capG;
   return rv(v,"reference","たんぱく質目安",{
-    formula:"基準体重 × 1.6（減量・維持）/ 1.7（増量）、上限170g",
-    premise:"基準体重は "+round1(base)+"kg（"+(d==="gain"?"増量時は目標と現体重の高い方":"減量時は目標体重と現体重の90%の高い方＝筋量維持のため")+"）。"+(capped?"上限170gで頭打ち。":""),
+    formula:"基準体重 × "+PR.perKgDefault+"（減量・維持）/ "+PR.perKgGain+"（増量）、上限"+PR.capG+"g（一般値(仮)）",
+    premise:"基準体重は "+round1(base)+"kg（"+(d==="gain"?"増量時は目標と現体重の高い方":"減量時は目標体重と現体重の90%の高い方＝筋量維持のため")+"）。"+(capped?"上限"+PR.capG+"gで頭打ち。":""),
     citation:"高たんぱく＋食物繊維で満腹感（PMC）"
   });
 }
 function targetFat(p,kcal){
-  return rv(Math.round((kcal*0.25)/9),"reference","脂質目安",{
-    formula:"総kcal×25%÷9kcal/g", premise:"脂質比率25%は一般的な健康域の目安。"
+  var FR=DEED_FORMULA.fatRatio;
+  return rv(Math.round((kcal*FR)/9),"reference","脂質目安",{
+    formula:"総kcal×"+Math.round(FR*100)+"%÷9kcal/g", premise:"脂質比率"+Math.round(FR*100)+"%は一般的な健康域の目安（一般値(仮)・リード式に差し替え予定）。"
   });
 }
 function targetCarb(p,kcal,protein,fat){
@@ -483,10 +631,11 @@ function plannedPace(p){
   return rv(round2(Math.abs(w-gw)/wk),"input","想定ペース",{});
 }
 function safePace(p){
+  var SP=DEED_FORMULA.safePace;
   var d=goalDir(p), w=p.body.weight;
-  var byRate=(d==="gain")?w*0.005:w*0.01, byAbs=(d==="gain")?0.3:0.5;
+  var byRate=(d==="gain")?w*SP.gainPctPerWeek:w*SP.losePctPerWeek, byAbs=(d==="gain")?SP.gainAbsKg:SP.loseAbsKg;
   return rv(round2(Math.min(byRate,byAbs)),"reference","安全ペース",{
-    formula:(d==="gain"?"min(体重×0.5%/週, 0.3kg/週)（増量）":"min(体重×1%/週, 0.5kg/週)（減量）"),
+    formula:(d==="gain"?"min(体重×"+(SP.gainPctPerWeek*100)+"%/週, "+SP.gainAbsKg+"kg/週)（増量）":"min(体重×"+(SP.losePctPerWeek*100)+"%/週, "+SP.loseAbsKg+"kg/週)（減量）"),
     premise:"健康的な体重変化の上限。体重"+w+"kg基準。",
     citation:"健康的減量 週0.5–1kg・体重1%まで（Harvard Health等）"
   });
@@ -587,8 +736,22 @@ function currentStreak(){
    ============================================================ */
 var screens=document.getElementById("screens");
 var afterRender={};
+/* スタッフ閲覧中フラグ。stateに入れず保存もしない＝リロードで必ず会員ビューに戻り
+   合言葉の再入力を要求する（デモの権限境界表現。仕様でありバグではない） */
+var staffView=false;
+var MEMBER_SCREENS=["home","meals","body","chat","settings"];
+function isLockedFor(st, sv){ return st.memberStatus==="resigned" && !sv; }
 function go(name){ state.screen=name; save(); render(); }
+function goTab(name){ state.tab=name; go(name); }
 function render(){
+  /* スタッフ画面ガード: staffViewは非永続＝リロード後は必ず合言葉を再要求する（冒頭チェックリストの宣言仕様をここで実際に担保） */
+  if(state.screen==="staff" && !staffView){ state.screen = isLockedFor(state,false) ? "locked" : "home"; }
+  /* 退会ロックガード: 退会状態の会員画面はロック表示（スタッフ画面は通す） */
+  if(isLockedFor(state, staffView) && MEMBER_SCREENS.indexOf(state.screen)>=0){
+    screens.innerHTML='<div class="screen active">'+viewLocked()+'</div>';
+    window.scrollTo(0,0);
+    return;
+  }
   var html="";
   switch(state.screen){
     case "consent": html=viewConsent(); break;
@@ -600,8 +763,12 @@ function render(){
     case "analyzing": html=viewAnalyzing(); break;
     case "result": html=viewResult(); break;
     case "home": html=viewHome(); break;
+    case "meals": html=viewMeals(); break;
+    case "body": html=viewBody(); break;
     case "chat": html=viewChat(); break;
     case "settings": html=viewSettings(); break;
+    case "staff": html=viewStaff(); break;
+    case "locked": html=viewLocked(); break;
     default: html=viewConsent();
   }
   screens.innerHTML='<div class="screen active">'+html+'</div>';
@@ -645,10 +812,10 @@ function stepper(cur){
   return '<div class="stepper">'+bars+segs+'</div>';
 }
 function tabbar(active){
-  return '<div class="tabbar">'+
-    '<button class="'+(active==="home"?"on":"")+'" onclick="go(\'home\')"><span class="ti">🏠</span>ホーム</button>'+
-    '<button class="'+(active==="chat"?"on":"")+'" onclick="go(\'chat\')"><span class="ti">💬</span>D.Dに相談</button>'+
-  '</div>';
+  var items=[["home","🏠","ホーム"],["meals","🍽","食事"],["body","📏","からだ"],["chat","💬","相談"],["settings","⚙","設定"]];
+  return '<div class="tabbar">'+items.map(function(it){
+    return '<button class="'+(active===it[0]?"on":"")+'" onclick="goTab(\''+it[0]+'\')"><span class="ti">'+it[1]+'</span>'+it[2]+'</button>';
+  }).join("")+'</div>';
 }
 
 /* ---- 同意 ---- */
@@ -877,7 +1044,14 @@ function updateBCDerived(){
 function toggleEdit(){ state.body.edited=!state.body.edited; save(); render(); }
 function nextStep2(){
   var b=state.body;
-  if(b.height<100||b.height>220||b.weight<30||b.weight>200||b.bodyFatPct<3||b.bodyFatPct>60){ toast("計測値が範囲外です。確認してください"); return; }
+  /* BC_FIELDSのmin/maxを唯一の基準として参照（blur警告の案内範囲とゲートの不一致を防ぐ） */
+  var outOfRange=BC_FIELDS.some(function(f){
+    if(f.calc) return false;
+    var v=b[f.k];
+    return typeof v!=="number" || !isFinite(v) || v<f.min || v>f.max;
+  });
+  if(outOfRange){ toast("計測値が範囲外です。確認してください"); return; }
+  if(typeof b.muscle==="number" && typeof b.weight==="number" && b.muscle>b.weight){ toast("筋肉量が体重を超えています。確認してください"); return; }
   save(); go("step3");
 }
 
@@ -1069,7 +1243,8 @@ function viewResult(){
     {note:"式：男 10×体重+6.25×身長−5×年齢+5 ／ 女 −161 ／ 回答しない −78"});
 
   var c2=mcard("× 活動係数", a.activityFactor.value+"",
-    srcChip("choice", a.activityFactor.label, "STEP4であなたが選んだ活動レベル。固定値（1.375）ではありません。"),
+    srcChip("choice", a.activityFactor.label, "STEP4であなたが選んだ活動レベル。固定値（1.375）ではありません。")+
+    srcChip("ref","一般値(仮)","現在の係数は一般的な計算式の値です。正式にはDEEDの“リード式”に差し替え予定。差し替えても出どころ表示の仕組みは変わりません。"),
     {note:"BMR × 係数 = 活動込み消費 "+a.tdee.value+"kcal"});
 
   var c3=mcard("目的補正", (a.goalAdjust.value>0?"+":"")+a.goalAdjust.value+'<span class="u">kcal</span>',
@@ -1078,7 +1253,7 @@ function viewResult(){
 
   var c4='<div class="metric-card" style="text-align:center; border:1px solid var(--accent);"><div class="mc-lab">＝ 推奨カロリー</div>'+
     '<div class="bignum">'+a.targetKcal.value+' <span class="u" style="font-size:var(--fs-body); color:var(--text-3);">kcal/日</span></div>'+
-    '<div class="srcchips" style="justify-content:center;">'+srcChip("ref","上記の合算", a.targetKcal.formula+"／"+a.targetKcal.premise)+'</div></div>';
+    '<div class="srcchips" style="justify-content:center;">'+srcChip("ref","上記の合算", a.targetKcal.formula+"／"+a.targetKcal.premise)+srcChip("ref","一般値(仮)","活動係数・補正値は一般値(仮)〔目安〕。正式には“リード式”（DEED式の算出方法）に差し替え予定です。")+'</div></div>';
 
   var c5=mcard("たんぱく質", a.protein.value+'<span class="u">g/日</span>',
     srcChip("ref","たんぱく質目安", a.protein.formula+"／"+a.protein.premise+"／出典:"+a.protein.citation));
@@ -1123,6 +1298,7 @@ function viewResult(){
     hgBanner+
     (mn?'<div class="small" style="margin-bottom:10px;">'+esc(mn)+'</div>':'')+
     c1+c2+c3+c4+c5+pfc+bfmLbm+c6+c7+
+    '<div class="micro" style="margin-top:10px;">係数は一般値(仮)です。正式には“リード式”に差し替え予定（CONFIG一箇所で全画面反映）。</div>'+
     '<div class="transparency"><div class="l1">数字は目安です。式と前提をすべて開示しています。</div><div class="l2">黙って想定した値はありません。</div></div>'+
   '</div>'+
   '<div class="footer-cta"><button class="btn secondary" onclick="go(\'step1\')">入力を見直す</button><button class="btn primary" onclick="go(\'home\')">D.D ホームへ</button></div>';
@@ -1133,12 +1309,27 @@ function ensureToday(){
   var t=todayISO();
   if(state.today.date!==t){ state.today={date:t, checks:[false,false,false]}; save(); }
 }
+var MILESTONES=[7,30,90];
+function milestoneInfo(streak, seen){
+  var achieved=MILESTONES.filter(function(m){ return streak>=m; });
+  var next=null, remaining=null, newly=null;
+  for(var i=0;i<MILESTONES.length;i++){ if(streak<MILESTONES[i]){ next=MILESTONES[i]; remaining=MILESTONES[i]-streak; break; } }
+  for(var j=0;j<achieved.length;j++){ if(seen.indexOf(achieved[j])<0){ newly=achieved[j]; break; } }
+  return { achieved:achieved, next:next, remaining:remaining, newly:newly };
+}
+/* 写真リマインド（決定的ルール）: 月の1〜7日 かつ 最新写真が今月でない（またはなし） */
+function needPhotoReminder(tISO, photos){
+  var day=parseInt(tISO.slice(8,10),10);
+  if(day<1 || day>7) return false;
+  if(!photos || !photos.latest) return true;
+  return photos.latest.date.slice(0,7)!==tISO.slice(0,7);
+}
 function viewHome(){
   ensureToday();
   var r=state.result||{};
   var name=state.profile.name?esc(state.profile.name):"ゲスト";
   var checks=state.today.checks;
-  var checkLabels=["推奨カロリー "+(r.recommended||"-")+"kcal を意識する","たんぱく質 "+(r.protein||"-")+"g を摂る","運動 or 1万歩（できる方）"];
+  var checkLabels=["推奨カロリー "+(r.recommended||"-")+"kcal を意識する","たんぱく質 "+(r.protein||"-")+"g を摂る","自宅トレ or 1万歩（できる方）"];
   var checkCards=checkLabels.map(function(l,i){
     return '<div class="check-card'+(checks[i]?' on':'')+'" onclick="toggleCheck('+i+')"><div class="ck">✓</div><div class="ck-t">'+esc(l)+'</div></div>';
   }).join("");
@@ -1147,19 +1338,44 @@ function viewHome(){
   var streak=currentStreak();
   var dotsArr=[];
   for(var i=6;i>=0;i--){ var d=addDaysISO(todayISO(),-i), on=state.streakDays.indexOf(d)>=0; dotsArr.push('<div class="sd'+(on?' on':'')+'">'+(on?'✓':'')+'</div>'); }
-  var ddq=ddMessage(state,{streak:streak, streakBroken:(streak===0 && state.streakDays.length>0)});
+  var photoCard="";
+  if(needPhotoReminder(todayISO(), state.photos)){
+    photoCard='<div class="card" onclick="goTab(\'body\')" style="cursor:pointer;"><b>📸 今月の記録写真、まだ撮っていない。</b><div class="small" style="margin-top:4px;">体重計が黙っている月でも、写真は嘘をつかない。ガイド通り、同じ条件で1枚。</div><div class="micro" style="margin-top:4px; color:var(--accent);">からだタブで撮る →</div></div>';
+  }
+  var mi=milestoneInfo(streak, state.milestonesSeen);
+  var pills=MILESTONES.map(function(m){
+    var icon=m===7?"🔥":(m===30?"🏅":"👑");
+    return '<span class="ms-pill'+(streak>=m?' on':'')+'">'+m+'日'+icon+'</span>';
+  }).join("");
+  var nextLine=(mi.next!=null)?'<div class="micro" style="margin-top:6px;">あと'+mi.remaining+'日で'+mi.next+'日達成</div>':'';
+  var giftLine=mi.achieved.length?'<div class="micro" style="margin-top:4px;">🎁 達成の特典はDEED店舗スタッフまで（デモでは表示のみ。特典等の有無・内容は店舗でご確認ください）</div>':'';
+  var lw=state.weights.length?state.weights[state.weights.length-1]:null;
+  var bodyCard='<div class="card" onclick="goTab(\'body\')" style="cursor:pointer; display:flex; justify-content:space-between; align-items:center;"><div><b>📏 からだ</b><div class="small">'+(lw?('最新 '+lw.val+'kg（'+esc(fmtJP(lw.date))+'）〔あなたの入力〕'):'体重・採寸・写真の記録はこちら')+'</div></div><div style="color:var(--accent);">→</div></div>';
+  var tMeals=mealsOn(state.meals,todayISO());
+  var mealCard='<div class="card" onclick="goTab(\'meals\')" style="cursor:pointer; display:flex; justify-content:space-between; align-items:center;"><div><b>🍽 食事</b><div class="small">'+(tMeals.length?('今日の記録 '+tMeals.length+'件・概算 約'+estDayKcal(state.meals,todayISO())+'kcal（タグからの概算）'):'今日はまだ記録なし')+'</div></div><div style="color:var(--accent);">→</div></div>';
+  var todayStrict=tMeals.filter(function(m){ return m.comment && m.comment.severity==="strict"; });
+  var ddq=todayStrict.length? todayStrict[todayStrict.length-1].comment.text : ddMessage(state,{streak:streak, streakBroken:(streak===0 && state.streakDays.length>0)});
 
   return ''+
   '<div class="greet"><div class="g-av">D.D</div><div><b>こんにちは、'+name+'さん</b><div class="g-date">'+esc(fmtJP(todayISO()))+'</div></div><div class="kcal-badge">推奨<b>'+(r.recommended||"-")+'</b>kcal/日</div></div>'+
   '<div class="scroll" style="padding-bottom:20px;">'+
-    '<div class="h2">今日のチェック</div>'+checkCards+doneBand+
-    '<div class="card lg" style="text-align:center; margin-top:6px;"><div class="mc-lab">習慣ストリーク</div><div class="streak-big">'+streak+'日連続 🔥</div><div class="streak-dots" style="justify-content:center;">'+dotsArr.join("")+'</div></div>'+
-    '<div class="card lg"><div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;"><div class="mc-lab">体重の推移</div><button class="btn ghost" style="width:auto; height:auto; padding:4px 10px;" onclick="openWeightModal()">記録する</button></div><div class="svg-wrap" id="weightChart"></div><div class="summary-line" id="weightSummary"></div></div>'+
-    '<div class="dd-quote"><div class="av">D.D</div><p>'+esc(ddq)+'</p></div>'+
+    '<div class="h2">今日のチェック — 来店しない日の3タスク</div>'+
+    '<div class="micro" style="margin:-4px 0 8px;">週1のセッション以外の日は、この3つだけでいい。できたらチェック——それをD.Dと担当トレーナーが見ている。</div>'+
+    checkCards+doneBand+photoCard+
+    '<div class="card lg" style="text-align:center; margin-top:6px;"><div class="mc-lab">習慣ストリーク</div><div class="streak-big">'+streak+'日連続 🔥</div><div class="streak-dots" style="justify-content:center;">'+dotsArr.join("")+'</div><div class="ms-row">'+pills+'</div>'+nextLine+giftLine+'</div>'+
+    bodyCard+mealCard+
+    '<div class="dd-quote'+(todayStrict.length?' strict':'')+'"><div class="av">D.D</div><p>'+esc(ddq)+'</p></div>'+
+    (todayStrict.length?'<div class="micro" style="margin:-6px 0 6px;">※今日の食事記録へのD.Dの指摘を再掲（選んだタグから生成・写真は未解析）</div>':'')+
   '</div>'+
   tabbar("home");
 }
-afterRender.home=function(){ renderWeightChart(); };
+afterRender.home=function(){
+  var mi=milestoneInfo(currentStreak(), state.milestonesSeen);
+  if(mi.newly!=null){
+    state.milestonesSeen.push(mi.newly); save();
+    toast(mi.newly+"日連続達成！（デモ表示。特典等の有無・内容は店舗でご確認ください）");
+  }
+};
 function toggleCheck(i){
   ensureToday();
   state.today.checks[i]=!state.today.checks[i];
@@ -1189,12 +1405,15 @@ function openWeightModal(){
   box.appendChild(cancel); box.appendChild(ok);
   bg.classList.add("show");
 }
-function renderWeightChart(){
-  var host=document.getElementById("weightChart"); if(!host) return;
-  var data=state.weights.slice();
-  if(data.length===0) data=[{date:todayISO(), val:state.body.weight}];
+/* 汎用折れ線グラフ（自前inline SVG・外部ライブラリなし）
+   points: [{date,val}] / opts: {goal:number|null（目標破線・体重のみ）, emptyMsg} */
+function drawLineChart(host, pointsIn, opts){
+  opts=opts||{};
+  if(!host) return;
+  var data=pointsIn.slice().sort(function(a,b){ return a.date<b.date?-1:1; });
+  if(data.length===0){ host.innerHTML='<div class="muted small">'+esc(opts.emptyMsg||"記録するとここに推移が出ます。")+'</div>'; return; }
   var W=320,H=140,padL=34,padR=12,padT=12,padB=22;
-  var vals=data.map(function(d){return d.val;}), gw=state.goal.targetWeight;
+  var vals=data.map(function(d){return d.val;}), gw=(opts.goal!=null)?opts.goal:null;
   var allVals=vals.slice(); if(gw!=null) allVals.push(gw);
   var minV=Math.min.apply(null,allVals), maxV=Math.max.apply(null,allVals);
   if(minV===maxV){ minV-=1; maxV+=1; }
@@ -1242,16 +1461,54 @@ function renderWeightChart(){
     svg.appendChild(tx);
   });
   host.innerHTML=""; host.appendChild(svg);
-  var sum=document.getElementById("weightSummary");
+}
+function renderWeightChart(hostId, sumId){
+  var host=document.getElementById(hostId||"weightChart"); if(!host) return;
+  var data=state.weights.slice();
+  if(data.length===0) data=[{date:todayISO(), val:state.body.weight}];
+  drawLineChart(host, data, {goal:state.goal.targetWeight, emptyMsg:"記録するとここに推移が出ます。"});
+  var sum=document.getElementById(sumId||"weightSummary");
   if(sum){
     if(state.weights.length<=1 && data.length<=1){ sum.innerHTML='<span class="muted">記録を続けると推移が見えます。</span>'; }
     else {
       var first=data[0].val, lastv=data[data.length-1].val, diff=round1(lastv-first), purpose=state.goal.purpose;
       var good=(purpose==="cut"&&diff<0)||(purpose==="bulk"&&diff>0)||(purpose==="keep"&&Math.abs(diff)<1);
       var col=good?"var(--ok)":"var(--warn)";
-      sum.innerHTML='開始'+first+'kg → 最新'+lastv+'kg（<span style="color:'+col+'; font-weight:700;">'+(diff>0?"+":"")+diff+'kg</span>）';
+      sum.innerHTML='開始'+first+'kg → 最新'+lastv+'kg（<span style="color:'+col+'; font-weight:700;">'+(diff>0?"+":"")+diff+'kg</span>）〔あなたの入力〕';
     }
   }
+}
+/* ---- 採寸（腹囲・胸囲） ---- */
+function girthSeries(girths, key){
+  return girths.filter(function(g){ return g[key]!=null; }).map(function(g){ return {date:g.date, val:g[key]}; });
+}
+function upsertGirth(dateISO, waist, chest){
+  var ex=state.girths.filter(function(g){ return g.date===dateISO; })[0];
+  if(ex){ if(waist!=null) ex.waist=waist; if(chest!=null) ex.chest=chest; }
+  else state.girths.push({date:dateISO, waist:waist, chest:chest});
+  state.girths.sort(function(a,b){ return a.date<b.date?-1:1; });
+}
+function openGirthModal(){
+  var bg=document.getElementById("modalBg");
+  document.getElementById("modalTitle").textContent="採寸を記録（任意）";
+  document.getElementById("modalBody").innerHTML=
+    '<label class="flabel">腹囲（cm・40〜200）</label><input class="inp" id="gWaist" type="text" inputmode="decimal" placeholder="例：85.0" style="margin-bottom:10px;">'+
+    '<label class="flabel">胸囲（cm・50〜200）</label><input class="inp" id="gChest" type="text" inputmode="decimal" placeholder="例：95.0" style="margin-bottom:8px;">'+
+    '<div class="micro" style="margin-bottom:14px;">どちらか片方だけでもOK。同じ日に入れ直すと上書きされます。数字が動かない時期の変化を見るための任意項目です。</div>';
+  var box=document.getElementById("modalBtns"); box.innerHTML="";
+  var cancel=document.createElement("button"); cancel.className="btn secondary"; cancel.textContent="キャンセル"; cancel.onclick=function(){ bg.classList.remove("show"); };
+  var ok=document.createElement("button"); ok.className="btn primary"; ok.textContent="記録";
+  ok.onclick=function(){
+    var wv=parseFloat(document.getElementById("gWaist").value), cv=parseFloat(document.getElementById("gChest").value);
+    var waist=isNaN(wv)?null:round1(wv), chest=isNaN(cv)?null:round1(cv);
+    if(waist==null && chest==null){ toast("腹囲か胸囲のどちらかを入力してください"); return; }
+    if(waist!=null && (waist<40 || waist>200)){ toast("腹囲は40〜200cmの範囲で入力してください"); return; }
+    if(chest!=null && (chest<50 || chest>200)){ toast("胸囲は50〜200cmの範囲で入力してください"); return; }
+    upsertGirth(todayISO(), waist, chest);
+    save(); bg.classList.remove("show"); render(); toast("採寸を記録しました");
+  };
+  box.appendChild(cancel); box.appendChild(ok);
+  bg.classList.add("show");
 }
 
 /* ---- D.D チャット ---- */
@@ -1265,11 +1522,11 @@ function viewChat(){
     state.chat.push({role:"dd", text:greet}); save();
   }
   var msgs=state.chat.map(function(m){ return '<div class="msg '+(m.role==="dd"?"dd":"me")+'">'+esc(m.text)+'</div>'; }).join("");
-  var quick=["停滞期がつらい","夜お腹がすく","運動が続かない","このペースで合ってる？"].map(function(q){
+  var quick=["食事写真見て","献立を提案して","今日は外食","停滞期がつらい","夜お腹がすく","運動が続かない","このペースで合ってる？"].map(function(q){
     return '<button class="chip" onclick="sendQuick(\''+esc(q)+'\')">'+esc(q)+'</button>';
   }).join("");
   return ''+
-  '<div class="chat-head"><div class="c-av">D.D</div><div><b>D.D（ディディ）</b><div class="c-sub"><span class="on-dot"></span>DEEDのAIトレーナー</div></div><button class="gear" style="margin-left:auto;" onclick="go(\'settings\')">⚙</button></div>'+
+  '<div class="chat-head"><div class="c-av">D.D</div><div><b>D.D（ディディ）</b><div class="c-sub"><span class="on-dot"></span>DEEDのAIトレーナー</div></div><button class="gear" style="margin-left:auto;" onclick="goTab(\'settings\')">⚙</button></div>'+
   '<div class="chat-scroll" id="chatScroll">'+msgs+'</div>'+
   '<div class="chat-note">D.Dの返答は一般的な情報で、医療助言ではありません。</div>'+
   '<div class="quickq">'+quick+'</div>'+
@@ -1292,7 +1549,19 @@ function respond(userText){
   var r=state.result||{}, pv=paceVerdict(state);
   var delta=state.goal.targetWeight!=null?round1(Math.abs(state.body.weight-state.goal.targetWeight)):null;
   var gwLabel=state.goal.targetWeight!=null?state.goal.targetWeight+"kg":"目標体重", reply;
-  if(/停滞|減らない|止まった|変わらない/.test(userText)){
+  if(/写真|添削/.test(userText)){
+    reply="食事の記録は🍽食事タブからどうぞ。写真＋タグで記録すれば、その場で僕が添削する。（デモでは写真の中身は解析せず、あなたが選んだタグから判断するよ）下のタブから食事へ移動して。";
+  } else if(/献立|メニュー|何食べ/.test(userText)){
+    var remC=state.result?remainingKcalOf(state.result, state.meals, todayISO()):null;
+    reply=(remC!=null?"今日の残りは概算約"+remC+"kcal（あなたが選んだタグからの概算）。":"")+"🍽食事タブの献立提案で、使いたい食材から2-3件出せる。数値は一般的な栄養概算〔目安〕だ。";
+  } else if(/外食|飲み会|コンビニ/.test(userText)){
+    reply="外食は敵じゃない。選び方の試験だ。①メインは肉か魚の焼き物・刺身系 ②揚げ物と〆の主食はどちらか片方まで ③帰ったらタグだけでも記録。なかったことにする方が問題だ。楽しんでこい。";
+  } else if(/食べてない|食べていない|抜いた|断食|1日1食/.test(userText)){
+    reply="それは頑張りじゃない。基礎代謝"+(r.bmr||"-")+"kcal〔目安・一般値(仮)〕を割る食べ方は、僕は認めない。減らすんじゃなく、たんぱく質"+(r.protein||"-")+"gを先に確保しろ。今日戻せば済む話だ。（極端な減食は勧めない。体調が悪い時は専門家へ）";
+  } else if(/怒って|厳しく/.test(userText)){
+    var lastStrict=state.strictLog.length?state.strictLog[state.strictLog.length-1]:null;
+    reply=lastStrict?("僕が最後に言ったのはこれだ——「"+lastStrict.text+"」。言うべきことはもう言った。あとはやるだけだ。"):"今のところ叱る材料がない。それが一番いい状態だ。";
+  } else if(/停滞|減らない|止まった|変わらない/.test(userText)){
     reply="停滞期は正常な反応だよ。体重は水分・便・グリコーゲンで日々±1kgは揺れる。1日の数字に一喜一憂せず、2週間の平均で見よう。たんぱく質"+(r.protein||"-")+"gと睡眠を守れば、また動き出すことが多い。";
   } else if(/ペース|速い|合っ|大丈夫か|間に合/.test(userText)){
     if(pv.tooFast){
@@ -1316,16 +1585,93 @@ function respond(userText){
 /* ---- 設定 ---- */
 function viewSettings(){
   return ''+
-  topbar(state.result?"home":"consent",null)+
+  (state.result?'':topbar("consent",null))+
   '<div class="scroll">'+
     '<h1 class="title">設定</h1>'+
-    '<div class="card"><div class="small">この端末に保存中（外部送信なし）。データはブラウザの localStorage にのみ保存されます。</div></div>'+
+    '<div class="card"><div class="small">この端末に保存中（外部送信なし）。データはブラウザの localStorage にのみ保存されます。写真（dataURL）を含むため、容量超過時は古い食事写真から自動削除してお知らせします。</div></div>'+
+    '<div class="h2">データ</div>'+
+    '<button class="btn secondary" onclick="openExport()" style="margin-bottom:12px;">データを書き出す（JSON）</button>'+
+    '<button class="btn secondary" onclick="openImport()" style="margin-bottom:12px;">データを読み込む（JSON）</button>'+
     '<button class="btn danger" onclick="confirmClear()" style="margin-bottom:12px;">データをクリア</button>'+
+    '<div class="h2">やり直し</div>'+
     '<button class="btn secondary" onclick="restartKeep()" style="margin-bottom:12px;">最初からやり直す（同意は保持）</button>'+
     '<button class="btn ghost" onclick="showConsentInfo()" style="margin-bottom:12px;">同意内容を見る</button>'+
-    '<div class="micro" style="margin-top:20px;">DEED D.D デモ v1.1 ／ 単一HTML・外部通信ゼロ ／ ※すべてデモ用ダミー</div>'+
+    '<div class="card" style="margin-top:8px;"><div class="mc-lab" style="margin-bottom:8px;">👔 スタッフの方へ</div>'+
+      '<button class="btn secondary" onclick="openStaffGate()">スタッフとして見る（デモ）</button>'+
+      '<div class="micro" style="margin-top:8px;">本番は職員ごとのアカウントとサーバー側の権限管理になります（合言葉方式は使いません）。</div></div>'+
+    '<div class="micro" style="margin-top:20px;">DEED D.D デモ v3.0 ／ 単一HTML・外部通信ゼロ ／ ※すべてデモ用ダミー</div>'+
   '</div>'+
-  (state.result?tabbar("home"):"");
+  (state.result?tabbar("settings"):"");
+}
+/* ---- データ書き出し/読み込み（端末内のみ・通信ゼロ） ---- */
+function openExport(){
+  var bg=document.getElementById("modalBg");
+  document.getElementById("modalTitle").textContent="データを書き出す（JSON）";
+  document.getElementById("modalBody").innerHTML=
+    '<textarea readonly id="expTxt" style="width:100%; height:140px; background:var(--surface-3); border:1px solid var(--line); border-radius:var(--r-md); color:var(--text); font-size:11px; padding:8px; font-family:var(--font);"></textarea>'+
+    '<div class="micro" style="margin:6px 0 12px;">写真（dataURL）込みのため大きくなることがあります。全文をコピーしてメモ等に保管してください。外部送信はされません。</div>';
+  /* innerHTML注入を避け value 代入（XSS安全） */
+  document.getElementById("expTxt").value=JSON.stringify({app:"dd_demo", v:2, exportedAt:todayISO(), state:state});
+  var box=document.getElementById("modalBtns"); box.innerHTML="";
+  var close=document.createElement("button"); close.className="btn secondary"; close.textContent="閉じる"; close.onclick=function(){ bg.classList.remove("show"); };
+  var copy=document.createElement("button"); copy.className="btn primary"; copy.textContent="コピー";
+  copy.onclick=function(){
+    var ta=document.getElementById("expTxt");
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(ta.value).then(function(){ toast("コピーしました"); }, function(){ ta.focus(); ta.select(); toast("全選択しました。手動でコピーしてください"); });
+    } else { ta.focus(); ta.select(); try{ document.execCommand("copy"); toast("コピーしました"); }catch(e){ toast("全選択しました。手動でコピーしてください"); } }
+  };
+  box.appendChild(close); box.appendChild(copy);
+  bg.classList.add("show");
+}
+function openImport(){
+  var bg=document.getElementById("modalBg");
+  document.getElementById("modalTitle").textContent="データを読み込む（JSON）";
+  document.getElementById("modalBody").innerHTML=
+    '<textarea id="impTxt" placeholder="書き出したJSONを貼り付け" style="width:100%; height:140px; background:var(--surface-3); border:1px solid var(--line); border-radius:var(--r-md); color:var(--text); font-size:11px; padding:8px; font-family:var(--font);"></textarea>'+
+    '<div class="micro" style="margin:6px 0 12px;">読み込むと現在のデータを置き換えます。v1（旧版）の書き出しも読み込めます（自動変換）。</div>';
+  var box=document.getElementById("modalBtns"); box.innerHTML="";
+  var cancel=document.createElement("button"); cancel.className="btn secondary"; cancel.textContent="キャンセル"; cancel.onclick=function(){ bg.classList.remove("show"); };
+  var okb=document.createElement("button"); okb.className="btn primary"; okb.textContent="読み込む";
+  okb.onclick=function(){
+    var raw=document.getElementById("impTxt").value.trim(), o=null;
+    try{ o=JSON.parse(raw); }catch(e){ toast("形式が不正です（JSONを貼り付けてください）"); return; }
+    var st=(o && o.app==="dd_demo" && o.state && typeof o.state==="object") ? o.state : o;
+    /* vフィールドは要求しない（v1旧stateはv無し＝migrateStateが想定済み）。形状で判定し変換はmigrate/normalizeに委ねる */
+    if(!st || typeof st!=="object" || !st.profile || typeof st.profile!=="object" || !st.body || typeof st.body!=="object"){ toast("形式が不正です（このアプリの書き出しではありません）"); return; }
+    bg.classList.remove("show");
+    modal("データを置き換え","現在のデータを、貼り付けた内容で置き換えます。よろしいですか？",[
+      {label:"キャンセル",cls:"secondary"},
+      {label:"置き換える",cls:"danger",fn:function(){
+        state=normalizeState(migrateState(st)); save();
+        go(state.result?"home":"consent"); toast("読み込みました");
+      }}
+    ]);
+  };
+  box.appendChild(cancel); box.appendChild(okb);
+  bg.classList.add("show");
+}
+/* ---- スタッフモード（デモ） ---- */
+function verifyStaffPass(input){ return input==="deed"; }
+function openStaffGate(){
+  var bg=document.getElementById("modalBg");
+  document.getElementById("modalTitle").textContent="スタッフモード（デモ）";
+  document.getElementById("modalBody").innerHTML=
+    '<p style="margin:0 0 8px; font-size:13px; color:var(--text-2);">スタッフ用の合言葉を入力してください。</p>'+
+    '<input class="inp" id="staffPass" type="password" placeholder="合言葉" style="margin-bottom:8px;">'+
+    '<div class="micro" style="margin-bottom:14px;">デモ版の合言葉は「deed」（共通）。本番では職員ごとのアカウントと権限管理で保護します（合言葉方式は使いません）。</div>';
+  var box=document.getElementById("modalBtns"); box.innerHTML="";
+  var cancel=document.createElement("button"); cancel.className="btn secondary"; cancel.textContent="キャンセル"; cancel.onclick=function(){ bg.classList.remove("show"); };
+  var enter=document.createElement("button"); enter.className="btn primary"; enter.textContent="入る";
+  enter.onclick=function(){
+    var v=document.getElementById("staffPass").value;
+    if(verifyStaffPass(v)){ bg.classList.remove("show"); staffView=true; go("staff"); }
+    else toast("合言葉が違います。デモ版の合言葉はご案内の通りです");
+  };
+  box.appendChild(cancel); box.appendChild(enter);
+  bg.classList.add("show");
+  var inp=document.getElementById("staffPass");
+  if(inp) inp.addEventListener("keydown", function(e){ if(e.key==="Enter" && !e.isComposing){ e.preventDefault(); enter.onclick(); } });
 }
 function confirmClear(){
   modal("データをクリア","この端末の保存データを完全に消去します。よろしいですか？",[
@@ -1336,6 +1682,506 @@ function confirmClear(){
 function restartKeep(){ var consent=state.consent; clearAll(); state.consent=consent; save(); go("step1"); }
 function showConsentInfo(){
   modal("同意内容","本アプリはデモです。表示数値は一般的な目安で医療助言ではありません。入力データは端末内にのみ保存され外部送信されません。",[{label:"閉じる",cls:"primary"}]);
+}
+
+/* ============================================================
+   🍽 食事エンジン（v3）— タグベースの決定的添削・献立提案・写真
+   デモでは写真の中身は解析しない（本番はAI解析）。全コメントは
+   「選んだタグ×量×時間帯×推奨カロリー」から決定的に生成する。
+   ============================================================ */
+var MEAL_TAGS={ staple:"主食", meatfish:"肉・魚", veg:"野菜", fried:"揚げ物", sweet:"甘い物", alcohol:"お酒" };
+var MEAL_SLOTS={ morning:"朝", noon:"昼", evening:"夜", snack:"間食" };
+var MEAL_AMOUNTS={ low:"少なめ", mid:"ふつう", high:"多め" };
+/* 〔目安・出典: 一般的な食品栄養概算。個々の食事の実測ではありません〕 */
+var MEAL_TAG_KCAL={
+  staple:  {low:150, mid:250, high:400},
+  meatfish:{low:150, mid:250, high:400},
+  veg:     {low: 30, mid: 60, high:100},
+  fried:   {low:200, mid:350, high:550},
+  sweet:   {low:100, mid:200, high:350},
+  alcohol: {low:100, mid:200, high:400}
+};
+var HONEST_TEXT="このデモでは写真の中身は解析していません（本番はAIが写真を解析して添削します）。コメントは、あなたが選んだタグ・時間帯・量と、あなたの推奨カロリー/たんぱく質目安〔一般値(仮)〕から生成しています。";
+function estMealKcal(meal){
+  return meal.tags.reduce(function(s,t){ return s+(MEAL_TAG_KCAL[t]?MEAL_TAG_KCAL[t][meal.amount]:0); },0);
+}
+function mealsOn(meals, dateISO){ return meals.filter(function(m){ return m.date===dateISO; }); }
+function estDayKcal(meals, dateISO){ return mealsOn(meals,dateISO).reduce(function(s,m){ return s+estMealKcal(m); },0); }
+function remainingKcalOf(result, meals, dateISO){ return (result?result.recommended:0)-estDayKcal(meals,dateISO); }
+function sortMealsForLog(meals){
+  return meals.map(function(m,i){ return {m:m,i:i}; }).sort(function(a,b){
+    if(a.m.date!==b.m.date) return a.m.date<b.m.date?1:-1;
+    return b.i-a.i;
+  }).map(function(x){ return x.m; });
+}
+/* 添削コメント決定ルール表（上から評価・最初にマッチした1本＋加点行。完全決定的）
+   健康ガード: 「もっと減らせ」系の文言は生成しない。S1/S2は“下げすぎを叱る”側 */
+function buildMealComment(meal, todayMeals, r, bmrVal){
+  var estDay=todayMeals.reduce(function(s,m){ return s+estMealKcal(m); },0);
+  var estMeal=estMealKcal(meal);
+  var remaining=r.recommended-estDay;
+  var lowMain=todayMeals.filter(function(m){ return m.amount==="low" && m.slot!=="snack"; }).length;
+  var allLow=todayMeals.every(function(m){ return m.amount==="low"; });
+  var has=function(t){ return meal.tags.indexOf(t)>=0; };
+  var text, severity, rule;
+  if(todayMeals.length>=2 && allLow && lowMain>=2){
+    rule="S1"; severity="strict";
+    text="足りない。今日の概算は約"+estDay+"kcal。基礎代謝"+bmrVal+"kcalを割る食べ方は、僕は認めない。減らすより、たんぱく質"+r.protein+"gを先に満たせ。";
+  } else if(meal.slot==="evening" && estDay<bmrVal){
+    rule="S2"; severity="strict";
+    text="今日はここまで約"+estDay+"kcal。基礎代謝"+bmrVal+"kcalに届いていない。極端に削るのは減量じゃない、消耗だ。次の食事はふつうの量で、たんぱく質から埋めろ。";
+  } else if(has("fried") && meal.amount==="high" && meal.slot==="evening"){
+    rule="S3"; severity="strict";
+    text="夜に揚げ物を多め、正直に言うが目標に対して逆走だ。概算+"+estMeal+"kcal。明日の昼に寄せるか、量を戻そう。";
+  } else if(has("sweet") && has("alcohol")){
+    rule="S4"; severity="strict";
+    text="甘い物とお酒の同時は概算"+estMeal+"kcal。どちらか片方に。両取りは目標が遠のく。";
+  } else if(remaining<0){
+    rule="W1"; severity="warn";
+    text="推奨"+r.recommended+"kcalを概算で約"+Math.abs(remaining)+"kcalオーバー。今日はもう締めて、明日リセットしよう。";
+  } else if(meal.slot==="snack" && meal.tags.length===1 && meal.tags[0]==="sweet"){
+    rule="W2"; severity="warn";
+    text="間食が甘い物だけ。たんぱく質側（ゆで卵・ヨーグルト等の一般例）に置き換えると空腹が長持ちするとされる。";
+  } else if(meal.amount==="low"){
+    rule="W3"; severity="warn";
+    text="少なめは悪くない。ただし1日トータルで基礎代謝"+bmrVal+"kcalは割らせない。次の食事で戻すこと。";
+  } else if(has("meatfish") && has("veg")){
+    rule="O1"; severity="ok";
+    text="いいバランスだ。たんぱく質"+r.protein+"g/日に近づく組み合わせ。こういう1食を“普通”にできる人間が、最後に勝つ。";
+  } else {
+    rule="O2"; severity="ok";
+    text="記録OK。今日の概算はここまで約"+estDay+"kcal／推奨"+r.recommended+"kcal。配分を考えて使え。";
+  }
+  /* 加点行（独立発火） */
+  if(has("veg") && rule!=="O1") text+=" 野菜を入れたのは良い。";
+  if(meal.slot==="morning" && has("meatfish")) text+=" 朝のたんぱく質は効く。";
+  var basis="タグ{"+meal.tags.map(function(t){ return MEAL_TAGS[t]; }).join("・")+"}×量{"+MEAL_AMOUNTS[meal.amount]+"}×時間帯{"+MEAL_SLOTS[meal.slot]+"}／推奨"+r.recommended+"kcal・基礎代謝"+bmrVal+"kcal（ルール表 "+rule+"）。写真は解析していません。";
+  return { text:text, severity:severity, basis:basis };
+}
+function pushStrictLog(st, text){
+  st.strictLog.push({date:todayISO(), text:text});
+  while(st.strictLog.length>20) st.strictLog.shift();
+}
+/* ---- 献立ミニDB（内蔵30件）〔目安・出典: 一般的な栄養概算。材料・量・調理法で変わります〕
+   AI生成ではなく、この固定DBを条件で絞り込むだけ（捏造ゼロ） ---- */
+var INGREDIENTS={ chicken:"鶏むね", egg:"卵", tofu:"豆腐", rice:"白米", pasta:"パスタ", veg:"野菜", fish:"魚", pork:"豚肉", natto:"納豆", oats:"オートミール" };
+var MENU_DB=[
+  {id:"k01", name:"鶏むねの塩麹焼き", kcal:250, p:35, ing:["chicken"], note:"迷ったらこれ。減量の王道だ"},
+  {id:"k02", name:"鶏むねと野菜の蒸し焼き", kcal:280, p:33, ing:["chicken","veg"], note:"一皿でたんぱく質も野菜も片づく"},
+  {id:"k03", name:"サラダチキンのせサラダ", kcal:220, p:28, ing:["chicken","veg"], note:"買って乗せるだけ。忙しい日の正解"},
+  {id:"k04", name:"鶏むねの照り焼き丼", kcal:550, p:38, ing:["chicken","rice"], note:"動いた日はこれで回復しろ"},
+  {id:"k05", name:"親子丼（むね肉）", kcal:600, p:36, ing:["chicken","egg","rice"], note:"増量期の味方。夜遅くは避けろ"},
+  {id:"k06", name:"ゆで卵2個＋味噌汁", kcal:200, p:14, ing:["egg"], note:"足りない時の“あと一品”要員"},
+  {id:"k07", name:"卵と野菜の炒め物", kcal:260, p:16, ing:["egg","veg"], note:"野菜ゼロの日をこれで消せ"},
+  {id:"k08", name:"オムレツ（卵2個）", kcal:240, p:15, ing:["egg"], note:"朝の10分でできる投資だ"},
+  {id:"k09", name:"卵かけご飯＋納豆", kcal:450, p:20, ing:["egg","natto","rice"], note:"朝の定番。安くて速くて強い"},
+  {id:"k10", name:"豆腐ステーキ", kcal:220, p:15, ing:["tofu"], note:"夜を軽くしたい日の主役"},
+  {id:"k11", name:"麻婆豆腐（ひき肉少なめ）", kcal:350, p:20, ing:["tofu","pork"], note:"満足感が欲しい減量日に"},
+  {id:"k12", name:"冷奴＋しらす", kcal:130, p:12, ing:["tofu","fish"], note:"追いたんぱくの最小コスト"},
+  {id:"k13", name:"豆腐と卵の中華スープ", kcal:180, p:13, ing:["tofu","egg"], note:"残り200kcal以下ならこれだ"},
+  {id:"k14", name:"サバの塩焼き定食", kcal:550, p:30, ing:["fish","rice"], note:"脂まで仕事する魚。定食の優等生"},
+  {id:"k15", name:"サバ缶と野菜の和え物", kcal:280, p:22, ing:["fish","veg"], note:"缶を開けるだけ。言い訳を消す一皿"},
+  {id:"k16", name:"鮭のホイル焼き", kcal:300, p:26, ing:["fish","veg"], note:"包んで焼くだけ。洗い物も少ない"},
+  {id:"k17", name:"ツナと豆腐のサラダ", kcal:240, p:24, ing:["fish","tofu","veg"], note:"たんぱく質の二段重ねだ"},
+  {id:"k18", name:"刺身盛り合わせ＋小ライス", kcal:450, p:32, ing:["fish","rice"], note:"外食ならこれを選べ"},
+  {id:"k19", name:"豚しゃぶサラダ", kcal:320, p:25, ing:["pork","veg"], note:"茹でて脂を落とす。賢い豚の食い方"},
+  {id:"k20", name:"豚肉と野菜の生姜炒め", kcal:420, p:26, ing:["pork","veg"], note:"白米が進みすぎる点だけ注意しろ"},
+  {id:"k21", name:"豚汁＋おにぎり1個", kcal:480, p:20, ing:["pork","veg","rice"], note:"寒い日・疲れた日の立て直しに"},
+  {id:"k22", name:"納豆ご飯＋豆腐味噌汁", kcal:420, p:20, ing:["natto","tofu","rice"], note:"和食の基本形。腹持ちも良い"},
+  {id:"k23", name:"納豆オムレツ", kcal:260, p:18, ing:["natto","egg"], note:"変化球だが数字は優秀だ"},
+  {id:"k24", name:"鶏むねのパスタ（トマト）", kcal:580, p:35, ing:["chicken","pasta","veg"], note:"パスタを食うならたんぱく質を積め"},
+  {id:"k25", name:"ツナと野菜の和風パスタ", kcal:520, p:26, ing:["fish","pasta","veg"], note:"麺だけのパスタとは別物だ"},
+  {id:"k26", name:"オートミール雑炊（卵入り）", kcal:300, p:15, ing:["oats","egg"], note:"夜遅くなった日の“罪の浅い”一杯"},
+  {id:"k27", name:"オートミールバナナ粥", kcal:350, p:10, ing:["oats"], note:"朝が弱い君のための省エネ朝食"},
+  {id:"k28", name:"温野菜＋ゆで卵", kcal:180, p:10, ing:["veg","egg"], note:"残りわずかな日の締めの一皿"},
+  {id:"k29", name:"野菜たっぷりスープ", kcal:120, p:5, ing:["veg"], note:"空腹をごまかすんじゃない、満たすんだ"},
+  {id:"k30", name:"鶏むねと卵の親子スープ", kcal:250, p:28, ing:["chicken","egg"], note:"低カロリー高たんぱくの理想形だ"}
+];
+/* 決定的フィルタ: 残りが少なくても300kcal級は提案する（極端減食を勧めないため） */
+function suggestMenus(remaining, ingredientKeys, slot){
+  var cap=Math.max(remaining, 300);
+  var cand=MENU_DB.filter(function(m){
+    if(m.kcal>cap+100) return false;
+    if(ingredientKeys.length>0 && !m.ing.some(function(k){ return ingredientKeys.indexOf(k)>=0; })) return false;
+    return true;
+  });
+  cand.sort(function(a,b){
+    var pa=a.p/a.kcal, pb=b.p/b.kcal;
+    if(pa!==pb) return pb-pa;
+    if(a.kcal!==b.kcal) return a.kcal-b.kcal;
+    return a.id<b.id?-1:1;
+  });
+  return cand.slice(0,3);
+}
+/* ---- 写真圧縮（FileReader/canvasのみ・通信ゼロ・唯一の非同期処理）
+   EXIF回転は近年のブラウザのdecode時自動回転（image-orientation:from-image既定）に任せる簡易対応。
+   縦横が変な時は撮り直し案内をガイドに記載済み ---- */
+function compressImage(file, cb){
+  if(!file){ cb(null); return; }
+  /* file.typeが空（一部Androidカメラintent）は拒否せずデコード試行に委ねる（失敗はimg.onerrorで通知） */
+  if((file.type && !/^image\//.test(file.type)) || file.size>20*1024*1024){ toast("画像ファイル（20MB以下）を選んでください"); cb(null); return; }
+  var fr=new FileReader();
+  fr.onerror=function(){ toast("写真を読み込めませんでした"); cb(null); };
+  fr.onload=function(){
+    var img=new Image();
+    img.onerror=function(){ toast("この形式の写真は読み込めませんでした。別の写真をお試しください（写真なしでも記録できます）"); cb(null); };
+    img.onload=function(){
+      try{
+        var scale=Math.min(1, 512/Math.max(img.width,img.height));
+        var w=Math.max(1,Math.round(img.width*scale)), h=Math.max(1,Math.round(img.height*scale));
+        var cv=document.createElement("canvas"); cv.width=w; cv.height=h;
+        var ctx=cv.getContext("2d");
+        ctx.fillStyle="#fff"; ctx.fillRect(0,0,w,h); /* 透過PNG→JPEG黒化防止 */
+        ctx.drawImage(img,0,0,w,h);
+        var out=cv.toDataURL("image/jpeg",0.7);
+        if(out.length>180000) out=cv.toDataURL("image/jpeg",0.5);
+        if(out.length>180000){ toast("写真が大きすぎるため保存できませんでした（記録のみ可能です）"); cb(null); return; }
+        cb(out);
+      }catch(e){ toast("写真を処理できませんでした"); cb(null); }
+    };
+    img.src=fr.result;
+  };
+  fr.readAsDataURL(file);
+}
+/* 写真は直近10件まで（超過は最古の写真のみ削除・記録テキストは残す） */
+function enforcePhotoCap(silent){
+  var withPhoto=state.meals.filter(function(m){ return m.photo; });
+  var removed=0;
+  while(withPhoto.length>10){
+    var oldest=withPhoto.shift();
+    oldest.photo=null; oldest.photoRemoved=true; removed++;
+  }
+  if(removed>0 && !silent) toast("写真は直近10件まで保存。古い写真を"+removed+"枚削除しました（記録は残ります）");
+  return removed;
+}
+
+/* ---- 🍽 食事タブ UI ---- */
+var mealForm={ slot:null, tags:[], amount:"mid", photo:null, busy:false };
+var lastMealId=null;   /* 直近記録のコメント表示用（非保存・画面用） */
+var menuSel=[];        /* 献立提案の食材選択（非保存） */
+var menuShown=false;
+function mealSlot(s){ mealForm.slot=s; render(); }
+function mealTag(t){
+  var i=mealForm.tags.indexOf(t);
+  if(i>=0) mealForm.tags.splice(i,1); else mealForm.tags.push(t);
+  render();
+}
+function mealAmount(a){ mealForm.amount=a; render(); }
+function mealClearPhoto(){ mealForm.photo=null; render(); }
+function toggleIng(k){
+  var i=menuSel.indexOf(k);
+  if(i>=0) menuSel.splice(i,1); else menuSel.push(k);
+  menuShown=false; render();
+}
+function showMenus(){ menuShown=true; render(); }
+function submitMeal(){
+  if(!state.result){ toast("先にカルテを作成してください"); return; }
+  if(mealForm.busy){ toast("写真を処理中です。少し待ってください"); return; }
+  if(!mealForm.slot){ toast("時間帯を選んでください"); return; }
+  if(mealForm.tags.length===0){ toast("内容タグを1つ以上選んでください"); return; }
+  var t=todayISO(), seq=mealsOn(state.meals,t).length+1;
+  var meal={ id:"m"+t+"-"+seq, date:t, slot:mealForm.slot, tags:mealForm.tags.slice(), amount:mealForm.amount, photo:mealForm.photo, photoRemoved:false, comment:null };
+  var todayMeals=mealsOn(state.meals,t).concat([meal]);
+  meal.comment=buildMealComment(meal, todayMeals, state.result, state.result.bmr);
+  if(meal.comment.severity==="strict") pushStrictLog(state, meal.comment.text);
+  state.meals.push(meal);
+  enforcePhotoCap(false);
+  lastMealId=meal.id;
+  mealForm={ slot:null, tags:[], amount:"mid", photo:null, busy:false };
+  save(); render();
+}
+function showMealDetail(id){
+  var m=state.meals.filter(function(x){ return x.id===id; })[0]; if(!m) return;
+  var body=MEAL_SLOTS[m.slot]+"・"+MEAL_AMOUNTS[m.amount]+"／タグ: "+m.tags.map(function(t){ return MEAL_TAGS[t]; }).join("・")+
+    "／概算 約"+estMealKcal(m)+"kcal（タグからの概算）\n\n"+
+    (m.comment?("D.D「"+m.comment.text+"」\n\n出どころ: "+m.comment.basis):"")+
+    "\n\n※選んだタグから生成〔写真は未解析・本番はAI解析〕";
+  modal(fmtJP(m.date)+" の記録", body, [{label:"閉じる",cls:"primary"}]);
+}
+function viewMeals(){
+  ensureToday();
+  var r=state.result||{recommended:0, protein:0, bmr:0};
+  var t=todayISO();
+  var dayKcal=estDayKcal(state.meals,t);
+  var remaining=r.recommended-dayKcal;
+  var honest='<div class="honest-strip">🔍 <b>デモの正直な仕組み:</b> '+esc(HONEST_TEXT)+'</div>';
+  var remCard='<div class="metric-card"><div class="mc-lab">今日の残りカロリー（概算）</div>'+
+    '<div class="mc-val">'+(remaining>=0?('約 '+remaining):('約 '+Math.abs(remaining)+' オーバー'))+'<span class="u">kcal</span></div>'+
+    (remaining<0?'<div class="micro" style="color:var(--warn); margin-top:4px;">今日は概算オーバー。夜は軽めに。明日リセットしよう。</div>':'')+
+    '<div class="micro" style="margin-top:4px;">推奨 '+r.recommended+'kcal − 今日の概算 '+dayKcal+'kcal（あなたが選んだタグからの概算。実際の摂取量とはずれます）</div>'+
+    '<div class="srcchips">'+
+      srcChip("ref","推奨カロリー（一般値(仮)）","カルテで算出した推奨カロリー。係数は一般値(仮)・正式にはリード式に差し替え予定。")+
+      srcChip("choice","今日のタグからの概算","写真は解析していません。あなたが選んだタグ×量を目安換算表（一般的な食品栄養概算）で足し上げた推定で、実測ではありません。")+
+    '</div></div>';
+  var slotChips=Object.keys(MEAL_SLOTS).map(function(s){
+    return '<button class="chip'+(mealForm.slot===s?' on':'')+'" onclick="mealSlot(\''+s+'\')">'+MEAL_SLOTS[s]+'</button>';
+  }).join("");
+  var tagChips=Object.keys(MEAL_TAGS).map(function(tg){
+    return '<button class="chip'+(mealForm.tags.indexOf(tg)>=0?' on':'')+'" onclick="mealTag(\''+tg+'\')">'+MEAL_TAGS[tg]+'</button>';
+  }).join("");
+  var segBtns=Object.keys(MEAL_AMOUNTS).map(function(a){
+    return '<button class="'+(mealForm.amount===a?'on':'')+'" onclick="mealAmount(\''+a+'\')">'+MEAL_AMOUNTS[a]+'</button>';
+  }).join("");
+  var photoPart;
+  if(mealForm.busy) photoPart='<div class="micro" style="margin:8px 0;">写真を圧縮中…</div>';
+  else if(mealForm.photo) photoPart='<img class="photo-prev" src="'+esc(mealForm.photo)+'" alt="食事写真プレビュー"><button class="btn ghost" style="height:36px; margin-bottom:4px;" onclick="mealClearPhoto()">撮り直す</button>';
+  else photoPart='<button class="btn secondary" onclick="document.getElementById(\'mealPhoto\').click()">📷 写真を撮る／選ぶ（任意）</button>';
+  var form='<div class="card lg"><div class="mc-lab" style="margin-bottom:8px;">＋ 食事を記録</div>'+
+    photoPart+
+    '<div class="micro" style="margin:6px 0 10px;">写真はこの端末内にのみ保存（直近10件まで。超えた分は古い順に削除し、その際お知らせします）。外部送信は一切ありません。</div>'+
+    '<div class="flabel">時間帯 <span class="req">*</span></div><div class="chips" style="margin-bottom:10px;">'+slotChips+'</div>'+
+    '<div class="flabel">内容タグ（複数可）<span class="req">*</span></div><div class="chips" style="margin-bottom:10px;">'+tagChips+'</div>'+
+    '<div class="flabel">量</div><div class="seg3" style="margin-bottom:12px;">'+segBtns+'</div>'+
+    '<button class="btn primary"'+(mealForm.busy?' disabled':'')+' onclick="submitMeal()">D.Dに見せる</button>'+
+  '</div>';
+  var commentPart="";
+  var last=lastMealId?state.meals.filter(function(m){ return m.id===lastMealId; })[0]:null;
+  if(last && last.comment){
+    var sev=last.comment.severity;
+    commentPart='<div class="dd-quote'+(sev==="strict"?' strict':'')+'"><div class="av">D.D</div><p>'+esc(last.comment.text)+'</p></div>'+
+      '<div class="micro" style="margin:-6px 0 6px;">※選んだタグから生成〔写真は未解析・本番はAI解析〕</div>'+
+      '<div class="srcchips" style="margin-bottom:12px;">'+
+        srcChip("choice","選んだ内容", last.comment.basis)+
+        srcChip("ref","推奨"+r.recommended+"kcal・P"+r.protein+"g","カルテの計算値（一般値(仮)・リード式に差し替え予定）から判定。")+
+      '</div>';
+  }
+  var ingChips=Object.keys(INGREDIENTS).map(function(k){
+    return '<button class="chip'+(menuSel.indexOf(k)>=0?' on':'')+'" onclick="toggleIng(\''+k+'\')">'+INGREDIENTS[k]+'</button>';
+  }).join("");
+  var menuPart="";
+  if(menuShown){
+    var mm=suggestMenus(remaining, menuSel, null);
+    if(mm.length===0){
+      menuPart='<div class="small muted" style="margin-top:10px;">その食材と残りカロリーだと、提案できる献立がミニDBに無い。残りが少なすぎるなら、無理に詰め込むな。温かい汁物と野菜くらいにして、明日ちゃんと食べろ。</div>';
+    } else {
+      menuPart='<div class="small" style="margin-top:10px;">使いたい食材と残りカロリーから、僕が選んだのはこれだ。厳密な計量より“だいたい合ってる方向”を続けることが大事とされる。</div>'+
+        mm.map(function(m){
+          return '<div class="role-card" style="margin-top:8px; margin-bottom:0;"><div class="role-ic">🍳</div><div><h3>'+esc(m.name)+'</h3><p>約'+m.kcal+'kcal・P約'+m.p+'g ／ '+esc(m.note)+'</p></div></div>';
+        }).join("")+
+        '<div class="srcchips" style="margin-top:8px;">'+
+          srcChip("ref","内蔵献立DB（一般的な栄養概算）","デモ版は内蔵30件から条件で絞り込んで表示（AIによる生成ではありません）。kcal/Pは一般的な食品成分の概算値で、材料・量・調理法で変わります。")+
+          (menuSel.length?srcChip("choice","選んだ食材: "+menuSel.map(function(k){ return INGREDIENTS[k]; }).join("・"),"あなたが選んだ食材を1つ以上含む献立に絞り込み。"):"")+
+          srcChip("ref","残り概算 "+remaining+"kcal","推奨カロリー − 今日のタグ概算。実測ではありません。")+
+        '</div>'+
+        (remaining<300?'<div class="micro" style="margin-top:6px;">残りが少ない日は無理に削らず明日調整を（300kcal級も提案しています）。</div>':'');
+    }
+  }
+  var menuCard='<div class="card lg"><div class="mc-lab">🍳 残り約'+remaining+'kcalで作るなら（献立提案）</div>'+
+    '<div class="chips" style="margin:8px 0 10px;">'+ingChips+'</div>'+
+    '<button class="btn ghost" onclick="showMenus()">提案を見る</button>'+menuPart+
+    '<div class="micro" style="margin-top:8px;">※献立のkcal・P（たんぱく質）は一般的な栄養概算です〔目安〕。</div></div>';
+  var logs=sortMealsForLog(state.meals), logPart="";
+  if(logs.length===0) logPart='<div class="muted small">まだ記録がありません。最初の1件からD.Dが見ている。</div>';
+  else {
+    var curDate=null;
+    logs.forEach(function(m){
+      if(m.date!==curDate){
+        curDate=m.date;
+        logPart+='<div class="flabel" style="margin:12px 0 6px;">'+esc(fmtJP(m.date))+'（概算 約'+estDayKcal(state.meals,m.date)+'kcal）</div>';
+      }
+      var thumb=m.photo
+        ? '<div class="meal-thumb"><img src="'+esc(m.photo)+'" alt=""></div>'
+        : '<div class="meal-thumb">'+(m.photoRemoved?'<span class="micro" style="line-height:1.3;">写真は上限で削除済み</span>':'🍽')+'</div>';
+      var tagsHtml=m.tags.map(function(tg){ return '<span class="mini-chip">'+MEAL_TAGS[tg]+'</span>'; }).join("");
+      var sevIc=(m.comment && m.comment.severity==="strict")?'🔴 ':((m.comment && m.comment.severity==="warn")?'🟡 ':'');
+      var sum=m.comment?esc(m.comment.text.slice(0,22))+(m.comment.text.length>22?'…':''):'';
+      logPart+='<div class="meal-row" onclick="showMealDetail(\''+m.id+'\')" style="cursor:pointer;">'+thumb+
+        '<div style="flex:1; min-width:0;"><div class="small"><b>'+MEAL_SLOTS[m.slot]+'</b>・'+MEAL_AMOUNTS[m.amount]+'</div><div>'+tagsHtml+'</div><div class="micro">'+sevIc+sum+'</div></div></div>';
+    });
+  }
+  return ''+
+  '<div class="scroll">'+
+    '<h1 class="title">食事</h1><div class="subtitle">記録して、D.Dに見せる。トレーナーにも共有されます（デモでは端末内のみ）。</div>'+
+    remCard+honest+form+commentPart+menuCard+
+    '<div class="h2">食事ログ（この端末に蓄積）</div>'+logPart+
+    '<input type="file" id="mealPhoto" accept="image/*" capture="environment" style="display:none;">'+
+  '</div>'+
+  tabbar("meals");
+}
+afterRender.meals=function(){
+  var fi=document.getElementById("mealPhoto");
+  if(fi) fi.addEventListener("change", function(){
+    if(!fi.files || fi.files.length===0) return; /* キャンセル */
+    var f=fi.files[0]; fi.value=""; /* 同一ファイル再選択対策 */
+    mealForm.busy=true; render();
+    compressImage(f, function(url){
+      mealForm.busy=false;
+      if(url) mealForm.photo=url;
+      render();
+    });
+  });
+};
+
+/* ---- 📏 からだタブ UI ---- */
+var baTarget="auto"; /* 次に撮る写真の入れ先: "start"|"auto"（autoは開始が無ければ開始、あれば最新） */
+function baShoot(which){
+  baTarget=which;
+  var fi=document.getElementById("baPhoto"); if(!fi) return;
+  var overwrite=(which==="start" && state.photos.start) || (which!=="start" && state.photos.start && state.photos.latest);
+  if(overwrite){
+    modal("撮り直し","前の写真は消えます（上書き）。よろしいですか？",[
+      {label:"キャンセル",cls:"secondary"},
+      {label:"撮影する",cls:"primary",fn:function(){ fi.click(); }}
+    ]);
+  } else fi.click();
+}
+function baAssign(url){
+  var rec={ date:todayISO(), dataURL:url };
+  if(baTarget==="start" || !state.photos.start){
+    state.photos.start=rec;
+    toast("受け取った。よく撮った。この1枚は次の1枚と並んだ瞬間に語り出す");
+  } else {
+    state.photos.latest=rec;
+    toast("受け取った。開始の1枚と見比べてみよう");
+  }
+  baTarget="auto"; save(); render();
+}
+function girthSummary(key, unit){
+  var s=girthSeries(state.girths, key);
+  if(s.length===0) return '<span class="muted">記録するとここに推移が出ます。</span>';
+  if(s.length===1) return '最新 '+s[s.length-1].val+unit+'（'+esc(fmtJP(s[s.length-1].date))+'）〔あなたの入力〕';
+  var diff=round1(s[s.length-1].val-s[0].val);
+  return '開始'+s[0].val+unit+' → 最新'+s[s.length-1].val+unit+'（'+(diff>0?'+':'')+diff+unit+'）〔あなたの入力〕';
+}
+function viewBody(){
+  var ph=state.photos;
+  function slotHTML(rec, label, which){
+    if(rec) return '<div><div class="ba-slot"><img src="'+esc(rec.dataURL)+'" alt="'+label+'の写真"></div><div class="ba-cap">'+label+' '+esc(fmtJP(rec.date))+'</div></div>';
+    return '<div><div class="ba-slot" onclick="baShoot(\''+which+'\')" style="cursor:pointer;">＋撮影する<br><span class="micro">まだありません</span></div><div class="ba-cap">'+label+'</div></div>';
+  }
+  var guide='<details style="margin-bottom:10px;"><summary style="cursor:pointer; font-weight:700; font-size:var(--fs-sub);">📋 撮影ガイド（毎回同じ条件で）</summary>'+
+    '<ul class="small" style="margin:8px 0 0; padding-left:18px;">'+
+      '<li>同じ場所・同じ背景で撮る（毎回同じ立ち位置に印をつけると確実）</li>'+
+      '<li>正面と横の2方向。体はまっすぐ、ひねらない（デモは各1枚）</li>'+
+      '<li>腕は自然に下ろす（腰に当てない・組まない。体のラインを隠さない）</li>'+
+      '<li>明るい場所で、逆光を避ける（窓を背にしない。照明は毎回同じが理想）</li>'+
+      '<li>毎回同じ服装（体のラインが分かる薄手のもの）</li>'+
+      '<li>同じタイミングで撮る（朝起きて食事の前、が比べやすいとされる）</li>'+
+      '<li>縦横の向きが変になった時は撮り直してください（デモは簡易処理です）</li>'+
+    '</ul></details>';
+  var retake=(ph.start)?'<button class="btn ghost" style="height:38px; margin-top:8px;" onclick="baShoot(\'start\')">開始写真を撮り直す</button>':'';
+  var latestBtn=(ph.start && ph.latest)?'<button class="btn ghost" style="height:38px; margin-top:2px;" onclick="baShoot(\'auto\')">最新写真を撮り直す</button>':'';
+  return ''+
+  '<div class="scroll">'+
+    '<h1 class="title">からだ</h1><div class="subtitle">数字・採寸・写真の3点で変化を見る。</div>'+
+    '<div class="dd-quote"><div class="av">D.D</div><p>数字が動かない時こそ、採寸と写真が変化を教えてくれる。体重は水分ひとつで揺れるが、シルエットは積み重ねでしか変わらないとされる。</p></div>'+
+    '<div class="card lg"><div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;"><div class="mc-lab">体重の推移</div><button class="btn ghost" style="width:auto; height:auto; padding:4px 10px;" onclick="openWeightModal()">記録する</button></div><div class="svg-wrap" id="bodyWeightChart"></div><div class="summary-line" id="bodyWeightSummary"></div></div>'+
+    '<div class="card lg"><div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;"><div class="mc-lab">腹囲の推移（任意）</div><button class="btn ghost" style="width:auto; height:auto; padding:4px 10px;" onclick="openGirthModal()">記録する</button></div><div class="svg-wrap" id="waistChart"></div><div class="summary-line">'+girthSummary("waist","cm")+'</div></div>'+
+    '<div class="card lg"><div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;"><div class="mc-lab">胸囲の推移（任意）</div><button class="btn ghost" style="width:auto; height:auto; padding:4px 10px;" onclick="openGirthModal()">記録する</button></div><div class="svg-wrap" id="chestChart"></div><div class="summary-line">'+girthSummary("chest","cm")+'</div></div>'+
+    '<div class="card lg"><div class="mc-lab" style="margin-bottom:8px;">📸 ビフォーアフター写真</div>'+guide+
+      '<div class="ba-grid">'+slotHTML(ph.start,"開始","start")+slotHTML(ph.latest,"最新","auto")+'</div>'+
+      retake+latestBtn+
+      (!ph.start?'<div class="small" style="margin-top:8px;">開始写真がまだ無いな。今が一番撮りたくない時期なのは分かる。だが3ヶ月後、君は今日の1枚に感謝する。撮るなら今日だ。— D.D</div>':'')+
+      '<div class="micro" style="margin-top:8px;">写真はこの端末にのみ保存（開始・最新の各1枚・512pxに圧縮）。外部送信されません。</div>'+
+    '</div>'+
+    '<input type="file" id="baPhoto" accept="image/*" capture="environment" style="display:none;">'+
+  '</div>'+
+  tabbar("body");
+}
+afterRender.body=function(){
+  renderWeightChart("bodyWeightChart","bodyWeightSummary");
+  drawLineChart(document.getElementById("waistChart"), girthSeries(state.girths,"waist"), {emptyMsg:"記録するとここに推移が出ます。"});
+  drawLineChart(document.getElementById("chestChart"), girthSeries(state.girths,"chest"), {emptyMsg:"記録するとここに推移が出ます。"});
+  var fi=document.getElementById("baPhoto");
+  if(fi) fi.addEventListener("change", function(){
+    if(!fi.files || fi.files.length===0) return;
+    var f=fi.files[0]; fi.value="";
+    compressImage(f, function(url){ if(url) baAssign(url); });
+  });
+};
+
+/* ---- 👔 スタッフ画面（見える化デモ・閲覧＋状態トグルのみ） ---- */
+function staffExit(){ staffView=false; go("home"); }
+function staffToggleStatus(){
+  if(state.memberStatus==="active"){
+    modal("退会にする","退会にすると、会員側のアプリはロックされます。（デモ: スタッフビューからいつでも「在籍」に戻せます）",[
+      {label:"キャンセル",cls:"secondary"},
+      {label:"退会にする",cls:"danger",fn:function(){ state.memberStatus="resigned"; save(); render(); toast("退会にしました（会員側はロック表示）"); }}
+    ]);
+  } else { state.memberStatus="active"; save(); render(); toast("在籍に戻しました"); }
+}
+function viewStaff(){
+  ensureToday();
+  var r=state.result, p=state.profile, g=state.goal;
+  var name=p.name?esc(p.name):"（名前未登録）";
+  var dir=goalDir(state), dirLabel=(dir==="gain"?"増量":dir==="lose"?"減量":"維持");
+  var summary='<div class="metric-card"><div class="mc-lab">📇 会員サマリ</div>'+
+    '<div class="small" style="margin-top:6px;"><b>'+name+'</b>'+(p.age!=null?('・'+p.age+'歳'):'')+(p.sex?('・'+SEX_LABEL[p.sex]):'')+'</div>'+
+    (r?('<div class="small">目的: '+dirLabel+(g.targetWeight!=null?('／目標 '+g.targetWeight+'kg'):'')+(g.deadline?('・期限 '+esc(fmtJP(g.deadline))):'')+'</div>'+
+    '<div class="small">推奨 '+r.recommended+'kcal ・ P '+r.protein+'g ・ 基礎代謝 '+r.bmr+'kcal</div>'):'<div class="small muted">カルテ未作成</div>')+
+    '<div class="srcchips">'+srcChip("ref","一般値(仮)・リード式に差し替え予定","現在の係数は一般的な計算式の値。DEED_FORMULA（CONFIG一箇所）の差し替えで全画面に反映されます。")+'</div></div>';
+  var lw=state.weights.length?state.weights[state.weights.length-1]:null;
+  var weight='<div class="metric-card"><div class="mc-lab">⚖️ 体重の推移</div>'+
+    '<div class="small" style="margin-top:4px;">'+(lw?('直近 '+lw.val+'kg（'+esc(fmtJP(lw.date))+'）〔会員の入力〕'):'記録なし')+'</div>'+
+    '<div class="svg-wrap" id="staffWeightChart" style="margin-top:6px;"></div></div>';
+  var dots=[], doneCount=0;
+  for(var i=6;i>=0;i--){
+    var d=addDaysISO(todayISO(),-i), on=state.streakDays.indexOf(d)>=0;
+    if(on) doneCount++;
+    dots.push('<div class="sd'+(on?' on':'')+'">'+(on?'✓':'')+'</div>');
+  }
+  var ckLabels=["推奨カロリー意識","たんぱく質","自宅トレ or 1万歩"];
+  var todayCk=ckLabels.map(function(l,i){ return '<span class="mini-chip">'+(state.today.checks[i]?'✅':'⬜')+' '+l+'</span>'; }).join("");
+  var checks='<div class="metric-card"><div class="mc-lab">✅ 今週のチェック達成</div>'+
+    '<div class="streak-dots" style="margin-top:8px;">'+dots.join("")+'</div>'+
+    '<div class="small" style="margin-top:6px;">直近7日中 '+doneCount+'日 全達成／今日: '+todayCk+'</div></div>';
+  var logs=sortMealsForLog(state.meals).slice(0,5);
+  var mealRows=logs.length?logs.map(function(m){
+    var thumb=m.photo?'<div class="meal-thumb" style="flex-basis:40px; width:40px; height:40px;"><img src="'+esc(m.photo)+'" alt=""></div>':'<div class="meal-thumb" style="flex-basis:40px; width:40px; height:40px;">🍽</div>';
+    var sev=(m.comment && m.comment.severity==="strict")?' 🔴':((m.comment && m.comment.severity==="warn")?' 🟡':'');
+    return '<div class="meal-row" style="padding:8px;">'+thumb+'<div class="small" style="flex:1;">'+esc(fmtJP(m.date))+' '+MEAL_SLOTS[m.slot]+'・'+MEAL_AMOUNTS[m.amount]+sev+'<div>'+m.tags.map(function(tg){ return '<span class="mini-chip">'+MEAL_TAGS[tg]+'</span>'; }).join("")+'</div></div></div>';
+  }).join(""):'<div class="small muted" style="margin-top:6px;">記録なし——ここが次のセッションの話題です。</div>';
+  var meals='<div class="metric-card"><div class="mc-lab">🍽 直近の食事ログ（最新5件）</div><div style="margin-top:8px;">'+mealRows+'</div><div class="micro">コメントは選んだタグから生成（写真は未解析・本番はAI解析）。</div></div>';
+  var ws=girthSeries(state.girths,"waist"), cs=girthSeries(state.girths,"chest");
+  var girth='<div class="metric-card"><div class="mc-lab">📏 採寸の最新値</div><div class="grid3" style="margin-top:8px;">'+
+    '<div class="g-item"><div class="gv">'+(lw?lw.val:'—')+'</div><div class="gl">体重 kg</div></div>'+
+    '<div class="g-item"><div class="gv">'+(ws.length?ws[ws.length-1].val:'—')+'</div><div class="gl">腹囲 cm</div></div>'+
+    '<div class="g-item"><div class="gv">'+(cs.length?cs[cs.length-1].val:'—')+'</div><div class="gl">胸囲 cm</div></div>'+
+  '</div><div class="micro" style="margin-top:6px;">「—」は未記録。〔会員の入力〕</div></div>';
+  var st=state.strictLog.slice(-5).reverse();
+  var strictRows=st.length?st.map(function(x){ return '<div class="strict-item">'+esc(fmtJP(x.date))+'　'+esc(x.text)+'</div>'; }).join(""):'<div class="small muted" style="margin-top:6px;">指摘なし。順調です。</div>';
+  var strict='<div class="metric-card"><div class="mc-lab">⚠️ D.Dの厳しめ指摘 履歴（最新5件）</div>'+
+    '<div class="micro" style="margin:4px 0 8px;">D.Dが自動で出した指摘の一覧。ここに並ぶものが、次のセッションで会員と話すべきテーマの候補です。</div>'+strictRows+'</div>';
+  var ph=state.photos;
+  var ba='<div class="metric-card"><div class="mc-lab">📸 ビフォーアフター</div>'+
+    ((ph.start||ph.latest)?('<div class="ba-grid" style="margin-top:8px;">'+
+      (ph.start?'<div><div class="ba-slot"><img src="'+esc(ph.start.dataURL)+'" alt="開始"></div><div class="ba-cap">開始 '+esc(fmtJP(ph.start.date))+'</div></div>':'<div><div class="ba-slot">未撮影</div><div class="ba-cap">開始</div></div>')+
+      (ph.latest?'<div><div class="ba-slot"><img src="'+esc(ph.latest.dataURL)+'" alt="最新"></div><div class="ba-cap">最新 '+esc(fmtJP(ph.latest.date))+'</div></div>':'<div><div class="ba-slot">未撮影</div><div class="ba-cap">最新</div></div>')+
+    '</div>'):'<div class="small muted" style="margin-top:6px;">未撮影 → セッション時に案内を。</div>')+'</div>';
+  var acct='<div class="card" style="border:1px solid var(--line);"><div class="mc-lab" style="margin-bottom:8px;">アカウント状態</div>'+
+    '<div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">'+
+      (state.memberStatus==="active"?'<span class="ok-badge">在籍</span>':'<span style="font-size:var(--fs-micro); background:var(--danger-soft); color:var(--danger); border-radius:var(--r-sm); padding:2px 7px; font-weight:700;">退会（会員側ロック中）</span>')+
+    '</div>'+
+    '<div class="micro" style="margin-bottom:10px;">退会にすると、会員側のアプリはロックされます（スタッフビューからいつでも復帰できます）。</div>'+
+    (state.memberStatus==="active"
+      ?'<button class="btn danger" onclick="staffToggleStatus()">退会にする</button>'
+      :'<button class="btn primary" onclick="staffToggleStatus()">在籍に戻す</button>')+
+  '</div>';
+  return ''+
+  '<div class="topbar"><button class="backbtn" onclick="staffExit()">← 会員画面へ</button><span style="margin-left:auto; font-weight:700;">👔 スタッフビュー — 会員カルテ</span></div>'+
+  '<div class="scroll" style="padding-bottom:20px;">'+
+    '<div class="warn-strip">🔧 デモの正直な注記: この画面はこの端末に保存された<b>1会員分のみ</b>を表示。本番は<b>全会員一覧＋職員ごとの権限管理＋サーバー保存</b>を実装します。データはこの端末の外へ一切送信されていません。</div>'+
+    '<div class="small" style="margin-bottom:12px;"><b>次のセッションの前に、この画面を1分見るだけ。</b> 会員が日々入力した内容がここに集まります。当日は“聞く”より先に“知っている”状態で迎えられます。</div>'+
+    summary+weight+checks+meals+girth+strict+ba+acct+
+  '</div>';
+}
+afterRender.staff=function(){
+  var host=document.getElementById("staffWeightChart");
+  var data=state.weights.length?state.weights:[{date:todayISO(), val:state.body.weight}];
+  drawLineChart(host, data, {goal:state.goal.targetWeight, emptyMsg:"記録なし"});
+};
+
+/* ---- 🔒 退会ロック画面（表示ゲートのみ・データは消さない） ---- */
+function viewLocked(){
+  return ''+
+  '<div class="scroll" style="display:flex; flex-direction:column; justify-content:center; text-align:center;">'+
+    '<div class="logoword"><span class="t">D</span>EED</div>'+
+    '<div style="font-size:40px; margin:18px 0 6px;">🔒</div>'+
+    '<h1 class="title" style="text-align:center;">アカウントが無効になっています</h1>'+
+    '<div class="small" style="margin:8px 0;">このアカウントは現在ご利用いただけません。お手続き・ご不明点は、<b>DEEDのスタッフまでお声がけください</b>。これまでの記録はこの端末に保持されています。</div>'+
+    '<div class="micro" style="margin-bottom:18px;">※デモの注記: これは「退会時にアプリをロックする」機能のデモです。本番はサーバー側で制御します。スタッフモード（合言葉入力）から「在籍」に戻すと再開できます。</div>'+
+    '<button class="btn secondary" onclick="openStaffGate()">👔 スタッフとして見る（デモ）</button>'+
+  '</div>';
 }
 
 /* ============================================================
@@ -1370,6 +2216,62 @@ function runSelfTests(){
   assert(allText.indexOf("必ず痩せる")<0 && allText.indexOf("治る")<0, "薬機法禁止語なし");
   var pLow=JSON.parse(JSON.stringify(p)); pLow.body.weight=44; pLow.goal.purpose="cut";
   assert(healthGuard(pLow).allowGoal===false, "BMI<16ブロック");
+
+  /* ---- v3: DEED_FORMULA導入後もv2既知入力で計算値が同一（回帰ゼロ） ---- */
+  assert(a.bmr.value===1695, "CONFIG等価: BMR=1695");
+  assert(a.tdee.value===2627, "CONFIG等価: TDEE=2627");
+  assert(a.targetKcal.value===2127, "CONFIG等価: 推奨=2127");
+  assert(a.protein.value===115, "CONFIG等価: P=115");
+  assert(a.fat.value===59, "CONFIG等価: F=59");
+  assert(a.safePace.value===0.5, "CONFIG等価: 安全ペース=0.5");
+  /* ---- v3: migration（v1形状→v2形状・既存データ保持・冪等） ---- */
+  var mo=normalizeState(migrateState({v:1, screen:"home", consent:true, weights:[{date:"2026-01-01",val:80}], chat:[{role:"dd",text:"x"}]}));
+  assert(Array.isArray(mo.meals) && Array.isArray(mo.girths) && mo.photos && mo.photos.start===null && mo.memberStatus==="active" && Array.isArray(mo.milestonesSeen) && mo.v===2, "migration: 新フィールド補完");
+  assert(mo.weights.length===1 && mo.chat.length===1 && mo.consent===true, "migration: 既存データ保持");
+  assert(JSON.stringify(normalizeState(migrateState(JSON.parse(JSON.stringify(mo)))))===JSON.stringify(mo), "migration: 冪等");
+  /* ---- v3: 添削の決定性・厳しめ発火・健康ガード ---- */
+  var rr={recommended:2127, protein:115, bmr:1695};
+  var mA={id:"mT-1",date:"2026-07-02",slot:"morning",tags:["staple"],amount:"low",photo:null};
+  var mB={id:"mT-2",date:"2026-07-02",slot:"noon",tags:["veg"],amount:"low",photo:null};
+  var cS1=buildMealComment(mB,[mA,mB],rr,1695);
+  assert(cS1.severity==="strict" && cS1.text.indexOf("1695")>=0, "S1発火（低量連続→基礎代謝値を含む）");
+  var mC={id:"mT-3",date:"2026-07-02",slot:"evening",tags:["fried"],amount:"high",photo:null};
+  var mPre={id:"mT-0",date:"2026-07-02",slot:"noon",tags:["staple","meatfish","fried"],amount:"high",photo:null};
+  var cS3=buildMealComment(mC,[mPre,mC],rr,1695);
+  assert(cS3.severity==="strict" && cS3.basis.indexOf("S3")>=0, "S3発火（夜×揚げ物×多め）");
+  assert(JSON.stringify(cS3)===JSON.stringify(buildMealComment(mC,[mPre,mC],rr,1695)), "添削の決定性");
+  var guardTexts=[cS1,cS3,
+    buildMealComment({id:"g1",date:"2026-07-02",slot:"snack",tags:["sweet"],amount:"mid",photo:null},[{id:"g0",date:"2026-07-02",slot:"noon",tags:["staple","meatfish"],amount:"mid",photo:null},{id:"g1",date:"2026-07-02",slot:"snack",tags:["sweet"],amount:"mid",photo:null}],rr,1695),
+    buildMealComment({id:"g2",date:"2026-07-02",slot:"noon",tags:["meatfish","veg"],amount:"mid",photo:null},[{id:"g2",date:"2026-07-02",slot:"noon",tags:["meatfish","veg"],amount:"mid",photo:null}],rr,1695),
+    buildMealComment({id:"g3",date:"2026-07-02",slot:"evening",tags:["sweet","alcohol"],amount:"high",photo:null},[{id:"gp",date:"2026-07-02",slot:"noon",tags:["staple","meatfish","fried"],amount:"high",photo:null},{id:"g3",date:"2026-07-02",slot:"evening",tags:["sweet","alcohol"],amount:"high",photo:null}],rr,1695)
+  ].map(function(c){ return c.text; }).join("");
+  assert(guardTexts.indexOf("もっと減ら")<0 && guardTexts.indexOf("食べるな")<0 && guardTexts.indexOf("必ず痩せる")<0, "健康ガード: 極端減食を勧める文言なし");
+  /* ---- v3: 献立の無捏造・決定性 ---- */
+  var mm1=suggestMenus(800,["chicken"],null);
+  assert(mm1.length>0 && mm1.every(function(x){ return MENU_DB.indexOf(x)>=0; }), "献立: 全返却がMENU_DBの参照（捏造ゼロ）");
+  assert(JSON.stringify(suggestMenus(800,["chicken"],null).map(function(x){return x.id;}))===JSON.stringify(mm1.map(function(x){return x.id;})), "献立: 決定性");
+  assert(suggestMenus(100,[],null).every(function(x){ return x.kcal<=400; }), "献立: 残り少でも300kcal級を提案（上限400）");
+  /* ---- v3: 退会ロック ---- */
+  assert(isLockedFor({memberStatus:"resigned"},false)===true && isLockedFor({memberStatus:"resigned"},true)===false && isLockedFor({memberStatus:"active"},false)===false, "退会ロック判定");
+  /* ---- v3: 写真上限10件（最古のみnull化・記録は残す） ---- */
+  var savedMeals=state.meals;
+  try{ /* 途中例外でも finally で必ず実データを復元（テスト用ダミーで実mealsを失わない） */
+    state.meals=[];
+    for(var pi=1; pi<=11; pi++){
+      state.meals.push({id:"mCap-"+pi, date:"2026-06-"+String(pi).padStart(2,"0"), slot:"noon", tags:["staple"], amount:"mid", photo:"data:image/jpeg;base64,AAAA", photoRemoved:false, comment:null});
+    }
+    enforcePhotoCap(true);
+    assert(state.meals[0].photo===null && state.meals[0].photoRemoved===true && state.meals[1].photo!==null && state.meals.length===11, "写真上限: 11件目で最古1件のみnull化");
+  }finally{
+    state.meals=savedMeals;
+  }
+  /* ---- v3: 写真リマインド決定ルール ---- */
+  assert(needPhotoReminder("2026-07-03",{start:null,latest:null})===true, "リマインド: 月初×写真なし");
+  assert(needPhotoReminder("2026-07-03",{start:null,latest:{date:"2026-07-01",dataURL:"x"}})===false, "リマインド: 今月撮影済みは出ない");
+  assert(needPhotoReminder("2026-07-15",{start:null,latest:null})===false, "リマインド: 8日以降は出ない");
+  /* ---- v3: 合言葉 ---- */
+  assert(verifyStaffPass("deed")===true && verifyStaffPass("DEED")===false, "スタッフ合言葉");
+
   if(window.console) console.log("[D.D SelfTest] "+(ok?"全テスト PASS":"一部 FAIL（上記参照）"));
 }
 (function init(){
