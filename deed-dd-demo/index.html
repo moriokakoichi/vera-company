@@ -18,7 +18,7 @@
   [✅] 8 決定的（Math.random 不使用・new Date は年齢/期限/日付キー/月初判定のみ。写真はユーザー入力＝決定性の対象外）
   [✅] 9 XSS（ユーザー文字列は esc() 経由・読み込みJSON内のdataURLは正規表現で厳格検証）
   [✅] 10 プレースホルダ/未実装コメント禁止（全機能実装）
-  [✅] 11 v3: 写真非解析の正直バッジ（2か所常設）・スタッフ画面デモ注記・退会ロック・DEED_FORMULA一元CONFIG（一般値(仮)→リード式差し替え前提）
+  [✅] 11 v3: 写真非解析の正直バッジ（2か所常設）・スタッフ画面デモ注記・退会ロック・DEED_FORMULA一元CONFIG（一般値(仮)→DEED式差し替え前提）
   ※スタッフ閲覧フラグ(staffView)は保存しない＝リロードで会員ビューに戻り合言葉を再要求する。仕様でありバグではない。
 -->
 <style>
@@ -498,12 +498,12 @@ function round2(n){ return Math.round(n*100)/100; }
    ============================================================ */
 /* ============================================================
    DEED_FORMULA — 係数・補正の一元CONFIG
-   MTG方針(2026-07-01): 現在は「一般値(仮)」。正式には“リード式”
-   （リードのスクールで教える係数体系）に差し替える。
+   MTG方針(2026-07-01): 現在は「一般値(仮)」。正式には“DEED式”
+   （DEEDのスクールで教える係数体系）に差し替える。
    ★このオブジェクトを書き換えるだけで全画面（カルテ/食事/からだ/スタッフ）に反映★
    ============================================================ */
 var DEED_FORMULA = {
-  label: "一般値(仮)・正式にはリード式に差し替え予定",
+  label: "一般値(仮)・正式にはDEED式に差し替え予定",
   activity: {
     "1.2":  { factor:1.2,   label:"座り仕事中心(運動なし)" },
     "1.375":{ factor:1.375, label:"軽い運動 週1-3回" },
@@ -562,7 +562,7 @@ function goalAdjust(p){
   var d=goalDir(p), v = d==="gain"?GA.gain:(d==="lose"?GA.lose:GA.keep);
   var b=bmr(p), fl=sexFloor(p.profile.sex);
   return rv(v,"reference","目的補正（"+(d==="gain"?"増量":d==="lose"?"減量":"維持")+"）",{
-    formula:"増量 +"+GA.gain+" / 維持 "+GA.keep+" / 減量 "+GA.lose+"（一般値(仮)・リード式に差し替え予定）",
+    formula:"増量 +"+GA.gain+" / 維持 "+GA.keep+" / 減量 "+GA.lose+"（一般値(仮)・DEED式に差し替え予定）",
     premise:"減量"+GA.lose+"kcalは1日約500kcal減＝週約0.5kgの健康的減量に対応。ただし基礎代謝"+b.value+"kcalと性別下限"+fl+"kcalは割らない（健康ガード）。",
     citation:"Harvard Health / NIH（健康的減量 週0.5–1kg・1日約500kcal減）"
   });
@@ -599,7 +599,7 @@ function targetProtein(p){
 function targetFat(p,kcal){
   var FR=DEED_FORMULA.fatRatio;
   return rv(Math.round((kcal*FR)/9),"reference","脂質目安",{
-    formula:"総kcal×"+Math.round(FR*100)+"%÷9kcal/g", premise:"脂質比率"+Math.round(FR*100)+"%は一般的な健康域の目安（一般値(仮)・リード式に差し替え予定）。"
+    formula:"総kcal×"+Math.round(FR*100)+"%÷9kcal/g", premise:"脂質比率"+Math.round(FR*100)+"%は一般的な健康域の目安（一般値(仮)・DEED式に差し替え予定）。"
   });
 }
 function targetCarb(p,kcal,protein,fat){
@@ -1244,7 +1244,7 @@ function viewResult(){
 
   var c2=mcard("× 活動係数", a.activityFactor.value+"",
     srcChip("choice", a.activityFactor.label, "STEP4であなたが選んだ活動レベル。固定値（1.375）ではありません。")+
-    srcChip("ref","一般値(仮)","現在の係数は一般的な計算式の値です。正式にはDEEDの“リード式”に差し替え予定。差し替えても出どころ表示の仕組みは変わりません。"),
+    srcChip("ref","一般値(仮)","現在の係数は一般的な計算式の値です。正式にはDEED式に差し替え予定。差し替えても出どころ表示の仕組みは変わりません。"),
     {note:"BMR × 係数 = 活動込み消費 "+a.tdee.value+"kcal"});
 
   var c3=mcard("目的補正", (a.goalAdjust.value>0?"+":"")+a.goalAdjust.value+'<span class="u">kcal</span>',
@@ -1253,7 +1253,7 @@ function viewResult(){
 
   var c4='<div class="metric-card" style="text-align:center; border:1px solid var(--accent);"><div class="mc-lab">＝ 推奨カロリー</div>'+
     '<div class="bignum">'+a.targetKcal.value+' <span class="u" style="font-size:var(--fs-body); color:var(--text-3);">kcal/日</span></div>'+
-    '<div class="srcchips" style="justify-content:center;">'+srcChip("ref","上記の合算", a.targetKcal.formula+"／"+a.targetKcal.premise)+srcChip("ref","一般値(仮)","活動係数・補正値は一般値(仮)〔目安〕。正式には“リード式”（DEED式の算出方法）に差し替え予定です。")+'</div></div>';
+    '<div class="srcchips" style="justify-content:center;">'+srcChip("ref","上記の合算", a.targetKcal.formula+"／"+a.targetKcal.premise)+srcChip("ref","一般値(仮)","活動係数・補正値は一般値(仮)〔目安〕。正式にはDEED式（DEEDの算出方法）に差し替え予定です。")+'</div></div>';
 
   var c5=mcard("たんぱく質", a.protein.value+'<span class="u">g/日</span>',
     srcChip("ref","たんぱく質目安", a.protein.formula+"／"+a.protein.premise+"／出典:"+a.protein.citation));
@@ -1298,7 +1298,7 @@ function viewResult(){
     hgBanner+
     (mn?'<div class="small" style="margin-bottom:10px;">'+esc(mn)+'</div>':'')+
     c1+c2+c3+c4+c5+pfc+bfmLbm+c6+c7+
-    '<div class="micro" style="margin-top:10px;">係数は一般値(仮)です。正式には“リード式”に差し替え予定（CONFIG一箇所で全画面反映）。</div>'+
+    '<div class="micro" style="margin-top:10px;">係数は一般値(仮)です。正式には“DEED式”に差し替え予定（CONFIG一箇所で全画面反映）。</div>'+
     '<div class="transparency"><div class="l1">数字は目安です。式と前提をすべて開示しています。</div><div class="l2">黙って想定した値はありません。</div></div>'+
   '</div>'+
   '<div class="footer-cta"><button class="btn secondary" onclick="go(\'step1\')">入力を見直す</button><button class="btn primary" onclick="go(\'home\')">D.D ホームへ</button></div>';
@@ -1910,7 +1910,7 @@ function viewMeals(){
     (remaining<0?'<div class="micro" style="color:var(--warn); margin-top:4px;">今日は概算オーバー。夜は軽めに。明日リセットしよう。</div>':'')+
     '<div class="micro" style="margin-top:4px;">推奨 '+r.recommended+'kcal − 今日の概算 '+dayKcal+'kcal（あなたが選んだタグからの概算。実際の摂取量とはずれます）</div>'+
     '<div class="srcchips">'+
-      srcChip("ref","推奨カロリー（一般値(仮)）","カルテで算出した推奨カロリー。係数は一般値(仮)・正式にはリード式に差し替え予定。")+
+      srcChip("ref","推奨カロリー（一般値(仮)）","カルテで算出した推奨カロリー。係数は一般値(仮)・正式にはDEED式に差し替え予定。")+
       srcChip("choice","今日のタグからの概算","写真は解析していません。あなたが選んだタグ×量を目安換算表（一般的な食品栄養概算）で足し上げた推定で、実測ではありません。")+
     '</div></div>';
   var slotChips=Object.keys(MEAL_SLOTS).map(function(s){
@@ -1942,7 +1942,7 @@ function viewMeals(){
       '<div class="micro" style="margin:-6px 0 6px;">※選んだタグから生成〔写真は未解析・本番はAI解析〕</div>'+
       '<div class="srcchips" style="margin-bottom:12px;">'+
         srcChip("choice","選んだ内容", last.comment.basis)+
-        srcChip("ref","推奨"+r.recommended+"kcal・P"+r.protein+"g","カルテの計算値（一般値(仮)・リード式に差し替え予定）から判定。")+
+        srcChip("ref","推奨"+r.recommended+"kcal・P"+r.protein+"g","カルテの計算値（一般値(仮)・DEED式に差し替え予定）から判定。")+
       '</div>';
   }
   var ingChips=Object.keys(INGREDIENTS).map(function(k){
@@ -2109,7 +2109,7 @@ function viewStaff(){
     '<div class="small" style="margin-top:6px;"><b>'+name+'</b>'+(p.age!=null?('・'+p.age+'歳'):'')+(p.sex?('・'+SEX_LABEL[p.sex]):'')+'</div>'+
     (r?('<div class="small">目的: '+dirLabel+(g.targetWeight!=null?('／目標 '+g.targetWeight+'kg'):'')+(g.deadline?('・期限 '+esc(fmtJP(g.deadline))):'')+'</div>'+
     '<div class="small">推奨 '+r.recommended+'kcal ・ P '+r.protein+'g ・ 基礎代謝 '+r.bmr+'kcal</div>'):'<div class="small muted">カルテ未作成</div>')+
-    '<div class="srcchips">'+srcChip("ref","一般値(仮)・リード式に差し替え予定","現在の係数は一般的な計算式の値。DEED_FORMULA（CONFIG一箇所）の差し替えで全画面に反映されます。")+'</div></div>';
+    '<div class="srcchips">'+srcChip("ref","一般値(仮)・DEED式に差し替え予定","現在の係数は一般的な計算式の値。DEED_FORMULA（CONFIG一箇所）の差し替えで全画面に反映されます。")+'</div></div>';
   var lw=state.weights.length?state.weights[state.weights.length-1]:null;
   var weight='<div class="metric-card"><div class="mc-lab">⚖️ 体重の推移</div>'+
     '<div class="small" style="margin-top:4px;">'+(lw?('直近 '+lw.val+'kg（'+esc(fmtJP(lw.date))+'）〔会員の入力〕'):'記録なし')+'</div>'+
