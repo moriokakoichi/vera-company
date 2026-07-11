@@ -84,8 +84,8 @@ section{padding:96px 0;position:relative}
 .problem .stitle{color:#fff}
 .problem-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:44px}
 .problem-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);border-radius:10px;padding:28px 24px}
-.problem-card .q{color:var(--gold);font-size:30px;line-height:1;font-family:"Yu Mincho",serif}
-.problem-card p{margin-top:14px;font-size:15px;opacity:.94;line-height:1.9}
+.problem-card .p-icon{width:52px;height:52px;display:block}
+.problem-card p{margin-top:20px;font-size:15px;opacity:.94;line-height:1.9}
 .problem .turn{margin-top:44px;text-align:center;font-size:clamp(18px,3vw,26px);letter-spacing:.04em}
 .problem .turn b{color:var(--gold)}
 
@@ -215,15 +215,33 @@ footer{background:var(--navy-deep);color:#fff;padding:56px 0 40px}
     <h2 class="stitle reveal">いい会社どうし、<br>つながれば強いのに。</h2>
     <div class="problem-grid">
       <div class="problem-card reveal">
-        <div class="q">?</div>
+        <svg class="p-icon" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="24" cy="24" r="15"/>
+          <path d="M24 13 L28 24 L24 35 L20 24 Z" stroke="#cbb27e"/>
+          <circle cx="24" cy="24" r="1.6" fill="#fff" stroke="none"/>
+        </svg>
         <p>本当は他社と組みたい。でも、誰とどう組めばいいか、一歩目が見えない。</p>
       </div>
       <div class="problem-card reveal">
-        <div class="q">?</div>
+        <svg class="p-icon" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="24" cy="24" r="10"/>
+          <g stroke="#fff">
+            <line x1="24" y1="9" x2="24" y2="13"/><line x1="24" y1="35" x2="24" y2="39"/>
+            <line x1="9" y1="24" x2="13" y2="24"/><line x1="35" y1="24" x2="39" y2="24"/>
+            <line x1="13.4" y1="13.4" x2="16" y2="16"/><line x1="32" y1="32" x2="34.6" y2="34.6"/>
+            <line x1="34.6" y1="13.4" x2="32" y2="16"/><line x1="16" y1="32" x2="13.4" y2="34.6"/>
+          </g>
+          <circle cx="24" cy="24" r="4" stroke="#cbb27e"/>
+        </svg>
         <p>いい道具（AI・DX）があるのは分かる。けれど、自社に合う形に落とせない。</p>
       </div>
       <div class="problem-card reveal">
-        <div class="q">?</div>
+        <svg class="p-icon" viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="12" y="22" width="24" height="17" rx="3"/>
+          <path d="M17 22 v-4 a7 7 0 0 1 14 0 v4" stroke="#cbb27e"/>
+          <circle cx="24" cy="29" r="2.4" fill="#fff" stroke="none"/>
+          <line x1="24" y1="31" x2="24" y2="34.5"/>
+        </svg>
         <p>支援会社に頼むと「囲い込まれる」気がして、任せきる前に手が止まる。</p>
       </div>
     </div>
