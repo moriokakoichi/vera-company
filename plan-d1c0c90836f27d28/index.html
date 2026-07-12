@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>株式会社VERA Holdings 第1期 経営計画書</title>
+<style>
+  :root{
+    --navy:#1D447C; --navy-d:#15335e; --red:#C5201D; --gold:#C9A44C;
+    --ink:#1c2530; --sub:#5b6672; --line:#d9dee6; --panel:#f4f6fa; --white:#fff;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{font-family:"Yu Gothic","Meiryo","Hiragino Kaku Gothic ProN",system-ui,sans-serif;
+    color:var(--ink); background:#e9edf3; line-height:1.75; font-size:15px;}
+  .sheet{background:var(--white); width:210mm; min-height:297mm; margin:14px auto; padding:22mm 20mm;
+    box-shadow:0 2px 14px rgba(20,40,80,.14);}
+  h1,h2,h3{font-weight:700; line-height:1.4; color:var(--navy);}
+  h2{font-size:20px; border-left:6px solid var(--navy); padding:2px 0 2px 12px; margin:34px 0 14px;}
+  h3{font-size:16px; color:var(--navy-d); margin:20px 0 6px;}
+  p{margin:8px 0;}
+  .muted{color:var(--sub);} .small{font-size:13px;}
+  .tag{display:inline-block; font-size:11px; font-weight:700; padding:1px 7px; border-radius:10px;
+    vertical-align:middle; margin-left:4px; background:#e2ecff; color:var(--navy); border:1px solid #b9cdf0;}
+  table{border-collapse:collapse; width:100%; margin:12px 0; font-size:13.5px;}
+  th,td{border:1px solid var(--line); padding:7px 9px; text-align:left; vertical-align:top;}
+  th{background:var(--navy); color:#fff; font-weight:700;}
+  tbody tr:nth-child(even){background:#f7f9fc;}
+  .cap{font-size:12px; color:var(--sub); margin-top:4px;}
+  .note{background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:12px 15px; margin:14px 0;}
+  .note.gold{background:#fbf6ea; border-color:#e6d4a3;}
+  .kicker{color:var(--red); font-weight:700; letter-spacing:.04em; font-size:13px; margin:0;}
+  ul,ol{margin:8px 0 8px 4px; padding-left:20px;} li{margin:4px 0;}
+  .ladder{display:flex; align-items:flex-end; gap:14px; height:250px; margin:18px 0 6px;
+    border-bottom:2px solid var(--navy); padding:0 4px;}
+  .bar{flex:1; background:var(--navy); position:relative; border-radius:5px 5px 0 0; color:#fff; text-align:center;}
+  .bar.q4{background:var(--red);}
+  .bar b{position:absolute; top:-40px; left:0; right:0; color:var(--navy); font-size:12.5px;}
+  .bar span{position:absolute; bottom:8px; left:0; right:0; font-size:12px;}
+  .qx{display:flex; gap:14px; padding:0 4px;} .qx div{flex:1; text-align:center; font-size:12px; color:var(--sub);}
+  .cover{display:flex; flex-direction:column; justify-content:center; min-height:250mm;}
+  .cover .brand{color:var(--red); font-weight:700; letter-spacing:.2em; font-size:14px;}
+  .cover h1{font-size:38px; margin:10px 0 4px; line-height:1.3;}
+  .cover .en{color:var(--sub); letter-spacing:.14em; font-size:14px;}
+  .clover{width:56px; height:56px; margin-bottom:20px; object-fit:contain;}
+  .meta{margin-top:40px; border-top:3px solid var(--navy); padding-top:16px; font-size:14px;}
+  .meta div{margin:3px 0;} .meta b{color:var(--navy); display:inline-block; min-width:88px;}
+  .two{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  .card{border:1px solid var(--line); border-radius:10px; padding:14px 16px;}
+  .card h3{margin-top:0;}
+  .engineA{border-top:4px solid var(--gold);} .engineB{border-top:4px solid var(--navy);}
+  .foot{margin-top:26px; padding-top:12px; border-top:1px solid var(--line); color:var(--sub); font-size:12px;
+    display:flex; justify-content:space-between;}
+  @media print{
+    body{background:#fff;} .sheet{box-shadow:none; margin:0; width:auto; min-height:auto; padding:16mm 15mm;
+      page-break-after:always;}
+    .noprint{display:none;}
+  }
+  @media(max-width:760px){ .sheet{width:auto; padding:16px;} .two{grid-template-columns:1fr;} h1{font-size:26px;} .cover h1{font-size:28px;} }
+  .toolbar{max-width:210mm; margin:14px auto 0; text-align:right;}
+  .btn{background:var(--navy); color:#fff; border:none; border-radius:7px; padding:8px 16px; font-size:13px; cursor:pointer;}
+</style>
+</head>
+<body>
+<div class="toolbar noprint"><button class="btn" onclick="window.print()">🖨 印刷 / PDF保存</button></div>
+
+<!-- 表紙 -->
+<section class="sheet cover">
+  <img class="clover" src="data:image/png;base64,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" alt="VERA ロゴ">
+  <p class="brand">VERA HOLDINGS ／ 第1期 経営計画書</p>
+  <h1>百年ブランドを支える、<br>最初の一年。</h1>
+  <p class="en">Business Plan for FY1 &nbsp;|&nbsp; 2026.7 – 2027.6</p>
+  <div class="meta">
+    <div><b>会社名</b>株式会社VERA Holdings（VERA Holdings Co., Ltd.）</div>
+    <div><b>設立</b>2026年7月9日（設立登記申請日）</div>
+    <div><b>第1期</b>2026年7月9日 〜 2027年6月30日（6月決算）</div>
+    <div><b>事業領域</b>アライアンスハブSaaSによる企業連携の後方支援 ／ 防災事業</div>
+    <div><b>作成</b>2026年7月</div>
+  </div>
+  <p class="cap" style="margin-top:26px">※本計画書は当社の事業計画・将来の見通しを含みます。記載の数値は現時点の目標・計画値であり、将来の実績を保証するものではありません。取引先名は守秘のため業種で表記しています。</p>
+</section>
+
+<!-- 1. ごあいさつと事業概要 -->
+<section class="sheet">
+  <h2>1. ごあいさつと事業概要</h2>
+  <p>株式会社VERA Holdingsは、100年続くブランドを目指す中小企業を<b>後方から支える</b>会社です。提案・アプリ・AI・継続収益プロダクトを組み合わせ、経営者の「右腕・左腕」として伴走します。単発の受託で終わらせず、<b>解約されない限り続く関係（継続収益・MRR）</b>を一緒に育てることを事業の軸に置きます。</p>
+  <div class="two">
+    <div class="card">
+      <h3>会社概要</h3>
+      <table style="margin:4px 0"><tbody>
+        <tr><th style="width:38%">会社名</th><td>株式会社VERA Holdings</td></tr>
+        <tr><th>設立</th><td>2026年7月9日</td></tr>
+        <tr><th>第1期</th><td>2026/7/9〜2027/6/30（6月決算）</td></tr>
+        <tr><th>本店</th><td>東京都千代田区内幸町</td></tr>
+        <tr><th>事業領域</th><td>企業連携の後方支援／防災事業</td></tr>
+      </tbody></table>
+    </div>
+    <div class="card">
+      <h3>4つの信念（VERA）</h3>
+      <ul>
+        <li><b>Vital</b>／活力 — 相手の事業に元気を灯す</li>
+        <li><b>Earnest</b>／誠実 — 約束を守り、手の内を明かす</li>
+        <li><b>Real</b>／本物 — 数字も言葉も、ごまかさない</li>
+        <li><b>Authentic</b>／自分らしさ — 選ぶ自由を尊重する</li>
+      </ul>
+      <p class="small muted">四葉のクローバー（紺×赤）はこの4信念を表す社章です。</p>
+    </div>
+  </div>
+  <div class="note gold">
+    <p class="kicker">私たちの立ち位置</p>
+    <p style="margin-bottom:0">お客様の本業と競合しない「後方支援」に徹します。集客・定着・情報発信・デジタル化といった<b>裏方の継続支援</b>を担い、お客様のブランドが長く続くことそのものを成果とします。</p>
+  </div>
+</section>
+
+<!-- 2. 事業の全体設計 -->
+<section class="sheet">
+  <h2>2. 事業の全体設計 — 二本のエンジン</h2>
+  <p>継続収益は、性質の違う二つのエンジンで積み上げます。片方だけでは目標に届かないため、<b>一社に複数のサービスを重ねる（クロスセル）</b>ことで、一件あたりの継続収益を厚くします。</p>
+  <div class="two">
+    <div class="card engineA">
+      <h3>エンジンA｜高付加価値 × 少数</h3>
+      <p class="small muted">一件の単価は高いが、伴走に手間がかかるため件数に上限がある。</p>
+      <ul>
+        <li>経営企画の継続支援（伴走型）</li>
+        <li>会社案内・ブランディング制作</li>
+        <li>健康経営・人的資本レポートの運用支援</li>
+      </ul>
+    </div>
+    <div class="card engineB">
+      <h3>エンジンB｜サブスク × 多数</h3>
+      <p class="small muted">一件は小さいが、積むほど自動で増える。数を広げる仕組みが要点。</p>
+      <ul>
+        <li>口コミ・MEO集客ツール（提携提供）</li>
+        <li>組織定着・離職防止ツール（提携提供）</li>
+        <li>自社サブスクプロダクト（月額）</li>
+      </ul>
+    </div>
+  </div>
+  <div class="note">
+    <p style="margin:0"><b>収益の考え方</b>：一時的な制作収入は運転資金に充て、事業の評価軸は<b>毎月積み上がる継続収益（MRR）</b>に置きます。二本のエンジンとクロスセルで、安定した収益基盤を築きます。</p>
+  </div>
+</section>
+
+<!-- 3. 数値計画 -->
+<section class="sheet">
+  <h2>3. 数値計画 — 継続収益の階段</h2>
+  <p>第1期末（2027年6月）に <b>継続収益（MRR）月200万円</b>を目標とします。下は四半期ごとの積み上げ計画です<span class="tag">計画値</span></p>
+  <div class="ladder">
+    <div class="bar" style="height:22%"><b>20〜40万</b><span>Q1</span></div>
+    <div class="bar" style="height:44%"><b>70〜100万</b><span>Q2</span></div>
+    <div class="bar" style="height:72%"><b>130〜160万</b><span>Q3</span></div>
+    <div class="bar q4" style="height:100%"><b>200万</b><span>Q4</span></div>
+  </div>
+  <div class="qx"><div>7–9月<br>種まき</div><div>10–12月<br>起動</div><div>1–3月<br>積み上げ</div><div>4–6月<br>到達</div></div>
+  <h3>目標構成のイメージ</h3>
+  <p class="small muted">到達時の構成イメージです。各サービスの単価・件数は個別の商談を経て確定するため、下表は現時点の計画値です。</p>
+  <table>
+    <thead><tr><th>柱</th><th>エンジン</th><th>積み上げの考え方</th></tr></thead>
+    <tbody>
+      <tr><td>経営企画の継続支援</td><td>A</td><td>伴走型の継続契約を数件</td></tr>
+      <tr><td>健康経営・人的資本の運用支援</td><td>A</td><td>制度対応ニーズを背景に数社</td></tr>
+      <tr><td>口コミ・MEO集客ツール</td><td>B</td><td>店舗系のお客様へまとめて</td></tr>
+      <tr><td>組織定着ツール</td><td>B</td><td>集客ツールとセットで</td></tr>
+      <tr><td>自社サブスクプロダクト</td><td>B</td><td>月額 × 会員数</td></tr>
+    </tbody>
+  </table>
+  <p class="cap">見立て：早期の成約が続けば2026年内、通常の立ち上がりでは2027年6月での到達を計画しています。</p>
+</section>
+
+<!-- 4. 重点プロジェクト -->
+<section class="sheet">
+  <h2>4. 第1期の重点プロジェクト</h2>
+  <p>取り組みを「今期の継続収益化」「今期着手・来期収益化」「中長期の種まき」の3層で進めます。取引先名は守秘のため業種で表記しています。</p>
+
+  <h3>今期に継続収益化を狙う</h3>
+  <table>
+    <thead><tr><th style="width:34%">領域</th><th>内容</th></tr></thead>
+    <tbody>
+      <tr><td>経営企画の継続支援</td><td>提携サービスを継続提供。当社自身が長年の利用者であり、実体験に基づいて紹介できる強みがある</td></tr>
+      <tr><td>口コミ・MEO集客ツール</td><td>店舗系のお客様へまとめて提供（提携商材）</td></tr>
+      <tr><td>組織定着・離職防止ツール</td><td>集客ツールとセットで提供（提携商材）</td></tr>
+      <tr><td>自社サブスクプロダクト</td><td>月額課金の仕組みは構築済み。実績づくりを経て本格提供へ</td></tr>
+      <tr><td>多店舗フィットネス企業</td><td>集客と定着の提案が進行中（都内・多店舗展開）</td></tr>
+      <tr><td>地方の設備・通信インフラ企業</td><td>Web集客の入口支援から提案予定</td></tr>
+    </tbody>
+  </table>
+
+  <h3>今期着手 → 来期に収益化</h3>
+  <table>
+    <thead><tr><th style="width:34%">領域</th><th>内容</th></tr></thead>
+    <tbody>
+      <tr><td>会社案内・ブランディング制作</td><td>制作パッケージを整備。商品設計をブラッシュアップ中</td></tr>
+      <tr><td>住宅メーカー（超耐震・施工実績上位）との連携</td><td>OB顧客の見守り・継続接点づくりで代理店連携を計画</td></tr>
+      <tr><td>地域再開発（総合建設企業）</td><td>大規模拠点開発の完成後を見据えたエリア運営のデジタル支援</td></tr>
+      <tr><td>インバウンド富裕層向け 体験観光（伊勢志摩）</td><td>多言語ガイド等のデジタル基盤づくり。実証段階</td></tr>
+      <tr><td>国内一貫生産のアパレル製造企業（奈良）</td><td>継続型サービスの協業を協議</td></tr>
+    </tbody>
+  </table>
+
+  <h3>中長期の種まき</h3>
+  <ul>
+    <li><b>不動産事業</b>：許認可（宅地建物取引業）の取得準備を進め、賃貸・管理・仲介へ段階的に展開。自社保有物件の賃貸は今期の着実な収益基盤。</li>
+    <li><b>防災事業</b>：自社ブランド「VERA House」と、防災製品のマッチングを育てる。</li>
+    <li><b>海外連携</b>：人材・教育・観光の分野で、日本側の運用支援を担う立ち位置を探索。</li>
+    <li><b>出版・情報発信</b>：書籍・コンテンツを通じた認知づくり（継続的な商談の入口）。</li>
+  </ul>
+</section>
+
+<!-- 5. ロードマップ -->
+<section class="sheet">
+  <h2>5. 四半期ロードマップ</h2>
+  <table>
+    <thead><tr><th style="width:16%">四半期</th><th style="width:34%">主な予定</th><th>テーマ</th></tr></thead>
+    <tbody>
+      <tr><td><b>Q1</b><br>7–9月</td><td>提携商材の提案開始／協業各社との面談・実証／海外連携の現地視察</td><td>種まきと起動</td></tr>
+      <tr><td><b>Q2</b><br>10–12月</td><td>不動産事業の許認可準備／継続契約の積み上げ</td><td>基盤づくり</td></tr>
+      <tr><td><b>Q3</b><br>1–3月</td><td>クロスセルによる一件あたりの厚み増し／運用支援の本格化</td><td>積み上げ</td></tr>
+      <tr><td><b>Q4</b><br>4–6月</td><td>第1期 決算（6月）／目標到達の確認</td><td>到達と次期準備</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- 6. 体制とガバナンス -->
+<section class="sheet">
+  <h2>6. 体制とガバナンス</h2>
+  <div class="two">
+    <div class="card">
+      <h3>獲る → 続けてもらう</h3>
+      <p class="small">お客様に選んでいただき、その後も<b>続けていただく</b>ことを重視します。継続収益は「増やす」だけでなく「減らさない（解約防止）」も同じくらい大切と考え、納品後の伴走を仕組みにしています。</p>
+    </div>
+    <div class="card">
+      <h3>情報管理・コンプライアンス</h3>
+      <ul class="small">
+        <li>お客様の機密情報・個人情報は用途を限定して厳格に管理</li>
+        <li>実名・写真の掲載は事前同意を取得（未成年は保護者同意）</li>
+        <li>決済のカード情報は自社で保持せず外部決済に委任</li>
+        <li>プライバシーマーク等の第三者認証の取得を予定</li>
+      </ul>
+    </div>
+  </div>
+  <div class="note">
+    <p style="margin:0" class="small">AIを業務に活用しつつ、最終的な判断・お客様対応は人が責任を持って行います。数値やご提案に事実と異なる点を混入させないことを、制作上の第一原則としています。</p>
+  </div>
+</section>
+
+<!-- 7. リスクと対応 / 資金方針 -->
+<section class="sheet">
+  <h2>7. リスクと対応・資金方針</h2>
+  <h3>主なリスクと備え</h3>
+  <table>
+    <thead><tr><th style="width:40%">リスク</th><th>備え・対応</th></tr></thead>
+    <tbody>
+      <tr><td>特定サービスへの依存</td><td>二本のエンジン＋クロスセルで収益源を分散</td></tr>
+      <tr><td>伴走型サービスの件数上限</td><td>手間の少ないサブスク型（エンジンB）を厚くして拡張性を確保</td></tr>
+      <tr><td>個別協業が想定通り進まない場合</td><td>複数の候補を並行して進め、代替の入口を用意</td></tr>
+      <tr><td>許認可・制度対応</td><td>専門家（弁護士・行政書士・審査機関）に確認しながら段階的に整備</td></tr>
+    </tbody>
+  </table>
+  <h3>資金の方針</h3>
+  <ul>
+    <li>一時的な制作収入は運転資金に充て、継続収益（MRR）の積み上げを事業の柱とする。</li>
+    <li>継続課金の各種契約は、法人口座・法人カードの整備後に法人名義で行う。</li>
+    <li>会計基盤（クラウド会計）は導入済み。設立後に法人口座・決済連携を整備する。</li>
+  </ul>
+  <div class="note gold">
+    <p class="kicker">この一年のひとこと</p>
+    <p style="margin-bottom:0">派手な一発ではなく、<b>解約されない関係を毎月ひとつずつ</b>。二本のエンジンで、第1期末に継続収益 月200万円の基盤づくりを目指します。</p>
+  </div>
+  <div class="foot"><span>株式会社VERA Holdings ／ 第1期 経営計画書</span><span>2026年7月</span></div>
+</section>
+
+</body>
+</html>
